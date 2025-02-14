@@ -8,9 +8,7 @@ import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
 import java.util.ArrayList;
@@ -23,15 +21,21 @@ public class DeleteUserTests extends BaseTest {
 
     private String name;
     private String email;
+    private String token;
     private String password = "Test12345!";
 
     private List<String> registeredUsersList = new ArrayList<>();
 
-    @BeforeMethod(alwaysRun = true)
+    @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
         name = "Test User" + random;
         email = "testuser" + random + "@test.com";
+
+        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
+        postRegisterUserSteps.registerUser(name, email, password);
+
+        token = getToken(email, password);
     }
 
 
@@ -52,6 +56,10 @@ public class DeleteUserTests extends BaseTest {
     @Story("Delete User")
     @Severity(SeverityLevel.NORMAL)
     public void deleteUserTest() {
+        String random = RandomStringUtils.randomNumeric(6);
+        name = "Test User" + random;
+        email = "testuser" + random + "@test.com";
+
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
         postRegisterUserSteps.registerUser(name, email, password);
 
@@ -70,13 +78,6 @@ public class DeleteUserTests extends BaseTest {
     public void deleteUserWrongPasswordTest() {
         String incorrectPassword = "TempT3mp!";
 
-        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
-
-        registeredUsersList.add(email);
-
-        String token = getToken(email, password);
-
         DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
         deleteUserSteps.deleteUserErrorForbidden(incorrectPassword);
 
@@ -88,13 +89,6 @@ public class DeleteUserTests extends BaseTest {
     @Story("Delete User")
     @Severity(SeverityLevel.NORMAL)
     public void deleteUserNoPasswordTest() {
-        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
-
-        registeredUsersList.add(email);
-
-        String token = getToken(email, password);
-
         DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
         ErrorResponseDto errorResponseDto = deleteUserSteps.deleteUserError(null);
 

@@ -1,11 +1,10 @@
 package com.photopixels.api.helpers;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.Method;
-import io.restassured.internal.RestAssuredResponseImpl;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import org.testng.Reporter;
 
 import static io.restassured.RestAssured.given;
 
@@ -16,16 +15,11 @@ public class RequestOperationsHelper {
 
 		// @formatter:off
 
-		Response response = given().spec(requestSpecification).when().request(method);
+		Response response = given().filter(new AllureRestAssured()).spec(requestSpecification).when().request(method);
 
 		response.then().spec(responseSpecification);
 
 		// @formatter:on
-
-		RestAssuredResponseImpl restAssuredResponseImpl = (RestAssuredResponseImpl) response;
-
-		Reporter.log(restAssuredResponseImpl.getLogRepository().getRequestLog());
-		Reporter.log(restAssuredResponseImpl.getLogRepository().getResponseLog());
 
 		return response;
 	}

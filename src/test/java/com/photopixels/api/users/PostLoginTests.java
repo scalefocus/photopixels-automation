@@ -39,6 +39,7 @@ public class PostLoginTests extends BaseTest {
         softAssert.assertEquals(loginResponseDto.getTokenType(), "Bearer", "Token type is not correct");
         softAssert.assertNotNull(loginResponseDto.getAccessToken(), "Access token is missing");
         softAssert.assertNotNull(loginResponseDto.getRefreshToken(), "Refresh token is missing");
+        softAssert.assertNotNull(loginResponseDto.getUserId(), "User id is missing");
 
         softAssert.assertAll();
     }

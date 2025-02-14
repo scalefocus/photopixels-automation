@@ -1,6 +1,7 @@
 target/
 allure-results/
 allure-report/
+allure-history/
 
 ### IntelliJ IDEA ###
 .idea/

@@ -18,6 +18,7 @@ public class GetUserInfoSteps {
     public GetUserInfoSteps(String token) {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
+
         requestSpecification.addBasePath(GET_USER_INFO);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();

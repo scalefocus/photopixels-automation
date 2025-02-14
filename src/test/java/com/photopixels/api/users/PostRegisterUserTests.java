@@ -153,4 +153,7 @@ public class PostRegisterUserTests extends BaseTest {
 
         softAssert.assertAll();
     }
+
+    // TODO: Add test for "The admin should be able to disable new user registration and when this is enabled
+    //  the server should return an error when a new user registration is detected." requirement
 }

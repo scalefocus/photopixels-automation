@@ -21,6 +21,8 @@ public class GetStatusTests extends BaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(getStatusResponseDto, "Status is not returned!");
+        softAssert.assertNotNull(getStatusResponseDto.getRegistration(), "Registration is not returned!");
+        softAssert.assertNotNull(getStatusResponseDto.getServerVersion(), "Server version is not returned!");
 
         softAssert.assertAll();
     }
