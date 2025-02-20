@@ -1,14 +1,17 @@
 package com.photopixels.api.status;
 
-import com.photopixels.api.base.BaseTest;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
 import com.photopixels.api.steps.status.GetStatusSteps;
 import io.qameta.allure.*;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+@Listeners(StatusTestListener.class)
 @Feature("Status")
-public class GetStatusTests extends BaseTest {
+public class GetStatusTests extends ApiBaseTest {
 
     @Test(description = "Get status")
     @Description("Get status")

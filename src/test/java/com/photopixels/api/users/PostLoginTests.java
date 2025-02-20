@@ -1,6 +1,7 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.base.BaseTest;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
@@ -9,13 +10,15 @@ import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
+@Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostLoginTests extends BaseTest {
+public class PostLoginTests extends ApiBaseTest {
 
     private String email;
     private String password;

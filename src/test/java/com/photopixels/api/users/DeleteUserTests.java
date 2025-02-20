@@ -1,6 +1,7 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.base.BaseTest;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
 import com.photopixels.api.steps.users.DeleteUserSteps;
@@ -11,20 +12,21 @@ import org.apache.http.HttpStatus;
 import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
+@Listeners(StatusTestListener.class)
 @Feature("Users")
-public class DeleteUserTests extends BaseTest {
+public class DeleteUserTests extends ApiBaseTest {
 
     private String name;
     private String email;
     private String token;
     private String password = "Test12345!";
 
-    private List<String> registeredUsersList = new ArrayList<>();
+    private Map<String, String> registeredUsersList = new HashMap<>();
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -35,20 +37,15 @@ public class DeleteUserTests extends BaseTest {
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
         postRegisterUserSteps.registerUser(name, email, password);
 
+        registeredUsersList.put(email, password);
+
         token = getToken(email, password);
     }
 
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        if (!registeredUsersList.isEmpty()) {
-            for (String user : registeredUsersList) {
-                String token = getToken(user, password);
-
-                DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
-                deleteUserSteps.deleteUser(password);
-            }
-        }
+       deleteRegisteredUsers(registeredUsersList);
     }
 
     @Test(description = "Delete user")

@@ -1,10 +1,8 @@
-package com.photopixels.api.base;
+package com.photopixels.base;
 
 
-import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.helpers.InputDataHelper;
 import com.photopixels.api.helpers.PropertiesUtils;
-import com.photopixels.api.steps.users.PostLoginSteps;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -71,17 +69,6 @@ public class BaseTest {
 
 		copyReportHistory(allureResults);
 		generateEnvironmentFile(allureResults);
-	}
-
-	protected String getToken() {
-		return getToken(inputData.getUsername(), inputData.getPassword());
-	}
-
-	protected String getToken(String username, String password) {
-		PostLoginSteps postLoginSteps = new PostLoginSteps();
-		LoginResponseDto loginResponseDto = postLoginSteps.login(username, password);
-
-		return loginResponseDto.getTokenType() + " " + loginResponseDto.getAccessToken();
 	}
 
 	private void copyReportHistory(String allureResults) {

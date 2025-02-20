@@ -1,8 +1,8 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.base.BaseTest;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
 import com.photopixels.api.steps.users.*;
 import io.qameta.allure.*;
@@ -10,19 +10,18 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
-import static com.photopixels.api.enums.ErrorMessagesEnum.NEW_PASSWORD;
 
+@Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostForgotUserPasswordTests extends BaseTest {
+public class PostForgotUserPasswordTests extends ApiBaseTest {
 
     private String email;
     private String password = "Test12345!";
@@ -42,14 +41,7 @@ public class PostForgotUserPasswordTests extends BaseTest {
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        if (!registeredUsersList.isEmpty()) {
-            for (Map.Entry<String, String> entry : registeredUsersList.entrySet()) {
-                String token = getToken(entry.getKey(), entry.getValue());
-
-                DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
-                deleteUserSteps.deleteUser(entry.getValue());
-            }
-        }
+        deleteRegisteredUsers(registeredUsersList);
     }
 
     @Test(description = "Forgot user password")

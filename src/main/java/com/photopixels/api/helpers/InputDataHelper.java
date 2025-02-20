@@ -32,4 +32,12 @@ public class InputDataHelper {
     public String getPassword() {
         return getProperty("password");
     }
+
+    public String getUsernameAdmin() {
+        return getProperty("usernameAdmin");
+    }
+
+    public String getPasswordAdmin() {
+        return getProperty("passwordAdmin");
+    }
 }
