@@ -50,9 +50,7 @@ public class PostRegisterUserSteps {
 
         requestSpecification.addBodyToRequest(registerUserRequestDto);
 
-        Response response = requestOperationsHelper
+        return requestOperationsHelper
                 .sendPostRequest(requestSpecification.getFiltarableRequestSpecification());
-
-        return response;
     }
 }

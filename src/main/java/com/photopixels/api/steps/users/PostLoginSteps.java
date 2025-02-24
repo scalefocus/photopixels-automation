@@ -58,9 +58,7 @@ public class PostLoginSteps {
 
         requestSpecification.addBodyToRequest(loginRequestDto);
 
-        Response response = requestOperationsHelper
+        return requestOperationsHelper
                 .sendPostRequest(requestSpecification.getFiltarableRequestSpecification());
-
-        return response;
     }
 }

@@ -18,6 +18,7 @@ public class GetStatusSteps {
     public GetStatusSteps() {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
+
         requestSpecification.addBasePath(GET_STATUS);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();

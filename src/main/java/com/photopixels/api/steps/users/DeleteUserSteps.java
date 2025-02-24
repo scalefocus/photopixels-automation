@@ -61,9 +61,7 @@ public class DeleteUserSteps {
 
         requestSpecification.addBodyToRequest(deleteUserRequestDto);
 
-        Response response = requestOperationsHelper
+        return requestOperationsHelper
                 .sendDeleteRequest(requestSpecification.getFiltarableRequestSpecification());
-
-        return response;
     }
 }
