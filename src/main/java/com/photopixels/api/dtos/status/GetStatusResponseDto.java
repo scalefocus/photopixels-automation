@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class GetStatusResponseDto {
 
-    private String registration;
+    private Boolean registration;
     private String serverVersion;
 
 }

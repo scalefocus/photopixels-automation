@@ -16,5 +16,7 @@ public class BasePathsConstants {
     public static String POST_REFRESH_TOKEN = "/user/refresh";
 
     // Admin
-    public static String POST_REGISTRATION = "/registration";
+    public static String POST_DISABLE_REGISTRATION = "/registration";
+    public static String GET_USERS = "/users";
+    public static String GET_USER = "/user/{Id}";
 }

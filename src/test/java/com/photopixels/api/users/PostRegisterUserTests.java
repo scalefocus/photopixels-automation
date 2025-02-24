@@ -1,31 +1,31 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.base.BaseTest;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
+import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
+@Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostRegisterUserTests extends BaseTest {
+public class PostRegisterUserTests extends ApiBaseTest {
 
     private String name;
     private String email;
     private String password = "Test12345!";
-    private List<String> registeredUsersList = new ArrayList<>();
+
+    private Map<String, String> registeredUsersList = new HashMap<>();
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -36,14 +36,7 @@ public class PostRegisterUserTests extends BaseTest {
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        if (!registeredUsersList.isEmpty()) {
-            for (String user : registeredUsersList) {
-                String token = getToken(user, password);
-
-                DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
-                deleteUserSteps.deleteUser(password);
-            }
-        }
+        deleteRegisteredUsers(registeredUsersList);
     }
 
     @Test(description = "Register user")
@@ -54,7 +47,7 @@ public class PostRegisterUserTests extends BaseTest {
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
         postRegisterUserSteps.registerUser(name, email, password);
 
-        registeredUsersList.add(email);
+        registeredUsersList.put(email, password);
 
         // No response body is returned
     }
@@ -137,7 +130,7 @@ public class PostRegisterUserTests extends BaseTest {
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
         postRegisterUserSteps.registerUser(name, email, password);
 
-        registeredUsersList.add(email);
+        registeredUsersList.put(email, password);
 
         ErrorResponseDto errorResponseDto = postRegisterUserSteps.registerUserError(name, email, password);
 
@@ -154,6 +147,29 @@ public class PostRegisterUserTests extends BaseTest {
         softAssert.assertAll();
     }
 
-    // TODO: Add test for "The admin should be able to disable new user registration and when this is enabled
-    //  the server should return an error when a new user registration is detected." requirement
+    @Test(description = "Register user disabled registration")
+    @Description("Register user when registration is disabled")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerUserDisabledRegistrationTest() {
+        // Disable registration
+        PostDisableRegistrationSteps postDisableRegistrationSteps = new PostDisableRegistrationSteps(getAdminToken());
+        postDisableRegistrationSteps.disableRegistration(false);
+
+        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
+        ErrorResponseDto errorResponseDto = postRegisterUserSteps.registerUserError(name, email, password);
+
+        // Enable registration
+        postDisableRegistrationSteps.disableRegistration(true);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE, "Error title is not correct");
+        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
+
+        softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.REGISTRATION_IS_DISABLED.getKey()),
+                ErrorMessagesEnum.REGISTRATION_IS_DISABLED.getErrorMessage(), "Error message is not correct");
+        softAssert.assertAll();
+    }
+
 }

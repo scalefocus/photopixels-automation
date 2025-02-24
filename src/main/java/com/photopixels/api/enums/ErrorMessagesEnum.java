@@ -20,7 +20,9 @@ public enum ErrorMessagesEnum {
     DUPLICATE_USER_NAME("DuplicateUserName", "Username '%s' is already taken."),
     NAME("Name", "The Name field is required."),
     CODE("Code", "The Code field is required."),
-    INVALID_CODE("InvalidCode", "The provided code is invalid");
+    INVALID_CODE("InvalidCode", "The provided code is invalid"),
+    REFRESH_TOKEN("RefreshToken", "The RefreshToken field is required."),
+    REGISTRATION_IS_DISABLED("RegistrationIsDisabled", "Cannot register new user until registration is enabled by admin!");
 
     private final String key;
 
