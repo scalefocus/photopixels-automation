@@ -1,21 +1,16 @@
 package com.photopixels.api.admin;
 
-import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
-import com.photopixels.api.enums.ErrorMessagesEnum;
 import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
 import com.photopixels.api.steps.status.GetStatusSteps;
 import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
-import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
-
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")

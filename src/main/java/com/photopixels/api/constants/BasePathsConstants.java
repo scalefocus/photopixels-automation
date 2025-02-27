@@ -19,4 +19,8 @@ public class BasePathsConstants {
     public static String POST_DISABLE_REGISTRATION = "/registration";
     public static String GET_USERS = "/users";
     public static String GET_USER = "/user/{Id}";
+    public static String POST_RESET_PASSWORD_ADMIN = "/admin/resetpassword";
+
+    // Sync
+    public static String GET_CHANGES = "/revision/{RevisionId}";
 }
