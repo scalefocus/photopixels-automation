@@ -20,6 +20,7 @@ public class BasePathsConstants {
     public static String GET_USERS = "/users";
     public static String GET_USER = "/user/{Id}";
     public static String POST_RESET_PASSWORD_ADMIN = "/admin/resetpassword";
+    public static String DELETE_USER_ADMIN = "/admin/user/{Id}";
 
     // Sync
     public static String GET_CHANGES = "/revision/{RevisionId}";
