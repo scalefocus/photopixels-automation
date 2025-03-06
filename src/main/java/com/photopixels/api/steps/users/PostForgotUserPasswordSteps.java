@@ -36,10 +36,10 @@ public class PostForgotUserPasswordSteps {
     }
 
     @Step("Forgot user password with error response")
-    public ErrorResponseDto forgotUserPasswordError(String email) {
+    public ErrorResponseDto forgotUserPasswordError(String email, int status) {
         Response response = forgotUserPasswordResponse(email);
 
-        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        response.then().statusCode(status);
 
         return response.as(ErrorResponseDto.class);
     }

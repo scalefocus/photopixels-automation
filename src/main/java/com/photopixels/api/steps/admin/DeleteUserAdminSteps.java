@@ -1,6 +1,5 @@
 package com.photopixels.api.steps.admin;
 
-import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.helpers.CustomRequestSpecification;
 import com.photopixels.api.helpers.RequestOperationsHelper;
@@ -12,49 +11,49 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.GET_USER;
+import static com.photopixels.api.constants.BasePathsConstants.DELETE_USER_ADMIN;
 
-public class GetUserSteps {
+public class DeleteUserAdminSteps {
 
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
-    public GetUserSteps(String token) {
+    public DeleteUserAdminSteps(String token) {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(GET_USER);
+        requestSpecification.addBasePath(DELETE_USER_ADMIN);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
-    @Step("Get user")
-    public GetUserResponseDto getUser(String id) {
-        Response response = getUserResponse(id);
+    @Step("Delete user by admin")
+    public void deleteUserAdmin(String userId) {
+        Response response = deleteUserAdminResponse(userId);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
-        return response.as(GetUserResponseDto.class);
+        // No response is returned
     }
 
-    @Step("Get user with error response")
-    public ErrorResponseDto getUserError(String id) {
-        Response response = getUserResponse(id);
+    @Step("Delete user by admin with error response")
+    public ErrorResponseDto deleteUserAdminError(String userId) {
+        Response response = deleteUserAdminResponse(userId);
 
         response.then().statusCode(HttpStatus.SC_NOT_FOUND);
 
         return response.as(ErrorResponseDto.class);
     }
 
-    private Response getUserResponse(String id) {
+    private Response deleteUserAdminResponse(String userId) {
         Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("Id", id);
+        pathParams.put("Id", userId);
 
         requestSpecification.addPathParams(pathParams);
 
         return requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendDeleteRequest(requestSpecification.getFiltarableRequestSpecification());
     }
 }

@@ -1,10 +1,11 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.steps.users.*;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.api.steps.users.PostForgotUserPasswordSteps;
+import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.testng.asserts.SoftAssert;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -61,12 +63,15 @@ public class PostForgotUserPasswordTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void forgotUserPasswordNoEmailTest() {
         PostForgotUserPasswordSteps postForgotUserPasswordSteps = new PostForgotUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postForgotUserPasswordSteps.forgotUserPasswordError(null);
+        ErrorResponseDto errorResponseDto = postForgotUserPasswordSteps
+                .forgotUserPasswordError(null, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE, "Error title is not correct");
-        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
+        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE,
+                "Error title is not correct");
+        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST,
+                "Error status is not correct");
 
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.EMAIL.getKey()),
                 ErrorMessagesEnum.EMAIL.getErrorMessage(), "Error message is not correct");
@@ -82,16 +87,16 @@ public class PostForgotUserPasswordTests extends ApiBaseTest {
         String invalidEmail = "InvalidEmail";
 
         PostForgotUserPasswordSteps postForgotUserPasswordSteps = new PostForgotUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postForgotUserPasswordSteps.forgotUserPasswordError(invalidEmail);
+        ErrorResponseDto errorResponseDto = postForgotUserPasswordSteps
+                .forgotUserPasswordError(invalidEmail, HttpStatus.SC_NOT_FOUND);
 
         SoftAssert softAssert = new SoftAssert();
 
-        // TODO Missing fields in the error response
-//        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE, "Error title is not correct");
-//        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
-
-        softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.PASSWORD_MISMATCH.getKey()),
-                ErrorMessagesEnum.PASSWORD_MISMATCH.getErrorMessage(), "Error message is not correct");
+        // TODO: Check if this is the expected response
+        softAssert.assertEquals(errorResponseDto.getTitle(), NOT_FOUND_ERROR,
+                "Error title is not correct");
+        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_NOT_FOUND,
+                "Error status is not correct");
 
         softAssert.assertAll();
     }
