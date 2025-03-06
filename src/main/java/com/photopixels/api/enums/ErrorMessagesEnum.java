@@ -22,7 +22,8 @@ public enum ErrorMessagesEnum {
     CODE("Code", "The Code field is required."),
     INVALID_CODE("InvalidCode", "The provided code is invalid"),
     REFRESH_TOKEN("RefreshToken", "The RefreshToken field is required."),
-    REGISTRATION_IS_DISABLED("RegistrationIsDisabled", "Cannot register new user until registration is enabled by admin!");
+    REGISTRATION_IS_DISABLED("RegistrationIsDisabled", "Cannot register new user until registration is enabled by admin!"),
+    REQUEST("request", "The request field is required.");
 
     private final String key;
 

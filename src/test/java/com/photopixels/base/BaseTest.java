@@ -3,10 +3,6 @@ package com.photopixels.base;
 
 import com.photopixels.api.helpers.InputDataHelper;
 import com.photopixels.api.helpers.PropertiesUtils;
-import io.restassured.RestAssured;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -14,44 +10,22 @@ import org.testng.annotations.BeforeSuite;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.FileSystems;
+import java.util.Properties;
 
 import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.proxy;
 
 public class BaseTest {
 
 	private static final String CONFIG_PROPS = "config.properties";
-	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
 
 	protected static InputDataHelper inputData;
+	protected Properties configProperties;
 
 	@BeforeSuite(alwaysRun = true)
 	public void initSuiteBase() {
-		baseURI = System.getProperty("baseUri");
-
-		Properties props = new PropertiesUtils().loadProps(CONFIG_PROPS);
-
-		if (baseURI == null || baseURI.isEmpty()) {
-			baseURI = props.getProperty("baseUri");
-
-			if (Boolean.parseBoolean(props.getProperty("isProxyNeeded"))) {
-				proxy(props.getProperty("proxyHost"), Integer.parseInt(props.getProperty("proxyPort")));
-				RestAssured.useRelaxedHTTPSValidation();
-			}
-		}
-
-		String logEnabled = System.getProperty("isLogEnabled");
-		if (logEnabled == null) {
-			logEnabled = props.getProperty("isLogEnabled");
-		}
-
-		if (Boolean.parseBoolean(logEnabled)) {
-			RestAssured.replaceFiltersWith(new RequestLoggingFilter(LogDetail.ALL),
-					new ResponseLoggingFilter(LogDetail.ALL));
-		} else {
-			RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-		}
+		configProperties = new PropertiesUtils().loadProps(CONFIG_PROPS);
 
 		inputData = new InputDataHelper();
 	}

@@ -4,11 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum UserRolesEnum {
-    USER("1"), ADMIN("0");
+    USER(1), ADMIN(0);
 
-    String value;
+    final Integer value;
 
-     UserRolesEnum(String value) {
+     UserRolesEnum(Integer value) {
          this.value = value;
      }
 }

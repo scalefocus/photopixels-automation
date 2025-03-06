@@ -1,13 +1,11 @@
 package com.photopixels.api.admin;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
-import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.UserRolesEnum;
 import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.admin.GetUserSteps;
 import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
-import org.apache.http.HttpStatus;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -15,8 +13,6 @@ import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import java.util.UUID;
-
-import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
@@ -66,14 +62,8 @@ public class GetUserTests extends ApiBaseTest {
         String notExistingId = UUID.randomUUID().toString();
 
         GetUserSteps getUserSteps = new GetUserSteps(token);
-        ErrorResponseDto errorResponseDto = getUserSteps.getUserError(notExistingId);
+        getUserSteps.getUserNoContent(notExistingId);
 
-        SoftAssert softAssert = new SoftAssert();
-
-        // TODO: Check if this is the expected response
-        softAssert.assertEquals(errorResponseDto.getTitle(), NOT_FOUND_ERROR, "Error title is not correct");
-        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_NOT_FOUND, "Error status is not correct");
-
-        softAssert.assertAll();
+        // No response body in case the user is not found
     }
 }

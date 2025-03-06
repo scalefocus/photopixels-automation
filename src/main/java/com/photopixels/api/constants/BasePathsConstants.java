@@ -21,6 +21,9 @@ public class BasePathsConstants {
     public static String GET_USER = "/user/{Id}";
     public static String POST_RESET_PASSWORD_ADMIN = "/admin/resetpassword";
     public static String DELETE_USER_ADMIN = "/admin/user/{Id}";
+    public static String POST_REGISTER_USER_ADMIN = "/admin/register";
+    public static String POST_CHANGE_USER_ROLE = "/admin/role";
+    public static String POST_ADJUST_STORAGE_QUOTA = "/admin/quota";
 
     // Sync
     public static String GET_CHANGES = "/revision/{RevisionId}";

@@ -8,14 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class GetUserResponseDto {
+public class RegisterUserAdminRequestDto {
 
-    private String id;
     private String name;
     private String email;
-    private String userName;
-    private String dateCreated;
-    private Long quota;
-    private Long usedQuota;
+    private String password;
     private Integer role;
 }

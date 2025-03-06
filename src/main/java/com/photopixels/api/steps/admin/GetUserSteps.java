@@ -1,7 +1,6 @@
 package com.photopixels.api.steps.admin;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
-import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.helpers.CustomRequestSpecification;
 import com.photopixels.api.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
@@ -39,13 +38,11 @@ public class GetUserSteps {
         return response.as(GetUserResponseDto.class);
     }
 
-    @Step("Get user with error response")
-    public ErrorResponseDto getUserError(String id) {
+    @Step("Get user with no content response")
+    public void getUserNoContent(String id) {
         Response response = getUserResponse(id);
 
-        response.then().statusCode(HttpStatus.SC_NOT_FOUND);
-
-        return response.as(ErrorResponseDto.class);
+        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
     private Response getUserResponse(String id) {
