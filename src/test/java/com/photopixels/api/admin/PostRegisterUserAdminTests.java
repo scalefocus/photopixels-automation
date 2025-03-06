@@ -164,29 +164,4 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-//    @Test(description = "Register user disabled registration")
-//    @Description("Register user when registration is disabled")
-//    @Story("Register User")
-//    @Severity(SeverityLevel.NORMAL)
-//    public void registerUserDisabledRegistrationTest() {
-//        // Disable registration
-//        PostDisableRegistrationSteps postDisableRegistrationSteps = new PostDisableRegistrationSteps(getAdminToken());
-//        postDisableRegistrationSteps.disableRegistration(false);
-//
-//        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-//        ErrorResponseDto errorResponseDto = postRegisterUserSteps.registerUserError(name, email, password);
-//
-//        // Enable registration
-//        postDisableRegistrationSteps.disableRegistration(true);
-//
-//        SoftAssert softAssert = new SoftAssert();
-//
-//        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE, "Error title is not correct");
-//        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
-//
-//        softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.REGISTRATION_IS_DISABLED.getKey()),
-//                ErrorMessagesEnum.REGISTRATION_IS_DISABLED.getErrorMessage(), "Error message is not correct");
-//        softAssert.assertAll();
-//    }
-
 }
