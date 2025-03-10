@@ -1,20 +1,24 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -24,7 +28,6 @@ public class DeleteUserTests extends ApiBaseTest {
     private String name;
     private String email;
     private String token;
-    private String password = "Test12345!";
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
@@ -35,11 +38,11 @@ public class DeleteUserTests extends ApiBaseTest {
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        registeredUsersList.put(email, password);
+        registeredUsersList.put(email, PASSWORD);
 
-        token = getToken(email, password);
+        token = getToken(email, PASSWORD);
     }
 
 
@@ -58,12 +61,12 @@ public class DeleteUserTests extends ApiBaseTest {
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        String token = getToken(email, password);
+        String token = getToken(email, PASSWORD);
 
         DeleteUserSteps deleteUserSteps = new DeleteUserSteps(token);
-        deleteUserSteps.deleteUser(password);
+        deleteUserSteps.deleteUser(PASSWORD);
 
         // No response is returned
     }

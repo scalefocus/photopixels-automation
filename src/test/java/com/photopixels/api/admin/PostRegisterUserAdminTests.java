@@ -15,6 +15,7 @@ import org.testng.asserts.SoftAssert;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -24,7 +25,6 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     private String token;
     private String name;
     private String email;
-    private String password = "Test12345!";
 
     private List<String> registeredUsersList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
-        postRegisterUserAdminSteps.registerUserAdmin(name, email, password, role);
+        postRegisterUserAdminSteps.registerUserAdmin(name, email, PASSWORD, role);
 
         registeredUsersList.add(email);
 
@@ -101,7 +101,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     public void registerUserAdminNoEmailTest() {
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
         ErrorResponseDto errorResponseDto = postRegisterUserAdminSteps
-                .registerUserAdminError(name, null, password, UserRolesEnum.USER);
+                .registerUserAdminError(name, null, PASSWORD, UserRolesEnum.USER);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -121,7 +121,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     public void registerUserAdminNoNameTest() {
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
         ErrorResponseDto errorResponseDto = postRegisterUserAdminSteps
-                .registerUserAdminError(null, email, password, UserRolesEnum.USER);
+                .registerUserAdminError(null, email, PASSWORD, UserRolesEnum.USER);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -144,12 +144,12 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
         String email = "test" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
-        postRegisterUserAdminSteps.registerUserAdmin(name, email, password, UserRolesEnum.USER);
+        postRegisterUserAdminSteps.registerUserAdmin(name, email, PASSWORD, UserRolesEnum.USER);
 
         registeredUsersList.add(email);
 
         ErrorResponseDto errorResponseDto = postRegisterUserAdminSteps
-                .registerUserAdminError(name, email, password, UserRolesEnum.USER);
+                .registerUserAdminError(name, email, PASSWORD, UserRolesEnum.USER);
 
         SoftAssert softAssert = new SoftAssert();
 

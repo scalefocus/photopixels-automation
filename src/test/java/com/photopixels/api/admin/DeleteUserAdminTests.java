@@ -15,6 +15,7 @@ import org.testng.asserts.SoftAssert;
 
 import java.util.UUID;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
@@ -22,7 +23,6 @@ import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERRO
 public class DeleteUserAdminTests extends ApiBaseTest {
 
     private String token;
-    private String password = "Test12345!";
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -39,7 +39,7 @@ public class DeleteUserAdminTests extends ApiBaseTest {
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
         String userId = getUserId(email);
 

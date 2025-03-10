@@ -18,6 +18,7 @@ import org.testng.asserts.SoftAssert;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
@@ -26,7 +27,6 @@ import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERR
 public class PostForgotUserPasswordTests extends ApiBaseTest {
 
     private String email;
-    private String password = "Test12345!";
     private Map<String, String> registeredUsersList = new HashMap<>();
 
     @BeforeClass(alwaysRun = true)
@@ -36,9 +36,9 @@ public class PostForgotUserPasswordTests extends ApiBaseTest {
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        registeredUsersList.put(email, password);
+        registeredUsersList.put(email, PASSWORD);
     }
 
     @AfterClass(alwaysRun = true)

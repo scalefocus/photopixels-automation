@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
@@ -28,7 +29,6 @@ public class PostChangeUserRoleTests extends ApiBaseTest {
 
     private String token;
     private String userId;
-    private String password = "Test12345!";
     private UserRolesEnum role = UserRolesEnum.USER;;
 
     private List<String> registeredUsersList = new ArrayList<>();
@@ -42,7 +42,7 @@ public class PostChangeUserRoleTests extends ApiBaseTest {
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
-        postRegisterUserAdminSteps.registerUserAdmin(name, email, password, role);
+        postRegisterUserAdminSteps.registerUserAdmin(name, email, PASSWORD, role);
 
         registeredUsersList.add(email);
 

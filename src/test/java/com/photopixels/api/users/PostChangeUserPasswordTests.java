@@ -1,13 +1,13 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.users.GetUserInfoSteps;
 import com.photopixels.api.steps.users.PostChangeUserPasswordSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 import static com.photopixels.api.enums.ErrorMessagesEnum.NEW_PASSWORD;
 
@@ -26,7 +27,6 @@ import static com.photopixels.api.enums.ErrorMessagesEnum.NEW_PASSWORD;
 public class PostChangeUserPasswordTests extends ApiBaseTest {
 
     private String token;
-    private String password = "Test12345!";
     private Map<String, String> registeredUsersList = new HashMap<>();
 
     @BeforeClass(alwaysRun = true)
@@ -36,11 +36,11 @@ public class PostChangeUserPasswordTests extends ApiBaseTest {
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        registeredUsersList.put(email, password);
+        registeredUsersList.put(email, PASSWORD);
 
-        token = getToken(email, password);
+        token = getToken(email, PASSWORD);
     }
 
     @AfterClass(alwaysRun = true)
@@ -59,14 +59,14 @@ public class PostChangeUserPasswordTests extends ApiBaseTest {
         String newPassword = "!Test98765";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
         registeredUsersList.put(email, newPassword);
 
-        String token = getToken(email, password);
+        String token = getToken(email, PASSWORD);
 
         PostChangeUserPasswordSteps postChangeUserPasswordSteps = new PostChangeUserPasswordSteps(token);
-        postChangeUserPasswordSteps.changeUserPassword(password, newPassword);
+        postChangeUserPasswordSteps.changeUserPassword(PASSWORD, newPassword);
 
         String newToken = getToken(email, newPassword);
 
@@ -96,7 +96,7 @@ public class PostChangeUserPasswordTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void changeUserPasswordWithNotValidNewPasswordTest(String newPassword, ErrorMessagesEnum errorMessage) {
         PostChangeUserPasswordSteps postChangeUserPasswordSteps = new PostChangeUserPasswordSteps(token);
-        ErrorResponseDto errorResponseDto = postChangeUserPasswordSteps.changeUserPasswordError(password, newPassword);
+        ErrorResponseDto errorResponseDto = postChangeUserPasswordSteps.changeUserPasswordError(PASSWORD, newPassword);
 
         SoftAssert softAssert = new SoftAssert();
 
