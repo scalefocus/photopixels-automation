@@ -20,7 +20,7 @@ public class PostDisableRegistrationTests extends ApiBaseTest {
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
-        token = getToken(inputData.getUsernameAdmin(), inputData.getPasswordAdmin());
+        token = getAdminToken();
     }
 
     @AfterClass(alwaysRun = true)

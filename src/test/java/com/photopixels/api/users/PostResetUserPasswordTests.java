@@ -1,19 +1,24 @@
 package com.photopixels.api.users;
 
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.steps.users.*;
+import com.photopixels.api.helpers.listeners.StatusTestListener;
+import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.api.steps.users.PostResetUserPasswordSteps;
+import com.photopixels.base.ApiBaseTest;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -22,7 +27,6 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
 
     private String email;
     private String code;
-    private String password = "Test12345!";
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
@@ -34,9 +38,9 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
         code = RandomStringUtils.randomNumeric(6);
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        registeredUsersList.put(email, password);
+        registeredUsersList.put(email, PASSWORD);
     }
 
     @AfterClass(alwaysRun = true)
@@ -53,7 +57,7 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
         // TODO: call /user/forgotpassword to get valid code from the sent mail
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        postResetUserPasswordSteps.resetUserPassword(code, password, email);
+        postResetUserPasswordSteps.resetUserPassword(code, PASSWORD, email);
 
         // Empty response is returned
     }
@@ -83,7 +87,7 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void resetUserPasswordNoEmailTest() {
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(code, password, null);
+        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(code, PASSWORD, null);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -102,7 +106,7 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void resetUserPasswordNoCodeTest() {
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(null, password, email);
+        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(null, PASSWORD, email);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -123,7 +127,7 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
         String email = "InvalidEmail";
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(code, password, email);
+        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(code, PASSWORD, email);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -145,7 +149,7 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
         String invalidCode = "InvalidCode";
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(invalidCode, password, email);
+        ErrorResponseDto errorResponseDto = postResetUserPasswordSteps.resetUserPasswordError(invalidCode, PASSWORD, email);
 
         SoftAssert softAssert = new SoftAssert();
 

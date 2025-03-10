@@ -17,6 +17,7 @@ import org.testng.asserts.SoftAssert;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -25,7 +26,6 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
 
     private String token;
     private String email;
-    private String password = "Test12345!";
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
@@ -38,9 +38,9 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
-        registeredUsersList.put(email, password);
+        registeredUsersList.put(email, PASSWORD);
     }
 
     @AfterClass(alwaysRun = true)
@@ -60,7 +60,7 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, password);
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
 
         PostResetPasswordAdminSteps postResetPasswordAdminSteps = new PostResetPasswordAdminSteps(token);
         postResetPasswordAdminSteps.resetPasswordAdmin(newPassword, email);
@@ -86,7 +86,7 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void resetPasswordAdminNoEmailTest() {
         PostResetPasswordAdminSteps postResetPasswordAdminSteps = new PostResetPasswordAdminSteps(token);
-        ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(password, null);
+        ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(PASSWORD, null);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -107,7 +107,7 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
         String email = "InvalidEmail";
 
         PostResetPasswordAdminSteps postResetPasswordAdminSteps = new PostResetPasswordAdminSteps(token);
-        ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(password, email);
+        ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(PASSWORD, email);
 
         SoftAssert softAssert = new SoftAssert();
 
