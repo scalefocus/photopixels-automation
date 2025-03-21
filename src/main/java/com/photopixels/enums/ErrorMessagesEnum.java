@@ -1,4 +1,4 @@
-package com.photopixels.api.enums;
+package com.photopixels.enums;
 
 import lombok.Getter;
 
@@ -23,7 +23,10 @@ public enum ErrorMessagesEnum {
     INVALID_CODE("InvalidCode", "The provided code is invalid"),
     REFRESH_TOKEN("RefreshToken", "The RefreshToken field is required."),
     REGISTRATION_IS_DISABLED("RegistrationIsDisabled", "Cannot register new user until registration is enabled by admin!"),
-    REQUEST("request", "The request field is required.");
+    REQUEST("request", "The request field is required."),
+    FILE("File", "The File field is required."),
+    OBJECT_HASH("ObjectHash", "The ObjectHash field is required."),
+    OBJECT_HASH_NOT_MATCH("ObjectHash", "Object hash does not match");
 
     private final String key;
 

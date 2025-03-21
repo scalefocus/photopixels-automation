@@ -1,4 +1,4 @@
-package com.photopixels.api.enums;
+package com.photopixels.enums;
 
 import lombok.Getter;
 

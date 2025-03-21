@@ -1,8 +1,8 @@
 package com.photopixels.api.steps.users;
 
 import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -30,7 +30,7 @@ public class GetUserInfoSteps {
     @Step("Get user info")
     public GetUserInfoResponseDto getUserInfo() {
         Response response = requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
 
         response.then().statusCode(HttpStatus.SC_OK);
 

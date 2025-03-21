@@ -1,8 +1,8 @@
 package com.photopixels.api.steps.admin;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -52,6 +52,6 @@ public class GetUserSteps {
         requestSpecification.addPathParams(pathParams);
 
         return requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
     }
 }

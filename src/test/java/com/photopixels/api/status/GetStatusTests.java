@@ -1,9 +1,9 @@
 package com.photopixels.api.status;
 
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.base.ApiBaseTest;
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
 import com.photopixels.api.steps.status.GetStatusSteps;
+import com.photopixels.base.ApiBaseTest;
+import com.photopixels.helpers.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;

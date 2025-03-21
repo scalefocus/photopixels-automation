@@ -1,8 +1,8 @@
 package com.photopixels.api.steps.status;
 
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -27,7 +27,7 @@ public class GetStatusSteps {
     @Step("Get status")
     public GetStatusResponseDto getStatus() {
         Response response = requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
 
         response.then().statusCode(HttpStatus.SC_OK);
 

@@ -1,12 +1,16 @@
-package com.photopixels.api.helpers.listeners;
+package com.photopixels.helpers.listeners;
 
 import io.qameta.allure.Allure;
 import io.qameta.allure.listener.StepLifecycleListener;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
-import org.testng.*;
+import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
+import org.testng.ITestResult;
+import org.testng.TestListenerAdapter;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.UUID;
 
 public class StatusTestListener extends TestListenerAdapter implements StepLifecycleListener {
 
