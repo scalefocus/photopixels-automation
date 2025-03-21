@@ -1,22 +1,23 @@
 package com.photopixels.api.users;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.helpers.listeners.StatusTestListener;
-import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.api.dtos.users.LoginResponseDto;
+import com.photopixels.api.steps.users.PostForgotUserPasswordSteps;
+import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.api.steps.users.PostResetUserPasswordSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.enums.ErrorMessagesEnum;
+import com.photopixels.helpers.DriverUtils;
+import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.web.pages.email.EmailPage;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.testng.annotations.AfterClass;
+import org.openqa.selenium.WebDriver;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
@@ -28,24 +29,11 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
     private String email;
     private String code;
 
-    private Map<String, String> registeredUsersList = new HashMap<>();
-
     @BeforeClass(alwaysRun = true)
     public void setup() {
-        String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
-        email = "testuser" + random + "@test.com";
+        // Using predefined email to get the reset code from the inbox
+        email = "Romer1977@cuvox.de";
         code = RandomStringUtils.randomNumeric(6);
-
-        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-        postRegisterUserSteps.registerUser(name, email, PASSWORD);
-
-        registeredUsersList.put(email, PASSWORD);
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void cleanup() {
-        deleteRegisteredUsers(registeredUsersList);
     }
 
     @Test(description = "Reset user password")
@@ -53,13 +41,27 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
     @Story("Reset User Password")
     @Severity(SeverityLevel.CRITICAL)
     public void resetUserPasswordTest() {
+        String newPassword = "Test12345!";
 
-        // TODO: call /user/forgotpassword to get valid code from the sent mail
+        PostForgotUserPasswordSteps postForgotUserPasswordSteps = new PostForgotUserPasswordSteps();
+        postForgotUserPasswordSteps.forgotUserPassword(email);
+
+        String code = getCodeForReset();
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        postResetUserPasswordSteps.resetUserPassword(code, PASSWORD, email);
+        postResetUserPasswordSteps.resetUserPassword(code, newPassword, email);
 
-        // Empty response is returned
+        PostLoginSteps postLoginSteps = new PostLoginSteps();
+        LoginResponseDto loginResponseDto = postLoginSteps.login(email, newPassword);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertEquals(loginResponseDto.getTokenType(), "Bearer", "Token type is not correct");
+        softAssert.assertNotNull(loginResponseDto.getAccessToken(), "Access token is missing");
+        softAssert.assertNotNull(loginResponseDto.getRefreshToken(), "Refresh token is missing");
+        softAssert.assertNotNull(loginResponseDto.getUserId(), "User id is missing");
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Reset user password no password")
@@ -161,6 +163,30 @@ public class PostResetUserPasswordTests extends ApiBaseTest {
                 ErrorMessagesEnum.INVALID_CODE.getErrorMessage(), "Error message is not correct");
 
         softAssert.assertAll();
+    }
+
+    // TODO: Find better solution for the web part in the api tests
+    private String getCodeForReset() {
+        WebDriver driver = null;
+
+        // Sleep is needed to let the code be sent to the email
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            // No need to do anything here
+        }
+        try {
+            driver = new DriverUtils().getDriver();
+
+            driver.get(configProperties.getProperty("emailUrl"));
+
+            EmailPage emailPage = new EmailPage(driver);
+            return emailPage.getCodeFromEmail();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 
 }
