@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Users API Tests">
+
+    <test name="Users Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.api.users.PostRegisterUserTests"/>
+            <class name="com.photopixels.api.users.PostLoginTests"/>
+            <class name="com.photopixels.api.users.GetUserInfoTests"/>
+            <class name="com.photopixels.api.users.DeleteUserTests"/>
+            <class name="com.photopixels.api.users.PostRefreshTokenTests"/>
+            <class name="com.photopixels.api.users.PostResetUserPasswordTests"/>
+            <class name="com.photopixels.api.users.PostForgotUserPasswordTests"/>
+            <class name="com.photopixels.api.users.PostChangeUserPasswordTests"/>
+        </classes>
+    </test>
+
+</suite>

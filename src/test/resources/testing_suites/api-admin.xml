@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Admin API Tests">
+
+    <test name="Admin Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.api.admin.GetUsersTests"/>
+            <class name="com.photopixels.api.admin.GetUserTests"/>
+            <class name="com.photopixels.api.admin.PostDisableRegistrationTests"/>
+            <class name="com.photopixels.api.admin.PostRegisterUserAdminTests"/>
+            <class name="com.photopixels.api.admin.PostResetPasswordAdminTests"/>
+            <class name="com.photopixels.api.admin.PostChangeUserRoleTests"/>
+            <class name="com.photopixels.api.admin.PostAdjustStorageQuotaTests"/>
+            <class name="com.photopixels.api.admin.DeleteUserAdminTests"/>
+        </classes>
+    </test>
+
+</suite>

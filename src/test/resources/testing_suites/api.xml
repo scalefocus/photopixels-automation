@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels API Tests" >
+
+   <suite-files>
+     <suite-file path="./api-users.xml" />
+     <suite-file path="./api-admin.xml" />
+     <suite-file path="./api-status.xml" />
+     <suite-file path="./api-sync.xml" />
+     <suite-file path="./api-objectoperations.xml" />
+   </suite-files>
+
+</suite>
