@@ -1,4 +1,4 @@
-package com.photopixels.api.helpers;
+package com.photopixels.helpers;
 
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -80,7 +80,7 @@ public class CustomRequestSpecification {
 		filterableRequestSpecification.relaxedHTTPSValidation();
 	}
 
-	public FilterableRequestSpecification getFiltarableRequestSpecification() {
+	public FilterableRequestSpecification getFilterableRequestSpecification() {
 		return filterableRequestSpecification;
 	}
 }

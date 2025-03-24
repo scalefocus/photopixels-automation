@@ -1,8 +1,8 @@
 package com.photopixels.base;
 
 
-import com.photopixels.api.helpers.InputDataHelper;
-import com.photopixels.api.helpers.PropertiesUtils;
+import com.photopixels.helpers.InputDataHelper;
+import com.photopixels.helpers.PropertiesUtils;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -21,7 +21,7 @@ public class BaseTest {
 	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
 
 	protected static InputDataHelper inputData;
-	protected Properties configProperties;
+	protected static Properties configProperties;
 
 	@BeforeSuite(alwaysRun = true)
 	public void initSuiteBase() {

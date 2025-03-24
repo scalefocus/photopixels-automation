@@ -2,12 +2,12 @@ package com.photopixels.api.users;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
-import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.users.GetUserInfoSteps;
 import com.photopixels.api.steps.users.PostChangeUserPasswordSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.enums.ErrorMessagesEnum;
+import com.photopixels.helpers.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.Objects;
 
 import static com.photopixels.api.constants.Constants.PASSWORD;
 import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
-import static com.photopixels.api.enums.ErrorMessagesEnum.NEW_PASSWORD;
+import static com.photopixels.enums.ErrorMessagesEnum.NEW_PASSWORD;
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")

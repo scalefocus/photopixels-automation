@@ -1,4 +1,4 @@
-package com.photopixels.api.helpers;
+package com.photopixels.helpers;
 
 import java.util.Properties;
 

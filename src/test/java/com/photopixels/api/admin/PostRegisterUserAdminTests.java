@@ -1,11 +1,11 @@
 package com.photopixels.api.admin;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.enums.ErrorMessagesEnum;
-import com.photopixels.api.enums.UserRolesEnum;
-import com.photopixels.api.helpers.listeners.StatusTestListener;
 import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.enums.ErrorMessagesEnum;
+import com.photopixels.enums.UserRolesEnum;
+import com.photopixels.helpers.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;

@@ -3,8 +3,8 @@ package com.photopixels.api.steps.users;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.ChangeUserPasswordRequestDto;
 import com.photopixels.api.factories.users.ChangeUserPasswordFactory;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -53,6 +53,6 @@ public class PostChangeUserPasswordSteps {
         requestSpecification.addBodyToRequest(changeUserPasswordRequestDto);
 
         return requestOperationsHelper
-                .sendPostRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
 }

@@ -3,8 +3,8 @@ package com.photopixels.api.steps.admin;
 import com.photopixels.api.dtos.admin.ResetPasswordAdminRequestDto;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.factories.admin.ResetPasswordAdminFactory;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -54,6 +54,6 @@ public class PostResetPasswordAdminSteps {
         requestSpecification.addBodyToRequest(resetUserPasswordRequestDto);
 
         return requestOperationsHelper
-                .sendPostRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
 }

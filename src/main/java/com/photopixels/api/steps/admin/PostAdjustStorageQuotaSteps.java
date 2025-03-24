@@ -4,8 +4,8 @@ import com.photopixels.api.dtos.admin.AdjustStorageQuotaRequestDto;
 import com.photopixels.api.dtos.admin.AdjustStorageQuotaResponseDto;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.factories.admin.AdjustStorageQuotaFactory;
-import com.photopixels.api.helpers.CustomRequestSpecification;
-import com.photopixels.api.helpers.RequestOperationsHelper;
+import com.photopixels.helpers.CustomRequestSpecification;
+import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -55,6 +55,6 @@ public class PostAdjustStorageQuotaSteps {
         requestSpecification.addBodyToRequest(adjustStorageQuotaRequestDto);
 
         return requestOperationsHelper
-                .sendPostRequest(requestSpecification.getFiltarableRequestSpecification());
+                .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
 }
