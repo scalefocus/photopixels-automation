@@ -11,14 +11,14 @@ import java.time.Duration;
 public class WaitOperationHelper {
 
 	public static final int ONE_SECOND_IN_MS = 1000;
-
+	public static final int HALF_SECOND_IN_MS = 500;
 	public static final int SIXTY_SECONDS = 60;
 
 	private FluentWait<WebDriver> wait;
 
 	public WaitOperationHelper(WebDriver driver) {
 		wait = new FluentWait<WebDriver>(driver).withTimeout(Duration.ofSeconds(SIXTY_SECONDS));
-		wait.pollingEvery(Duration.ofMillis(ONE_SECOND_IN_MS)).ignoring(NoSuchElementException.class);
+		wait.pollingEvery(Duration.ofMillis(HALF_SECOND_IN_MS)).ignoring(NoSuchElementException.class);
 	}
 
 	public void waitMs() {
