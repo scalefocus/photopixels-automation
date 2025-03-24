@@ -25,6 +25,10 @@ public class InputDataHelper {
         }
     }
 
+    public String getUserFullName() {
+        return getProperty("userFullName");
+    }
+
     public String getUsername() {
         return getProperty("username");
     }
