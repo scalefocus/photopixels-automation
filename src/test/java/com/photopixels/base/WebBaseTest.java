@@ -70,7 +70,7 @@ public class WebBaseTest extends BaseTest {
     }
 
     public File takeScreenshot(String name) {
-        File screenshotPath;
+        File screenshotFile;
         File outputDir = new File(SCREENSHOTS_DIR);
         Date currentDate = Calendar.getInstance().getTime();
         String currentTime = new SimpleDateFormat("yyyyMMdd_HHmmss").format(currentDate);
@@ -79,15 +79,15 @@ public class WebBaseTest extends BaseTest {
             outputDir.mkdir();
         }
 
-        screenshotPath = new File(outputDir.getAbsolutePath(), currentTime + "_" + name + ".png");
+        screenshotFile = new File(outputDir.getAbsolutePath(), currentTime + "_" + name + ".png");
 
         try {
             File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.moveFile(screenshot, screenshotPath);
+            FileUtils.moveFile(screenshot, screenshotFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return screenshotPath;
+        return screenshotFile;
     }
 }
