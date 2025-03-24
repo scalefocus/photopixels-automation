@@ -29,14 +29,14 @@ public class PostUploadObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectHash;
-    private String fileName = FILE_LOCATION + "unnamed.jpg";
-    private String file = FILE_LOCATION + "training.jpg";
+    private String filePath = FILE_LOCATION + "unnamed.jpg";
+    private String uploadPhotoPath = FILE_LOCATION + "training.jpg";
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
-        objectHash = getObjectHash(fileName);
+        objectHash = getObjectHash(filePath);
 
         String random = RandomStringUtils.randomNumeric(6);
         String name = "Test User" + random;
@@ -60,11 +60,11 @@ public class PostUploadObjectTests extends ApiBaseTest {
     @Story("Upload Object")
     @Severity(SeverityLevel.CRITICAL)
     public void uploadObjectTest() {
-        String objectHash = getObjectHash(file);
+        String objectHash = getObjectHash(uploadPhotoPath);
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
         UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(file, objectHash);
+                .uploadObject(uploadPhotoPath, objectHash);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -82,11 +82,11 @@ public class PostUploadObjectTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void uploadObjectDuplicateFileTest() {
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        postUploadObjectSteps.uploadObject(fileName, objectHash);
+        postUploadObjectSteps.uploadObject(filePath, objectHash);
 
         // Upload the same file
         ErrorResponseDto errorResponseDto = postUploadObjectSteps
-                .uploadObjectError(fileName, objectHash, HttpStatus.SC_CONFLICT);
+                .uploadObjectError(filePath, objectHash, HttpStatus.SC_CONFLICT);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -121,7 +121,7 @@ public class PostUploadObjectTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void uploadObjectNoObjectHashTest() {
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(fileName, null, HttpStatus.SC_BAD_REQUEST);
+        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(filePath, null, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -142,7 +142,7 @@ public class PostUploadObjectTests extends ApiBaseTest {
         String invalidObjectHash = "invalidObjectHash";
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(fileName, invalidObjectHash, HttpStatus.SC_BAD_REQUEST);
+        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(filePath, invalidObjectHash, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
