@@ -10,8 +10,14 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import org.apache.commons.codec.binary.Base64;
 import org.testng.annotations.BeforeSuite;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +25,8 @@ import java.util.Map;
 import static io.restassured.RestAssured.baseURI;
 
 public class ApiBaseTest extends BaseTest{
+
+    protected static final String FILE_LOCATION = "upload_files/";
 
     @BeforeSuite(alwaysRun = true)
     public void initSuiteApi() {
@@ -86,5 +94,20 @@ public class ApiBaseTest extends BaseTest{
                 deleteUserAdminSteps.deleteUserAdmin(userId);
             }
         }
+    }
+
+    protected String getObjectHash(String fileName) {
+        String res = "";
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] array = Files.readAllBytes(Path.of(fileName));
+
+            res = Base64.encodeBase64String(md.digest(array));
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        return res;
     }
 }
