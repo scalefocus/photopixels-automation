@@ -61,7 +61,7 @@ public class GetObjectThumbnailTests extends ApiBaseTest {
 
     @Test(description = "Get object thumbnail with not existing id")
     @Description("Validation of get object thumbnail with not existing id")
-    @Story("Get Object thumbnail")
+    @Story("Get Object Thumbnail")
     @Severity(SeverityLevel.MINOR)
     public void getObjectThumbnailNotExistingIdTest() {
         String notExistingId = "NotExisting";
