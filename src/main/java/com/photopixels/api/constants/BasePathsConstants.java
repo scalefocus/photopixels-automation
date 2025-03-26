@@ -32,5 +32,6 @@ public class BasePathsConstants {
     public static String POST_UPLOAD_PHOTO = "/object";
     public static String DELETE_OBJECT = "/object/{Id}";
     public static String GET_OBJECT = "/object/{Id}";
+    public static String GET_OBJECT_THUMBNAIL = "/object/{Id}/thumbnail";
 
 }
