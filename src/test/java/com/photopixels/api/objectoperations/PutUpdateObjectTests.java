@@ -24,8 +24,8 @@ public class PutUpdateObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectId;
-    private String appleCloudId;
-    private String androidCloudId;
+    private String appleCloudId = "apple_cloud_id";
+    private String androidCloudId = "android_cloud_id";
     private String fileName = FILE_LOCATION + "french-fries.jpg";
 
     @BeforeClass(alwaysRun = true)
@@ -39,8 +39,6 @@ public class PutUpdateObjectTests extends ApiBaseTest {
                 .uploadObject(fileName, objectHash);
 
         objectId = uploadObjectResponseDto.getId();
-        appleCloudId = "apple_cloud_id";
-        androidCloudId = "android_cloud_id";
     }
 
     @AfterClass(alwaysRun = true)
@@ -71,7 +69,7 @@ public class PutUpdateObjectTests extends ApiBaseTest {
         String notExistingId = "NotExisting";
 
         PutUpdateObjectSteps putUpdateObjectSteps = new PutUpdateObjectSteps(token);
-        ErrorResponseDto errorResponseDto = putUpdateObjectSteps.updateObjectError(notExistingId,null,null);
+        ErrorResponseDto errorResponseDto = putUpdateObjectSteps.updateObjectError(notExistingId,appleCloudId,androidCloudId);
 
         SoftAssert softAssert = new SoftAssert();
 

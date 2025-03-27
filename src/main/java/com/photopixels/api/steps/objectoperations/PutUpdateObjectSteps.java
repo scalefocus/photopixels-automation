@@ -14,7 +14,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.GET_OBJECT;
+import static com.photopixels.api.constants.BasePathsConstants.UPDATE_OBJECT;
 
 public class PutUpdateObjectSteps {
 
@@ -25,7 +25,7 @@ public class PutUpdateObjectSteps {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(GET_OBJECT);
+        requestSpecification.addBasePath(UPDATE_OBJECT);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
