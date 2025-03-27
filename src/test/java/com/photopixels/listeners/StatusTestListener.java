@@ -30,19 +30,18 @@ public class StatusTestListener implements ITestListener, StepLifecycleListener,
 
 	@Override
 	public void beforeTestStop(TestResult result) {
-		// Fail step in case of soft assertion error
-		if (result.getStatus() == Status.FAILED || result.getStatus() == Status.BROKEN) {
-			List<StepResult> steps = result.getSteps();
-			StepResult stepResult = steps.get(steps.size() - 1);
+		List<StepResult> steps = result.getSteps();
+		StepResult stepResult = steps.get(steps.size() - 1);
 
-			if (stepResult.getStatus() == Status.PASSED) {
-				stepResult.setStatus(Status.FAILED);
-			}
+		// Fail step in case of soft assertion error
+		if ((result.getStatus() == Status.FAILED || result.getStatus() == Status.BROKEN)
+				&& (stepResult.getStatus() == Status.PASSED)) {
+			stepResult.setStatus(Status.FAILED);
 		}
 
 		// Attach screenshot for web test
 		if (driver != null) {
-			Allure.addAttachment(result.getName(),
+			Allure.addAttachment(stepResult.getName(),
 					new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
 		}
 	}
