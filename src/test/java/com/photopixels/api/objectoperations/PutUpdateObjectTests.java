@@ -1,10 +1,11 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
+import com.photopixels.api.dtos.objectoperations.UpdateObjectResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
-import com.photopixels.api.steps.objectoperations.GetObjectThumbnailSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
+import com.photopixels.api.steps.objectoperations.PutUpdateObjectSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.helpers.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -19,10 +20,12 @@ import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERRO
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class GetObjectThumbnailTests extends ApiBaseTest {
+public class PutUpdateObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectId;
+    private String appleCloudId = "apple_cloud_id";
+    private String androidCloudId = "android_cloud_id";
     private String fileName = FILE_LOCATION + "french-fries.jpg";
 
     @BeforeClass(alwaysRun = true)
@@ -44,30 +47,29 @@ public class GetObjectThumbnailTests extends ApiBaseTest {
         deleteObjectSteps.deleteObject(objectId);
     }
 
-    @Test(description = "Get object thumbnail")
-    @Description("Successful get of an object thumbnail")
-    @Story("Get Object Thumbnail")
+    @Test(description = "Update object")
+    @Description("Successful update of object")
+    @Story("Update Object")
     @Severity(SeverityLevel.CRITICAL)
-    public void getObjectThumbnailTest() {
-        GetObjectThumbnailSteps getObjectThumbnailSteps = new GetObjectThumbnailSteps(token);
-        String object = getObjectThumbnailSteps.getObjectThumbnail(objectId);
+    public void updateObjectTest() {
+        PutUpdateObjectSteps putUpdateObjectSteps = new PutUpdateObjectSteps(token);
+        UpdateObjectResponseDto updateObjectResponseDto = putUpdateObjectSteps.updateObject(objectId, appleCloudId, androidCloudId);
 
         SoftAssert softAssert = new SoftAssert();
-
-        softAssert.assertNotNull(object, "Object is not returned");
+        softAssert.assertTrue(updateObjectResponseDto.getRevision() > 0, "Value should be greater than 0");
 
         softAssert.assertAll();
     }
 
-    @Test(description = "Get object thumbnail with not existing id")
-    @Description("Validation of get object thumbnail with not existing id")
-    @Story("Get Object Thumbnail")
+    @Test(description = "Update object with not existing id")
+    @Description("Validation of update object with not existing id")
+    @Story("Update Object")
     @Severity(SeverityLevel.MINOR)
-    public void getObjectThumbnailNotExistingIdTest() {
+    public void updateObjectNotExistingIdTest() {
         String notExistingId = "NotExisting";
 
-        GetObjectThumbnailSteps getObjectThumbnailSteps = new GetObjectThumbnailSteps(token);
-        ErrorResponseDto errorResponseDto = getObjectThumbnailSteps.getObjectThumbnailError(notExistingId);
+        PutUpdateObjectSteps putUpdateObjectSteps = new PutUpdateObjectSteps(token);
+        ErrorResponseDto errorResponseDto = putUpdateObjectSteps.updateObjectError(notExistingId,appleCloudId,androidCloudId);
 
         SoftAssert softAssert = new SoftAssert();
 

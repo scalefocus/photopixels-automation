@@ -7,6 +7,7 @@
             <class name="com.photopixels.api.objectoperations.DeleteObjectTests"/>
             <class name="com.photopixels.api.objectoperations.GetObjectTests"/>
             <class name="com.photopixels.api.objectoperations.GetObjectThumbnailTests"/>
+            <class name="com.photopixels.api.objectoperations.PutUpdateObjectTests"/>
         </classes>
     </test>
 
