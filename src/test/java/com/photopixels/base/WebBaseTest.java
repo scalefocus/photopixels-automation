@@ -3,7 +3,7 @@ package com.photopixels.base;
 import com.photopixels.helpers.DriverUtils;
 import com.photopixels.web.pages.LoginPage;
 import com.photopixels.web.pages.email.EmailPage;
-import io.qameta.allure.Attachment;
+import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -24,6 +24,8 @@ public class WebBaseTest extends BaseTest {
     private static final String SCREENSHOTS_DIR = "target/screenshots";
 
     private DriverUtils driverUtils;
+
+    @Getter
     protected WebDriver driver;
 
     @BeforeClass(alwaysRun = true)
@@ -34,11 +36,6 @@ public class WebBaseTest extends BaseTest {
     @BeforeMethod(alwaysRun = true)
     public void setupBaseMethod() {
         driver = driverUtils.getDriver();
-    }
-
-    @Attachment(value = "Page screenshot", type = "image/png")
-    public byte[] saveScreenshot(WebDriver driver) {
-        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
     }
 
     @AfterMethod(alwaysRun = true)

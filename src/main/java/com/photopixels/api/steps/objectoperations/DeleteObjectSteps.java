@@ -12,7 +12,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.DELETE_OBJECT;
+import static com.photopixels.constants.BasePathsConstants.DELETE_OBJECT;
 
 public class DeleteObjectSteps {
 

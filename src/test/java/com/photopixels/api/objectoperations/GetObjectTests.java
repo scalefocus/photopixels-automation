@@ -6,7 +6,7 @@ import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.GetObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.base.ApiBaseTest;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
@@ -15,7 +15,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
+import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")

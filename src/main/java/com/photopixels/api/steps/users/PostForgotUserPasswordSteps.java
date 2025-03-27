@@ -10,7 +10,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
-import static com.photopixels.api.constants.BasePathsConstants.POST_FORGOT_USER_PASSWORD;
+import static com.photopixels.constants.BasePathsConstants.POST_FORGOT_USER_PASSWORD;
 
 public class PostForgotUserPasswordSteps {
 

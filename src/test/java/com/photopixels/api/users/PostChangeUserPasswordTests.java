@@ -7,7 +7,7 @@ import com.photopixels.api.steps.users.PostChangeUserPasswordSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.photopixels.api.constants.Constants.PASSWORD;
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
+import static com.photopixels.constants.Constants.PASSWORD;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 import static com.photopixels.enums.ErrorMessagesEnum.NEW_PASSWORD;
 
 @Listeners(StatusTestListener.class)

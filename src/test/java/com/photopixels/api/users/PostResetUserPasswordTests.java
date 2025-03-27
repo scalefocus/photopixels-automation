@@ -8,7 +8,7 @@ import com.photopixels.api.steps.users.PostResetUserPasswordSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.helpers.DriverUtils;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import com.photopixels.web.pages.email.EmailPage;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,8 +19,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import static com.photopixels.api.constants.Constants.PASSWORD;
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
+import static com.photopixels.constants.Constants.PASSWORD;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")

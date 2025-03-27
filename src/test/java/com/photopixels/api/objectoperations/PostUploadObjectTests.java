@@ -6,7 +6,7 @@ import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -19,9 +19,9 @@ import org.testng.asserts.SoftAssert;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.Constants.PASSWORD;
-import static com.photopixels.api.constants.ErrorMessageConstants.CONFLICT_ERROR;
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
+import static com.photopixels.constants.Constants.PASSWORD;
+import static com.photopixels.constants.ErrorMessageConstants.CONFLICT_ERROR;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")

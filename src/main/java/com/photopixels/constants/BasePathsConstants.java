@@ -1,4 +1,4 @@
-package com.photopixels.api.constants;
+package com.photopixels.constants;
 
 public class BasePathsConstants {
 

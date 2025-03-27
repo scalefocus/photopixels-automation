@@ -11,7 +11,7 @@ import org.apache.http.HttpStatus;
 
 import java.io.File;
 
-import static com.photopixels.api.constants.BasePathsConstants.POST_UPLOAD_PHOTO;
+import static com.photopixels.constants.BasePathsConstants.POST_UPLOAD_PHOTO;
 
 public class PostUploadObjectSteps {
 
