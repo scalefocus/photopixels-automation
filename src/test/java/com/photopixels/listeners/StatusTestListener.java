@@ -19,7 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Iterator;
 import java.util.List;
 
-public class StatusTestListener implements ITestListener,  StepLifecycleListener, TestLifecycleListener {
+public class StatusTestListener implements ITestListener, StepLifecycleListener, TestLifecycleListener {
 
 	private static WebDriver driver;
 
