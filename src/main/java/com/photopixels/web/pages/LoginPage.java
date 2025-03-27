@@ -32,14 +32,7 @@ public class LoginPage extends WaitOperationHelper {
 
 	@Step("Login successfully")
 	public OverviewPage login(String username, String password) {
-
-		if (username != null) {
-			usernameField.sendKeys(username);
-		}
-
-		if (password != null) {
-			passwordField.sendKeys(password);
-		}
+		fillCredentials(username, password);
 
 		loginButton.click();
 
