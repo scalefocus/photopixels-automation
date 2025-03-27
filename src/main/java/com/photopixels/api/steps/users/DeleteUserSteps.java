@@ -10,7 +10,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
-import static com.photopixels.api.constants.BasePathsConstants.DELETE_USER;
+import static com.photopixels.constants.BasePathsConstants.DELETE_USER;
 
 public class DeleteUserSteps {
 

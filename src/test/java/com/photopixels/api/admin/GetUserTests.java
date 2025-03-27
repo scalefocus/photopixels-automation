@@ -4,7 +4,7 @@ import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.steps.admin.GetUserSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.UserRolesEnum;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;

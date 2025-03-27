@@ -8,7 +8,7 @@ import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.enums.UserRolesEnum;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.photopixels.api.constants.Constants.PASSWORD;
-import static com.photopixels.api.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
+import static com.photopixels.constants.Constants.PASSWORD;
+import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")

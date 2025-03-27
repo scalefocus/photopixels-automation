@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
@@ -14,7 +14,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import static com.photopixels.api.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")

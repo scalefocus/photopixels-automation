@@ -8,7 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
-import static com.photopixels.api.constants.BasePathsConstants.GET_USER_INFO;
+import static com.photopixels.constants.BasePathsConstants.GET_USER_INFO;
 
 public class GetUserInfoSteps {
 

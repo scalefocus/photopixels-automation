@@ -4,7 +4,7 @@ import com.photopixels.api.dtos.status.GetStatusResponseDto;
 import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
 import com.photopixels.api.steps.status.GetStatusSteps;
 import com.photopixels.base.ApiBaseTest;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

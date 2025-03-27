@@ -3,7 +3,7 @@ package com.photopixels.api.users;
 import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
 import com.photopixels.api.steps.users.GetUserInfoSteps;
 import com.photopixels.base.ApiBaseTest;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;

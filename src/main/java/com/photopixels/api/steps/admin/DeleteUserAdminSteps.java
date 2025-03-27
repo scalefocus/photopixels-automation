@@ -11,7 +11,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.DELETE_USER_ADMIN;
+import static com.photopixels.constants.BasePathsConstants.DELETE_USER_ADMIN;
 
 public class DeleteUserAdminSteps {
 

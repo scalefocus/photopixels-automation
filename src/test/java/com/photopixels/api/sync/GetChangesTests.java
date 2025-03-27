@@ -3,7 +3,7 @@ package com.photopixels.api.sync;
 import com.photopixels.api.dtos.sync.GetChangesResponseDto;
 import com.photopixels.api.steps.sync.GetChangesSteps;
 import com.photopixels.base.ApiBaseTest;
-import com.photopixels.helpers.listeners.StatusTestListener;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.BeforeClass;

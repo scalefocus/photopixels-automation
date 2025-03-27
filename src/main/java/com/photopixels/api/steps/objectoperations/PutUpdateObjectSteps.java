@@ -14,7 +14,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.PUT_UPDATE_OBJECT;
+import static com.photopixels.constants.BasePathsConstants.PUT_UPDATE_OBJECT;
 
 public class PutUpdateObjectSteps {
 

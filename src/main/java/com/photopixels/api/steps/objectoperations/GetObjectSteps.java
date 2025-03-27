@@ -11,7 +11,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.api.constants.BasePathsConstants.GET_OBJECT;
+import static com.photopixels.constants.BasePathsConstants.GET_OBJECT;
 
 public class GetObjectSteps {
 

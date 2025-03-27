@@ -11,7 +11,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
-import static com.photopixels.api.constants.BasePathsConstants.POST_ADJUST_STORAGE_QUOTA;
+import static com.photopixels.constants.BasePathsConstants.POST_ADJUST_STORAGE_QUOTA;
 
 public class PostAdjustStorageQuotaSteps {
 
