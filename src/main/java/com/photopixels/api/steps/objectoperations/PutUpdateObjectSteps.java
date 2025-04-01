@@ -1,8 +1,8 @@
 package com.photopixels.api.steps.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
+import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UpdateObjectRequestDto;
-import com.photopixels.api.dtos.objectoperations.UpdateObjectResponseDto;
 import com.photopixels.api.factories.objectoperations.UpdateObjectFactory;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
@@ -33,11 +33,11 @@ public class PutUpdateObjectSteps {
     }
 
     @Step("Update object")
-    public UpdateObjectResponseDto updateObject(String objectId, String appleCloudId, String androidCloudId) {
+    public ObjectVersioningResponseDto updateObject(String objectId, String appleCloudId, String androidCloudId) {
         Response response = updateObjectResponse(objectId, appleCloudId, androidCloudId);
 
         response.then().statusCode(HttpStatus.SC_OK);
-        return response.as(UpdateObjectResponseDto.class);
+        return response.as(ObjectVersioningResponseDto.class);
     }
 
     @Step("Update object with error response")
@@ -52,7 +52,7 @@ public class PutUpdateObjectSteps {
     private Response updateObjectResponse(String objectId, String appleCloudId, String androidCloudId) {
         UpdateObjectFactory updateObjectFactory = new UpdateObjectFactory();
         UpdateObjectRequestDto updateObjectRequestDto = updateObjectFactory.
-                updateObjectRequestDto(appleCloudId, androidCloudId);
+                createUpdateObjectRequestDto(appleCloudId, androidCloudId);
 
         requestSpecification.addBodyToRequest(updateObjectRequestDto);
 

@@ -1,7 +1,7 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.objectoperations.UpdateObjectResponseDto;
+import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
@@ -16,6 +16,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
@@ -26,7 +27,7 @@ public class PutUpdateObjectTests extends ApiBaseTest {
     private String objectId;
     private String appleCloudId = "apple_cloud_id";
     private String androidCloudId = "android_cloud_id";
-    private String fileName = FILE_LOCATION + "french-fries.jpg";
+    private String fileName = FRENCH_FRIES_FILE;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -53,10 +54,12 @@ public class PutUpdateObjectTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void updateObjectTest() {
         PutUpdateObjectSteps putUpdateObjectSteps = new PutUpdateObjectSteps(token);
-        UpdateObjectResponseDto updateObjectResponseDto = putUpdateObjectSteps.updateObject(objectId, appleCloudId, androidCloudId);
+        ObjectVersioningResponseDto objectVersioningResponseDto = putUpdateObjectSteps
+                .updateObject(objectId, appleCloudId, androidCloudId);
 
         SoftAssert softAssert = new SoftAssert();
-        softAssert.assertTrue(updateObjectResponseDto.getRevision() > 0, "Value should be greater than 0");
+        softAssert.assertTrue(objectVersioningResponseDto.getRevision() > 0,
+                "Value should be greater than 0");
 
         softAssert.assertAll();
     }

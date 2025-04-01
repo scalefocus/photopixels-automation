@@ -1,7 +1,7 @@
 package com.photopixels.api.steps.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
+import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
@@ -12,49 +12,49 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.constants.BasePathsConstants.DELETE_OBJECT;
+import static com.photopixels.constants.BasePathsConstants.GET_OBJECT_DATA;
 
-public class DeleteObjectSteps {
+public class GetObjectDataSteps {
 
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
-    public DeleteObjectSteps(String token) {
+    public GetObjectDataSteps(String token) {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(DELETE_OBJECT);
+        requestSpecification.addBasePath(GET_OBJECT_DATA);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
-    @Step("Delete object")
-    public ObjectVersioningResponseDto deleteObject(String objectId) {
-        Response response = deleteObjectResponse(objectId);
+    @Step("Get object data")
+    public GetObjectDataResponseDto getObjectData(String objectId) {
+        Response response = getObjectDataResponse(objectId);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
-        return response.as(ObjectVersioningResponseDto.class);
+        return response.as(GetObjectDataResponseDto.class);
     }
 
-    @Step("Delete object with error response")
-    public ErrorResponseDto deleteObjectError(String objectId) {
-        Response response = deleteObjectResponse(objectId);
+    @Step("Get object data with error response")
+    public ErrorResponseDto getObjectDataError(String objectId) {
+        Response response = getObjectDataResponse(objectId);
 
         response.then().statusCode(HttpStatus.SC_NOT_FOUND);
 
         return response.as(ErrorResponseDto.class);
     }
 
-    private Response deleteObjectResponse(String objectId) {
+    private Response getObjectDataResponse(String objectId) {
         Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("Id", objectId);
+        pathParams.put("ObjectId", objectId);
 
         requestSpecification.addPathParams(pathParams);
 
         return requestOperationsHelper
-                .sendDeleteRequest(requestSpecification.getFilterableRequestSpecification());
+                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
     }
 }

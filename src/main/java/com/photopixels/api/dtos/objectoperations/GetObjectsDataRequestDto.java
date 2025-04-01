@@ -2,14 +2,16 @@ package com.photopixels.api.dtos.objectoperations;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class DeleteObjectResponseDto {
+public class GetObjectsDataRequestDto {
 
-    private Integer revision ;
+    private List<String> objectIds;
 
 }
