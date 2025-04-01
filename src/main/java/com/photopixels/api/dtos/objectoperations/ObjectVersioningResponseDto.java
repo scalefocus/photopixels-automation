@@ -8,7 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class UpdateObjectResponseDto {
+public class ObjectVersioningResponseDto {
 
-    private Integer revision;
+    private Integer revision ;
+
 }

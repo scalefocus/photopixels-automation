@@ -33,6 +33,9 @@ public class BasePathsConstants {
     public static String DELETE_OBJECT = "/object/{Id}";
     public static String GET_OBJECT = "/object/{Id}";
     public static String PUT_UPDATE_OBJECT = "/object/{Id}";
-    public static String GET_OBJECT_THUMBNAIL = "/object/{Id}/thumbnail";
+    public static String GET_OBJECT_THUMBNAIL = "/object/{ObjectId}/thumbnail";
+    public static String GET_OBJECT_DATA = "/object/{ObjectId}/data";
+    public static String GET_OBJECTS_DATA = "/objects/data";
+    public static String GET_OBJECTS = "/objects";
 
 }

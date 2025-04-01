@@ -15,6 +15,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
@@ -23,7 +24,7 @@ public class GetObjectThumbnailTests extends ApiBaseTest {
 
     private String token;
     private String objectId;
-    private String fileName = FILE_LOCATION + "french-fries.jpg";
+    private String fileName = FRENCH_FRIES_FILE;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {

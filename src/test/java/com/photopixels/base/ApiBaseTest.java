@@ -26,8 +26,6 @@ import static io.restassured.RestAssured.baseURI;
 
 public class ApiBaseTest extends BaseTest{
 
-    protected static final String FILE_LOCATION = "upload_files/";
-
     @BeforeSuite(alwaysRun = true)
     public void initSuiteApi() {
         baseURI = System.getProperty("baseUri");

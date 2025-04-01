@@ -26,7 +26,8 @@ public enum ErrorMessagesEnum {
     REQUEST("request", "The request field is required."),
     FILE("File", "The File field is required."),
     OBJECT_HASH("ObjectHash", "The ObjectHash field is required."),
-    OBJECT_HASH_NOT_MATCH("ObjectHash", "Object hash does not match");
+    OBJECT_HASH_NOT_MATCH("ObjectHash", "Object hash does not match"),
+    OBJECT_IDS("ObjectIds", "The ObjectIds field is required.");
 
     private final String key;
 

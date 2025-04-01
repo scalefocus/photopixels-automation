@@ -1,7 +1,7 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.objectoperations.DeleteObjectResponseDto;
+import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
@@ -14,6 +14,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
@@ -22,7 +23,7 @@ public class DeleteObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectId;
-    private String fileName = FILE_LOCATION + "training.jpg";
+    private String fileName = TRAINING_FILE;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -43,11 +44,11 @@ public class DeleteObjectTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void deleteObjectTest() {
         DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        DeleteObjectResponseDto deleteObjectResponseDto = deleteObjectSteps.deleteObject(objectId);
+        ObjectVersioningResponseDto objectVersioningResponseDto = deleteObjectSteps.deleteObject(objectId);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertTrue(deleteObjectResponseDto.getRevision() > 0, "Revision is missing");
+        softAssert.assertTrue(objectVersioningResponseDto.getRevision() > 0, "Revision is missing");
 
         softAssert.assertAll();
     }

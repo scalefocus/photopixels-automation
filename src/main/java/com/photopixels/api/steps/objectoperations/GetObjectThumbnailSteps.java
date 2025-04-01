@@ -49,7 +49,7 @@ public class GetObjectThumbnailSteps {
 
     private Response getObjectThumbnailResponse(String objectId) {
         Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("Id", objectId);
+        pathParams.put("ObjectId", objectId);
 
         requestSpecification.addPathParams(pathParams);
 

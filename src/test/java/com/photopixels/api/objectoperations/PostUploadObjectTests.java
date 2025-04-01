@@ -19,7 +19,7 @@ import org.testng.asserts.SoftAssert;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.constants.Constants.PASSWORD;
+import static com.photopixels.constants.Constants.*;
 import static com.photopixels.constants.ErrorMessageConstants.CONFLICT_ERROR;
 import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
@@ -29,8 +29,8 @@ public class PostUploadObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectHash;
-    private String filePath = FILE_LOCATION + "unnamed.jpg";
-    private String uploadPhotoPath = FILE_LOCATION + "training.jpg";
+    private String filePath = UNNAMED_FILE;
+    private String uploadPhotoPath = TRAINING_FILE;
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
