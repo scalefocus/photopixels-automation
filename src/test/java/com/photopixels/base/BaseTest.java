@@ -3,6 +3,7 @@ package com.photopixels.base;
 
 import com.photopixels.helpers.InputDataHelper;
 import com.photopixels.helpers.PropertiesUtils;
+import io.qameta.allure.Allure;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -43,6 +44,10 @@ public class BaseTest {
 
 		copyReportHistory(allureResults);
 		generateEnvironmentFile(allureResults);
+	}
+
+	protected void attachIssueLinkToAllureReport(String issueLink) {
+		Allure.addAttachment("Github issue link", "text/uri-list", issueLink);
 	}
 
 	private void copyReportHistory(String allureResults) {
