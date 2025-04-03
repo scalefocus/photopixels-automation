@@ -4,6 +4,7 @@ import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.admin.DeleteUserAdminSteps;
 import com.photopixels.api.steps.admin.GetUsersSteps;
+import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import io.restassured.RestAssured;
@@ -91,6 +92,14 @@ public class ApiBaseTest extends BaseTest{
                 DeleteUserAdminSteps deleteUserAdminSteps = new DeleteUserAdminSteps(token);
                 deleteUserAdminSteps.deleteUserAdmin(userId);
             }
+        }
+    }
+
+    protected void deleteObjects(List<String> objectIds, String token) {
+        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
+
+        for (String objectId : objectIds) {
+            deleteObjectSteps.deleteObject(objectId);
         }
     }
 
