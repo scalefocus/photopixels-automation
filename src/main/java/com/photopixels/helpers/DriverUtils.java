@@ -81,11 +81,13 @@ public class DriverUtils {
 			ChromeOptions chromeOptions = new ChromeOptions();
 
 			driver = new RemoteWebDriver(url, chromeOptions);
+
 			break;
 		case FIREFOX:
 			FirefoxOptions firefoxOptions = new FirefoxOptions();
 
 			driver = new RemoteWebDriver(url, firefoxOptions);
+
 			break;
 		default:
 			break;

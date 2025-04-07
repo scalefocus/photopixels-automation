@@ -1,5 +1,6 @@
 package com.photopixels.listeners;
 
+import com.photopixels.base.MobileBaseTest;
 import com.photopixels.base.WebBaseTest;
 import io.qameta.allure.Allure;
 import io.qameta.allure.listener.StepLifecycleListener;
@@ -52,6 +53,10 @@ public class StatusTestListener implements ITestListener, StepLifecycleListener,
 
 		if (testClass.getClass().getSuperclass().equals(WebBaseTest.class)) {
 			driver = ((WebBaseTest) testClass).getDriver();
+		}
+
+		if (testClass.getClass().getSuperclass().equals(MobileBaseTest.class)) {
+			driver = ((MobileBaseTest) testClass).getMobileDriver();
 		}
 	}
 

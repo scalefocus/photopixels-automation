@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Mobile Tests">
+
+    <test name="Mobile Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.mobile.MobileLoginTests"/>
+        </classes>
+    </test>
+
+</suite>
