@@ -4,6 +4,7 @@ public class BasePathsConstants {
 
     // Status
     public static String GET_STATUS = "/status";
+    public static String GET_LOGS = "/logs";
 
     // Users
     public static String POST_REGISTER_USER = "/user/register";
