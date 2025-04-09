@@ -4,6 +4,7 @@
    <suite-files>
      <suite-file path="./api.xml" />
      <suite-file path="./web.xml" />
+     <suite-file path="./mobile.xml" />
    </suite-files>
 
 </suite>
