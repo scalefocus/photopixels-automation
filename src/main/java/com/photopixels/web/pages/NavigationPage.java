@@ -32,9 +32,6 @@ public class NavigationPage extends WaitOperationHelper {
     @FindBy(xpath = "//nav/div[@role='button']")
     private WebElement logoutButton;
 
-    @FindBy(xpath = "//*[@id=`root`]/div[1]/div/div[1]/div/div/nav/a[4]/div[2]/span")
-    private WebElement createUserTab;
-
     public NavigationPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
@@ -49,10 +46,19 @@ public class NavigationPage extends WaitOperationHelper {
         return userName.getText();
     }
 
-    @Step("Get user name")
-    public NavigationPage goToCreateNewUser() {
-        createUserTab.click();
+    @Step("Go to Create New User tab")
+    public CreateUserPage goToCreateNewUser() {
+        waitForElementToBeVisible(createUserMenu);
+        createUserMenu.click();
 
-        return new NavigationPage(driver);
+        return new CreateUserPage(driver);
+    }
+
+    @Step("Go to Users tab")
+    public CreateUserPage goToUserTab() {
+        waitForElementToBeVisible(usersMenu);
+        usersMenu.click();
+
+        return new CreateUserPage(driver);
     }
 }

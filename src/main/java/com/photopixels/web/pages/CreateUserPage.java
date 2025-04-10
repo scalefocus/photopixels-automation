@@ -2,6 +2,7 @@ package com.photopixels.web.pages;
 
 import com.photopixels.helpers.WaitOperationHelper;
 import io.qameta.allure.Step;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -13,17 +14,15 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CreateUserPage extends WaitOperationHelper {
+public class CreateUserPage extends NavigationPage {
 
     private WebDriver driver;
+    private JavascriptExecutor js;
 
     @FindBy(xpath = "//div[1]/h5[contains(text(), 'Create A New User')]")
     private WebElement createUserHeader;
 
-    @FindBy(xpath = "//nav//a[4]//span[contains(text(), 'Create User')]")
-    private WebElement createUserTab;
-
-    @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/form/div[1]/div/label[1]/span[2]")
+    @FindBy(xpath = "//form//span[contains(text(), 'Admin')]")
     private WebElement selectAdminRole;
 
     @FindBy(xpath = "//*[@id='name']")
@@ -38,7 +37,7 @@ public class CreateUserPage extends WaitOperationHelper {
     @FindBy(xpath = "//*[@id='root']//form/button")
     private WebElement createNewUserButton;
 
-    @FindBy(xpath = "//*[@id='root']//div[2]/div/div/div[2]")
+    @FindBy(css = ".MuiAlert-standardSuccess .MuiAlert-message")
     private WebElement userCreatedMsg;
 
     @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li")
@@ -62,16 +61,9 @@ public class CreateUserPage extends WaitOperationHelper {
     public CreateUserPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
+        this.js = (JavascriptExecutor) driver;
 
         PageFactory.initElements(driver, this);
-    }
-
-    @Step("Go to create user tab")
-    public CreateUserPage goToCreateUserTab() {
-        waitForElementToBeVisible(createUserTab);
-        createUserTab.click();
-
-        return new CreateUserPage(driver);
     }
 
     @Step("Get create user header")
@@ -103,6 +95,11 @@ public class CreateUserPage extends WaitOperationHelper {
         waitForElementToBeVisible(userCreatedMsg);
 
         return userCreatedMsg.getText();
+    }
+
+    @Step("Get validation message for a field using JavaScript")
+    public String getValidationMessage(WebElement element) {
+        return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 
     @Step("Return name field element for verification")

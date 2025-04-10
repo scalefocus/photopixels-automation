@@ -8,7 +8,6 @@ import com.photopixels.web.pages.OverviewPage;
 import io.qameta.allure.*;
 import net.bytebuddy.utility.RandomString;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.openqa.selenium.JavascriptExecutor;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -43,14 +42,16 @@ public class CreateNewUserTests extends WebBaseTest {
     @Story("Create New User")
     @Severity(SeverityLevel.CRITICAL)
     public void createUserSuccessfullyTest() {
-        CreateUserPage createUserPage = new CreateUserPage(driver);
         newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
+
         Assert.assertEquals(createUserPage.getCreateUserHeader(), CREATE_NEW_USER, "Correct header");
+
         createUserPage.createUser(randomName, newEmail, password);
+
         Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED, "User is successfully created" );
     }
 
@@ -59,14 +60,14 @@ public class CreateNewUserTests extends WebBaseTest {
     @Story("Create New user")
     @Severity(SeverityLevel.CRITICAL)
     public void createAdminSuccessfullyTest() {
-        CreateUserPage createUserPage = new CreateUserPage(driver);
         newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.selectAdminUserRole();
         createUserPage.createUser(randomName, newEmail, password);
+
         Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED, "User is successfully created" );
     }
 
@@ -76,16 +77,14 @@ public class CreateNewUserTests extends WebBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void emptyNameField() {
         String emptyName = "";
-        CreateUserPage createUserPage = new CreateUserPage(driver);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(emptyName, newEmail, password);
         createUserPage.waitMs();
 
-        String message = (String) js.executeScript("return arguments[0].validationMessage;", createUserPage.getNewNameUser());
+        String message = createUserPage.getValidationMessage(createUserPage.getNewNameUser());
         Assert.assertEquals(message, "Please fill out this field.");
     }
 
@@ -95,15 +94,13 @@ public class CreateNewUserTests extends WebBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void emptyEmailAddressField() {
         String emptyEmail = "";
-        CreateUserPage createUserPage = new CreateUserPage(driver);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(randomName, emptyEmail, password);
 
-        String message = (String) js.executeScript("return arguments[0].validationMessage;", createUserPage.getEmailAddress());
+        String message = createUserPage.getValidationMessage(createUserPage.getEmailAddress());
         Assert.assertEquals(message, "Please fill out this field.");
     }
 
@@ -112,16 +109,13 @@ public class CreateNewUserTests extends WebBaseTest {
     @Story("Create New User")
     @Severity(SeverityLevel.CRITICAL)
     public void invalidEmailFormatError() {
-        CreateUserPage createUserPage = new CreateUserPage(driver);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
-
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(randomName, invalidEmail, password);
 
-        String message = (String) js.executeScript("return arguments[0].validationMessage;", createUserPage.getEmailAddress());
+        String message = createUserPage.getValidationMessage(createUserPage.getEmailAddress());
         Assert.assertEquals(message, "Please include an '@' in the email address. '" + invalidEmail + "' is missing an '@'.");
     }
 
@@ -131,17 +125,15 @@ public class CreateNewUserTests extends WebBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void emptyPasswordField() {
         String emptyPassword = "";
-        CreateUserPage createUserPage = new CreateUserPage(driver);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
         newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
 
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(randomName, newEmail, emptyPassword);
 
-        String message = (String) js.executeScript("return arguments[0].validationMessage;", createUserPage.getPassword());
+        String message = createUserPage.getValidationMessage(createUserPage.getPassword());
         Assert.assertEquals(message, "Please fill out this field.");
     }
 
@@ -150,12 +142,11 @@ public class CreateNewUserTests extends WebBaseTest {
     @Story("Create New User")
     @Severity(SeverityLevel.CRITICAL)
     public void invalidPasswordFormatError() {
-        CreateUserPage createUserPage = new CreateUserPage(driver);
         newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(randomName, newEmail, invalidPassword);
 
         Assert.assertEquals(createUserPage.getCharacterPasswordRequirement(), EIGHT_CHARACTERS_REQUIREMENT);
@@ -169,12 +160,11 @@ public class CreateNewUserTests extends WebBaseTest {
     @Story("Create New User")
     @Severity(SeverityLevel.CRITICAL)
     public void duplicateEmailError() {
-        CreateUserPage createUserPage = new CreateUserPage(driver);
         String duplicateEmail = "test710270045@test.com";
 
         LoginPage loginPage = loadPhotoPixelsApp();
         OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
-        createUserPage.goToCreateUserTab();
+        CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
         createUserPage.createUser(randomName, duplicateEmail, password);
 
         Assert.assertEquals(createUserPage.getDuplicateEmailRequirement(), getDuplicateEmailError(duplicateEmail));
