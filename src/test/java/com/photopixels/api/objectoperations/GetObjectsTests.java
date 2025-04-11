@@ -71,7 +71,7 @@ public class GetObjectsTests extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         // TODO: Adjust the assertions when the endpoint functionality is fixed to not return the deleted objects
-        attachIssueLinkToAllureReport("https://github.com/scalefocus/photopixels-backend-net/issues/45");
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels-backend-net/issues/45");
 
         softAssert.assertNotNull(getObjectsResponseDto, "Object response is not returned");
 
@@ -150,7 +150,8 @@ public class GetObjectsTests extends ApiBaseTest {
             softAssert.assertNotNull(property.getId(), "Object property id is not returned");
         }
 
-        attachIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/41");
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/41");
 
         softAssert.assertAll();
     }

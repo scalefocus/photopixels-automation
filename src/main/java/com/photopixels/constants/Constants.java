@@ -17,5 +17,8 @@ public class Constants {
     // TUS
     public static final String VALID_UPLOAD_METADATA = "fileExtension cG5n,fileName bmlrZTMucG5n,fileHash ZXhhbXBsZWhhc2g=,fileSize MzI0NDQ=,appleId ,androidId";
     public static final String VALID_UPLOAD_LENGTH = "46606";
-
+    
+    // Login Mobile
+    public static final String LOGIN_ERROR_TITLE = "Error Login";
+    public static final String LOGIN_ERROR_TEXT = "Error while Login. Please try again.";
 }

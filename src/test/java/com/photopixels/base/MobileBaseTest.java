@@ -42,7 +42,7 @@ public class MobileBaseTest extends BaseTest {
         }
     }
 
-    @AfterClass
+    @AfterClass(alwaysRun = true)
     public void tearDownBaseClassMobile() {
         mobileDriverUtils.stopService();
     }
