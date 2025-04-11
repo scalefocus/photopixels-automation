@@ -23,6 +23,9 @@ public class MobileLoginPage extends WaitOperationHelper {
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='LOGIN']/following-sibling::android.widget.Button")
     private WebElement loginButton;
 
+    @AndroidFindBy(xpath = "//android.widget.TextView[@text='REGISTER']/following-sibling::android.widget.Button")
+    private WebElement registerButton;
+
     public MobileLoginPage(AppiumDriver driver) {
         super(driver);
         this.driver = driver;
@@ -40,9 +43,17 @@ public class MobileLoginPage extends WaitOperationHelper {
         return new HomePage(driver);
     }
 
+    @Step("Login with error")
+    public ErrorPopUpPage loginWithError(String username, String password) {
+        fillCredentialsMobile(username, password);
+
+        loginButton.click();
+
+        return new ErrorPopUpPage(driver);
+    }
+
     @Step("Fill credentials mobile app")
     public void fillCredentialsMobile(String username, String password) {
-
         waitForElementToBeVisible(usernameField);
 
         if (username != null) {
@@ -52,6 +63,10 @@ public class MobileLoginPage extends WaitOperationHelper {
         if (password != null) {
             passwordField.sendKeys(password);
         }
+    }
 
+    @Step("Check if login button is displayed")
+    public boolean isLoginButtonDisplayed() {
+        return loginButton.isDisplayed();
     }
 }

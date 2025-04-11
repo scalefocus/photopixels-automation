@@ -6,6 +6,7 @@ import io.qameta.allure.Allure;
 import io.qameta.allure.listener.StepLifecycleListener;
 import io.qameta.allure.listener.TestLifecycleListener;
 import io.qameta.allure.model.Status;
+import io.qameta.allure.model.StatusDetails;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
 import org.openqa.selenium.OutputType;
@@ -34,10 +35,22 @@ public class StatusTestListener implements ITestListener, StepLifecycleListener,
 		List<StepResult> steps = result.getSteps();
 		StepResult stepResult = steps.get(steps.size() - 1);
 
-		// Fail step in case of soft assertion error
-		if ((result.getStatus() == Status.FAILED || result.getStatus() == Status.BROKEN)
-				&& (stepResult.getStatus() == Status.PASSED)) {
-			stepResult.setStatus(Status.FAILED);
+
+		if ((result.getStatus() == Status.FAILED || result.getStatus() == Status.BROKEN)) {
+
+			// Fail step in case of soft assertion error
+			if (stepResult.getStatus() == Status.PASSED){
+				stepResult.setStatus(Status.FAILED);
+			}
+
+			String link = result.getLinks().stream().filter(l -> l.getType().equals("issue")).findFirst().get().getUrl();
+
+			// Check if issue link is attached and mark it as known issue
+			if (!link.isEmpty()) {
+				StatusDetails statusDetails = result.getStatusDetails();
+				statusDetails.setKnown(true);
+				statusDetails.setMessage("Known issue: " + link + " \n\n" + statusDetails.getMessage());
+			}
 		}
 
 		// Attach screenshot for web test

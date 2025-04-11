@@ -8,13 +8,9 @@ import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.util.Properties;
-
-import static io.restassured.RestAssured.baseURI;
 
 public class BaseTest {
 
@@ -44,10 +40,11 @@ public class BaseTest {
 
 		copyReportHistory(allureResults);
 		generateEnvironmentFile(allureResults);
+		generateCategoriesFile(allureResults);
 	}
 
-	protected void attachIssueLinkToAllureReport(String issueLink) {
-		Allure.addAttachment("Github issue link", "text/uri-list", issueLink);
+	protected void addIssueLinkToAllureReport(String issueLink) {
+		Allure.issue(issueLink, issueLink);
 	}
 
 	private void copyReportHistory(String allureResults) {
@@ -70,16 +67,7 @@ public class BaseTest {
 
 		String path = allureResults + FILE_SEPARATOR + "environment.properties";
 
-		File file = new File(path);
-
-		if (!file.exists()) {
-			try {
-				file.getParentFile().mkdir();
-				file.createNewFile();
-			} catch (IOException e) {
-				System.out.println("Environment file could not be created!");
-			}
-		}
+		File file = createFile(path);
 
 		FileOutputStream out = null;
 
@@ -88,7 +76,10 @@ public class BaseTest {
 
 			Properties prop = new Properties();
 
-			prop.setProperty("environment", baseURI);
+			String environment = configProperties.getProperty("webUrl").isEmpty() ? configProperties.getProperty("baseUri")
+					: configProperties.getProperty("webUrl");
+
+			prop.setProperty("environment", environment);
 
 			prop.store(out, "Setting environment data");
 
@@ -101,5 +92,40 @@ public class BaseTest {
 				System.out.println("Error while creating environment file!");
 			}
 		}
+	}
+
+	private void generateCategoriesFile(String allureResults) {
+
+		String path = allureResults + FILE_SEPARATOR + "categories.json";
+
+		File file = createFile(path);
+
+		String content = "[\n" +
+				"  {\n" +
+				"    \"name\": \"Known issues\",\n" +
+				"    \"messageRegex\": \".*Known issue.*\"\n" +
+				"  }\n" +
+				"]";
+
+		try (PrintWriter out = new PrintWriter(file)) {
+			out.println(content);
+		} catch (FileNotFoundException e) {
+			System.out.println("Categories file not found!");
+        }
+    }
+
+	private File createFile(String path) {
+		File file = new File(path);
+
+		if (!file.exists()) {
+			try {
+				file.getParentFile().mkdir();
+				file.createNewFile();
+			} catch (IOException e) {
+				System.out.println("File '" + path + "' could not be created!");
+			}
+		}
+
+		return file;
 	}
 }
