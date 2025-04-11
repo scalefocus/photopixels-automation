@@ -6,7 +6,7 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.apache.hc.core5.http.HttpStatus;
 
-import static com.photopixels.constants.BasePathsConstants.CREATE_UPLOAD;
+import static com.photopixels.constants.BasePathsConstants.POST_CREATE_UPLOAD;
 
 public class PostCreateUploadSteps {
 
@@ -18,7 +18,7 @@ public class PostCreateUploadSteps {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(CREATE_UPLOAD);
+        requestSpecification.addBasePath(POST_CREATE_UPLOAD);
         requestSpecification.setRelaxedHttpsValidation();
 
         requestSpecification.addCustomHeader("Authorization", token);
@@ -34,12 +34,12 @@ public class PostCreateUploadSteps {
     }
 
     @Step("Create upload resource with error response")
-    public Response createUploadError(String uploadMetadata, String uploadLength, int expectedStatusCode) {
+    public String createUploadError(String uploadMetadata, String uploadLength) {
         Response response = createUploadResponse(uploadMetadata, uploadLength);
 
-        response.then().statusCode(expectedStatusCode);
+        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
 
-        return response;
+        return response.asString();
     }
 
     private Response createUploadResponse(String uploadMetadata, String uploadLength) {

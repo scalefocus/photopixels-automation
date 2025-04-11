@@ -2,17 +2,28 @@ package com.photopixels.api.tus;
 
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
 import static com.photopixels.constants.Constants.VALID_UPLOAD_LENGTH;
 import static com.photopixels.constants.Constants.VALID_UPLOAD_METADATA;
 
+@Listeners(StatusTestListener.class)
 @Feature("Tus")
-public class PostUploadTests extends ApiBaseTest {
+public class PostCreateUploadTests extends ApiBaseTest {
     private String token;
+    private PostCreateUploadSteps steps;
+
+    @BeforeClass(alwaysRun = true)
+    public void setup() {
+        token = getAdminToken();
+        steps = new PostCreateUploadSteps(token);
+    }
 
     @Test(description = "Successfully create upload")
     @Description("Positive test: Verify that an upload resource is created successfully")
@@ -20,19 +31,13 @@ public class PostUploadTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
 
     public void createUploadSuccessfully() {
-        token = getUserToken();
 
         //TODO:Replace hardcoded uploadMetadata and uploadLength with dynamically generated values (e.g. encode fileName, extension, etc.)
 
-        String uploadMetadata = VALID_UPLOAD_METADATA;
-        String uploadLength = VALID_UPLOAD_LENGTH;
-
-        PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
-        Response response = steps.createUpload(uploadMetadata, uploadLength);
+        Response response = steps.createUpload(VALID_UPLOAD_METADATA, VALID_UPLOAD_LENGTH);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertEquals(response.getStatusCode(), 201, "Expected status 201 Created");
         softAssert.assertTrue(response.getHeaders().hasHeaderWithName("Location"), "Missing 'Location' header in response");
 
         softAssert.assertAll();
@@ -43,17 +48,13 @@ public class PostUploadTests extends ApiBaseTest {
     @Story("Create Upload")
     @Severity(SeverityLevel.NORMAL)
     public void createUploadWithoutMetadata() {
-        token = getUserToken();
         String uploadMetadata = "";
-        String uploadLength = VALID_UPLOAD_LENGTH;
 
-        PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
-        Response response = steps.createUploadError(uploadMetadata, uploadLength, 400);
+        String responseBody = steps.createUploadError(uploadMetadata, VALID_UPLOAD_LENGTH);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertEquals(response.getStatusCode(), 400, "Expected status 400 Bad Request");
-        softAssert.assertTrue(response.asString().contains("Upload-Metadata"), "Expected error message to reference 'Upload-Metadata'");
+        softAssert.assertTrue(responseBody.contains("Upload-Metadata"), "Expected error message to reference 'Upload-Metadata'");
 
         softAssert.assertAll();
     }
@@ -63,17 +64,13 @@ public class PostUploadTests extends ApiBaseTest {
     @Story("Create Upload")
     @Severity(SeverityLevel.NORMAL)
     public void createUploadWithoutLength() {
-        token = getUserToken();
-        String uploadMetadata = VALID_UPLOAD_METADATA;
         String uploadLength = "";
 
-        PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
-        Response response = steps.createUploadError(uploadMetadata, uploadLength, 400);
+        String responseBody = steps.createUploadError(VALID_UPLOAD_METADATA, uploadLength);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertEquals(response.getStatusCode(), 400, "Expected status 400 Bad Request");
-        softAssert.assertTrue(response.asString().contains("Upload-Length"), "Expected error message to reference 'Upload-Length'");
+        softAssert.assertTrue(responseBody.contains("Upload-Length"), "Expected error message to reference 'Upload-Length'");
 
         softAssert.assertAll();
     }

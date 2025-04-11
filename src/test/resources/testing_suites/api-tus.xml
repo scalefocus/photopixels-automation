@@ -3,7 +3,7 @@
 
     <test name="Tus Tests" thread-count="1">
         <classes>
-            <class name="com.photopixels.api.tus.PostUploadTests"/>
+            <class name="com.photopixels.api.tus.PostCreateUploadTests"/>
         </classes>
     </test>
 
