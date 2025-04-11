@@ -53,6 +53,11 @@ public class CreateNewUserTests extends WebBaseTest {
         createUserPage.createUser(randomName, newEmail, password);
 
         Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED, "User is successfully created" );
+
+        createUserPage.goToUserTab();
+        createUserPage.searchUser(newEmail);
+        createUserPage.verifySearchResultEmail(newEmail);
+        createUserPage.verifySearchResultRole("User");
     }
 
     @Test(description = "Successful user creation")
@@ -69,6 +74,11 @@ public class CreateNewUserTests extends WebBaseTest {
         createUserPage.createUser(randomName, newEmail, password);
 
         Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED, "User is successfully created" );
+
+        createUserPage.goToUserTab();
+        createUserPage.searchUser(newEmail);
+        createUserPage.verifySearchResultEmail(newEmail);
+        createUserPage.verifySearchResultRole("Admin");
     }
 
     @Test(description = "Unsuccessful user creation")

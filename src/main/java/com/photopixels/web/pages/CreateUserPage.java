@@ -1,16 +1,12 @@
 package com.photopixels.web.pages;
 
-import com.photopixels.helpers.WaitOperationHelper;
 import io.qameta.allure.Step;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +53,15 @@ public class CreateUserPage extends NavigationPage {
 
     @FindBy(xpath = "//li[contains(., 'Email /'test710270045@test.com/' is already taken.')]")
     private  WebElement duplicateEmailRequirement;
+
+    @FindBy(css = "input[placeholder='Search Users']")
+    private WebElement usersSearchBarElement;
+
+    @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(2)")
+    private List<WebElement> emailElements;
+
+    @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(3)")
+    private List<WebElement> roleElements;
 
     public CreateUserPage(WebDriver driver) {
         super(driver);
@@ -119,36 +124,77 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Return 8 character field text for verification")
     public String getCharacterPasswordRequirement() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOf(characterPasswordRequirement));
+        waitForElementToBeVisible(characterPasswordRequirement);
         return characterPasswordRequirement.getText();
     }
 
     @Step("Return alphanumeric field element for verification")
     public String getAlphanumericPasswordRequirement() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOf(alphanumericPasswordRequirement));
+        waitForElementToBeVisible(alphanumericPasswordRequirement);
         return alphanumericPasswordRequirement.getText();
     }
 
     @Step("Return one digit field element for verification")
     public String getDigitPasswordRequirement() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOf(digitPasswordRequirement));
+        waitForElementToBeVisible(digitPasswordRequirement);
         return digitPasswordRequirement.getText();
     }
 
     @Step("Return one uppercase field element for verification")
     public String getUppercasePasswordRequirement() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOf(uppercasePasswordRequirement));
+        waitForElementToBeVisible(uppercasePasswordRequirement);
         return uppercasePasswordRequirement.getText();
     }
 
     @Step("Return duplicate email element for verification")
     public String getDuplicateEmailRequirement() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOf(duplicateEmailRequirement));
+        waitForElementToBeVisible(duplicateEmailRequirement);
         return duplicateEmailRequirement.getText();
+    }
+
+    @Step("Return users search bar element")
+    public CreateUserPage searchUser(String credential) {
+        waitForElementToBeVisible(usersSearchBarElement);
+        usersSearchBarElement.click();
+        usersSearchBarElement.sendKeys(credential);
+
+        return new CreateUserPage(driver);
+    }
+
+    @Step("Get emails from search results")
+    public List<String> getEmailsFromResults() {
+        return emailElements.stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
+    }
+
+    @Step("Verify search results contain correct email")
+    public void verifySearchResultEmail(String expectedEmail) {
+        List<String> emails = getEmailsFromResults();
+        if (emails.isEmpty()) {
+            throw new AssertionError("No search results found.");
+        }
+        if (!emails.contains(expectedEmail)) {
+            throw new AssertionError("Expected email " + expectedEmail + " not found in search results. Found: " + emails);
+        }
+    }
+
+    @Step("Get roles from search results")
+    public List<String> getRolesFromResults() {
+        return roleElements.stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
+    }
+
+    @Step("Verify search result role is expected role")
+    public void verifySearchResultRole(String expectedRole) {
+        List<String> roles = getRolesFromResults();
+        if (roles.isEmpty()) {
+            throw new AssertionError("No search results found.");
+        }
+        String actualRole = roles.get(0); // Since we expect exactly one result
+        if (!actualRole.equalsIgnoreCase(expectedRole)) {
+            throw new AssertionError("Expected role " + expectedRole + " but found " + actualRole);
+        }
     }
 }
