@@ -13,4 +13,8 @@ public class Constants {
     // Login Web
     public static final String OVERVIEW_HEADER = "Overview";
     public static final String WRONG_CREDENTIALS_MESSAGE = "Wrong email or password!";
+
+    // Login Mobile
+    public static final String LOGIN_ERROR_TITLE = "Error Login";
+    public static final String LOGIN_ERROR_TEXT = "Error while Login. Please try again.";
 }

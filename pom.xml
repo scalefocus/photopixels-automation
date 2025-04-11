@@ -101,6 +101,10 @@
           <argLine>
             -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
           </argLine>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testing_suites/${suiteXmlFile}.xml</suiteXmlFile>
+          </suiteXmlFiles>
+          <rerunFailingTestsCount>3</rerunFailingTestsCount>
         </configuration>
         <dependencies>
           <dependency>
@@ -114,10 +118,10 @@
       <plugin>
         <groupId>io.qameta.allure</groupId>
         <artifactId>allure-maven</artifactId>
-        <version>2.9</version>
+        <version>2.15.2</version>
         <configuration>
           <!-- <reportDirectory>${basedir}/target/allure-results</reportDirectory> -->
-          <reportVersion>2.3.1</reportVersion>
+          <reportVersion>2.30.0</reportVersion>
           <!-- <buildDirectory>.</buildDirectory> -->
         </configuration>
       </plugin>

@@ -59,7 +59,7 @@ public class LoginTests extends WebBaseTest {
     @Test(description = "Login via web missing email")
     @Description("Login via web with missing email")
     @Story("Login User")
-    @Severity(SeverityLevel.NORMAL)
+    @Severity(SeverityLevel.MINOR)
     public void loginMissingEmailTest() {
         LoginPage loginPage = loadPhotoPixelsApp();
         loginPage.fillCredentials(null, password);
@@ -70,7 +70,7 @@ public class LoginTests extends WebBaseTest {
     @Test(description = "Login via web missing password")
     @Description("Login via web with missing password")
     @Story("Login User")
-    @Severity(SeverityLevel.NORMAL)
+    @Severity(SeverityLevel.MINOR)
     public void loginMissingPasswordTest() {
         LoginPage loginPage = loadPhotoPixelsApp();
         loginPage.fillCredentials(email, null);
