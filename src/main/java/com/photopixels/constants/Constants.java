@@ -13,4 +13,9 @@ public class Constants {
     // Login Web
     public static final String OVERVIEW_HEADER = "Overview";
     public static final String WRONG_CREDENTIALS_MESSAGE = "Wrong email or password!";
+
+    // TUS
+    public static final String VALID_UPLOAD_METADATA = "fileExtension cG5n,fileName bmlrZTMucG5n,fileHash ZXhhbXBsZWhhc2g=,fileSize MzI0NDQ=,appleId ,androidId";
+    public static final String VALID_UPLOAD_LENGTH = "46606";
+
 }
