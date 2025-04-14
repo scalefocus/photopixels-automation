@@ -39,4 +39,7 @@ public class BasePathsConstants {
     public static String GET_OBJECTS_DATA = "/objects/data";
     public static String GET_OBJECTS = "/objects";
 
+    // TUS
+    public static String POST_CREATE_UPLOAD = "/create_upload";
+
 }
