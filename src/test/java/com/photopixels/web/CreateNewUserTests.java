@@ -16,6 +16,7 @@
 
     import static com.photopixels.constants.Constants.*;
     import static com.photopixels.constants.ErrorMessageConstants.*;
+    import static com.photopixels.enums.ErrorMessagesEnum.*;
 
     @Listeners(StatusTestListener.class)
     @Feature("Web")
@@ -51,12 +52,12 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
 
             Assert.assertEquals(createUserPage.getCreateUserHeader(), CREATE_NEW_USER,
-                    "The header is not correct. Expected: " + CREATE_NEW_USER + ", but found: " + createUserPage.getCreateUserHeader());
+                    "The header is not correct.");
 
             createUserPage.createUser(randomName, newEmail, password);
 
             Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED,
-                    "The message is not correct. Expected: " + USER_CREATED + ", but found: " + createUserPage.getUserCreatedMsg() );
+                    "The message is not correct.");
 
             UsersPage usersPage = overviewPage.goToUserTab();
             usersPage.searchUser(newEmail);
@@ -172,13 +173,13 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, newEmail, invalidPassword);
 
-            Assert.assertEquals(createUserPage.getCharacterPasswordRequirement(),EIGHT_CHARACTERS_REQUIREMENT,
+            Assert.assertEquals(createUserPage.getCharacterPasswordRequirement(),PASSWORD_TOO_SHORT,
                     "Expected error message 'Passwords must be at least 8 characters.' not found. Actual errors: " + createUserPage.getCharacterPasswordRequirement());
-            Assert.assertEquals(createUserPage.getAlphanumericPasswordRequirement(), ALPHANUMERIC_RREQUIREMENT,
+            Assert.assertEquals(createUserPage.getAlphanumericPasswordRequirement(), PASSWORD_REQUIRES_NON_ALPHANUMERIC,
                     "Expected error message 'Passwords must have at least one non alphanumeric character.' not found. Actual errors: " + createUserPage.getAlphanumericPasswordRequirement());
-            Assert.assertEquals(createUserPage.getDigitPasswordRequirement(), ONE_DIGIT_REQUIREMENT,
+            Assert.assertEquals(createUserPage.getDigitPasswordRequirement(), PASSWORD_REQUIRES_DIGIT,
                     "Expected error message 'Passwords must have at least one digit ('0'-'9').' not found. Actual errors: " + createUserPage.getDigitPasswordRequirement());
-            Assert.assertEquals(createUserPage.getUppercasePasswordRequirement(), ONE_UPPERCASE_REQUIREMENT,
+            Assert.assertEquals(createUserPage.getUppercasePasswordRequirement(), PASSWORD_REQUIRES_UPPER,
                     "Expected error message 'Passwords must have at least one uppercase ('A'-'Z').' not found. Actual errors: " + createUserPage.getUppercasePasswordRequirement());
         }
 

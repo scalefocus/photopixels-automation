@@ -79,20 +79,16 @@ public class CreateUserPage extends NavigationPage {
     }
 
     @Step("Create new user successfully")
-    public CreateUserPage createUser(String name, String email, String password) {
+    public void createUser(String name, String email, String password) {
         newNameUser.sendKeys(name);
         newEmailAddress.sendKeys(email);
         newPassword.sendKeys(password);
         createNewUserButton.click();
-
-        return this;
     }
 
     @Step("Return select role element")
-    public CreateUserPage selectAdminUserRole() {
+    public void selectAdminUserRole() {
         selectAdminRole.click();
-
-        return this;
     }
 
     @Step("Get user created message")
