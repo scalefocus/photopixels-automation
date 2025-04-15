@@ -1,5 +1,6 @@
 package com.photopixels.api.steps.tus;
 
+import com.photopixels.api.dtos.tus.ResumableUploadsResponseDto;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
@@ -26,23 +27,22 @@ public class GetResumableUploadsSteps {
     }
 
     @Step("Get resumable uploads")
-    public String getResumableUploads() {
+    public ResumableUploadsResponseDto getResumableUploads() {
         Response response = requestOperationsHelper
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
 
         response.then().statusCode(HttpStatus.SC_OK);
 
-        return response.getBody().asString();
+        return response.as(ResumableUploadsResponseDto.class);
     }
 
     @Step("Get resumable uploads without token")
-    public Response getResumableUploadsError(){
+    public void getResumableUploadsError() {
 
         Response response = new RequestOperationsHelper()
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
 
         response.then().statusCode(HttpStatus.SC_UNAUTHORIZED);
 
-        return response;
     }
 }

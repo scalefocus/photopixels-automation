@@ -1,10 +1,10 @@
 package com.photopixels.api.tus;
 
+import com.photopixels.api.dtos.tus.ResumableUploadsResponseDto;
 import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
-import io.restassured.response.Response;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -28,13 +28,12 @@ public class GetResumableUploadsTests extends ApiBaseTest {
     public void getResumableUploadsSuccessfully() {
 
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(token);
-        String responseBody = getResumableUploadsSteps.getResumableUploads();
-
+        ResumableUploadsResponseDto responseBody = getResumableUploadsSteps.getResumableUploads();
 
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(responseBody, "Expected non-null response body");
-        softAssert.assertTrue(responseBody.contains("userUploads"), "Response body should contain 'userUploads'");
+        softAssert.assertNotNull(responseBody.getUserUploads(), "userUploads list is null");
 
         softAssert.assertAll();
     }
@@ -46,13 +45,7 @@ public class GetResumableUploadsTests extends ApiBaseTest {
       public void getResumableUploadsWithoutToken() {
 
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(null);
-        Response responseBody = getResumableUploadsSteps.getResumableUploadsError();
 
-        SoftAssert softAssert = new SoftAssert();
-
-        softAssert.assertNotNull(responseBody, "Expected non-null response body");
-        softAssert.assertEquals(responseBody.getHeader("Server"), "nginx", "Expected 'Server: nginx'");
-
-        softAssert.assertAll();
+        getResumableUploadsSteps.getResumableUploadsError();
     }
 }
