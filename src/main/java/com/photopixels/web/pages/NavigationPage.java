@@ -55,10 +55,10 @@ public class NavigationPage extends WaitOperationHelper {
     }
 
     @Step("Go to Users tab")
-    public CreateUserPage goToUserTab() {
+    public UsersPage goToUserTab() {
         waitForElementToBeVisible(usersMenu);
         usersMenu.click();
 
-        return new CreateUserPage(driver);
+        return new UsersPage(driver);
     }
 }

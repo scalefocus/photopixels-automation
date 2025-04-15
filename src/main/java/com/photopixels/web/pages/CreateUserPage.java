@@ -51,7 +51,7 @@ public class CreateUserPage extends NavigationPage {
     @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]/li[4]")
     private  WebElement uppercasePasswordRequirement;
 
-    @FindBy(xpath = "//li[contains(., 'Email /'test710270045@test.com/' is already taken.')]")
+    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li[1]")
     private  WebElement duplicateEmailRequirement;
 
     @FindBy(css = "input[placeholder='Search Users']")
@@ -85,14 +85,14 @@ public class CreateUserPage extends NavigationPage {
         newPassword.sendKeys(password);
         createNewUserButton.click();
 
-        return new CreateUserPage(driver);
+        return this;
     }
 
     @Step("Return select role element")
     public CreateUserPage selectAdminUserRole() {
         selectAdminRole.click();
 
-        return new CreateUserPage(driver);
+        return this;
     }
 
     @Step("Get user created message")
@@ -107,19 +107,34 @@ public class CreateUserPage extends NavigationPage {
         return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 
-    @Step("Return name field element for verification")
-    public WebElement getNewNameUser() {
-        return newNameUser;
+    @Step("Return name field attribute for verification")
+    public String getNewNameUser() {
+        return newNameUser.getAttribute("value");
+    }
+
+    @Step("Get name field validation message")
+    public String getNewNameUserValidationMessage() {
+        return getValidationMessage(newNameUser);
     }
 
     @Step("Return email address field element for verification")
-    public WebElement getEmailAddress() {
-        return newEmailAddress;
+    public String getEmailAddress() {
+        return newEmailAddress.getAttribute("value");
+    }
+
+    @Step("Get email address field validation message")
+    public String getEmailAddressValidationMessage() {
+        return getValidationMessage(newEmailAddress);
     }
 
     @Step("Return password field element for verification")
-    public WebElement getPassword() {
-        return newPassword;
+    public String getPassword() {
+        return newPassword.getAttribute("value");
+    }
+
+    @Step("Get password field validation message")
+    public String getPasswordValidationMessage() {
+        return getValidationMessage(newPassword);
     }
 
     @Step("Return 8 character field text for verification")
@@ -152,49 +167,4 @@ public class CreateUserPage extends NavigationPage {
         return duplicateEmailRequirement.getText();
     }
 
-    @Step("Return users search bar element")
-    public CreateUserPage searchUser(String credential) {
-        waitForElementToBeVisible(usersSearchBarElement);
-        usersSearchBarElement.click();
-        usersSearchBarElement.sendKeys(credential);
-
-        return new CreateUserPage(driver);
-    }
-
-    @Step("Get emails from search results")
-    public List<String> getEmailsFromResults() {
-        return emailElements.stream()
-                .map(WebElement::getText)
-                .collect(Collectors.toList());
-    }
-
-    @Step("Verify search results contain correct email")
-    public void verifySearchResultEmail(String expectedEmail) {
-        List<String> emails = getEmailsFromResults();
-        if (emails.isEmpty()) {
-            throw new AssertionError("No search results found.");
-        }
-        if (!emails.contains(expectedEmail)) {
-            throw new AssertionError("Expected email " + expectedEmail + " not found in search results. Found: " + emails);
-        }
-    }
-
-    @Step("Get roles from search results")
-    public List<String> getRolesFromResults() {
-        return roleElements.stream()
-                .map(WebElement::getText)
-                .collect(Collectors.toList());
-    }
-
-    @Step("Verify search result role is expected role")
-    public void verifySearchResultRole(String expectedRole) {
-        List<String> roles = getRolesFromResults();
-        if (roles.isEmpty()) {
-            throw new AssertionError("No search results found.");
-        }
-        String actualRole = roles.get(0); // Since we expect exactly one result
-        if (!actualRole.equalsIgnoreCase(expectedRole)) {
-            throw new AssertionError("Expected role " + expectedRole + " but found " + actualRole);
-        }
-    }
 }
