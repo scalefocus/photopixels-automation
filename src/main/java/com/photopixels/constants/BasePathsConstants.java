@@ -41,5 +41,6 @@ public class BasePathsConstants {
 
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
+    public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
 
 }

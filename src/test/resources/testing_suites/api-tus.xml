@@ -4,6 +4,7 @@
     <test name="Tus Tests" thread-count="1">
         <classes>
             <class name="com.photopixels.api.tus.PostCreateUploadTests"/>
+            <class name="com.photopixels.api.tus.GetResumableUploadsTests"/>
         </classes>
     </test>
 
