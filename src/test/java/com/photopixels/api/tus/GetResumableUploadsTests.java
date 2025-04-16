@@ -12,6 +12,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.List;
+
 @Listeners(StatusTestListener.class)
 @Feature("Tus")
 public class GetResumableUploadsTests extends ApiBaseTest {
@@ -37,19 +39,22 @@ public class GetResumableUploadsTests extends ApiBaseTest {
         softAssert.assertNotNull(responseBody, "Expected non-null response body");
         softAssert.assertFalse(responseBody.getUserUploads().isEmpty(), "userUploads list is empty");
 
-        ResumableUploadDto upload = responseBody.getUserUploads().get(0);
+        List<ResumableUploadDto> uploads = responseBody.getUserUploads();
 
-        softAssert.assertNotNull(upload.getFileId(), "fileId is missing");
-        softAssert.assertTrue(upload.getFileSize() > 0, "fileSize should be > 0");
-        softAssert.assertNotNull(upload.getCreation(), "creation is missing");
-        softAssert.assertNotNull(upload.getExpiration(), "expiration is missing");
+            softAssert.assertFalse(uploads.isEmpty(), "Uploads list is empty");
 
-        ResumableUploadMetadataDto metadata = upload.getMetadata();
+        for (ResumableUploadDto upload : uploads) {
+            softAssert.assertNotNull(upload.getFileId(), "fileId is missing");
+            softAssert.assertTrue(upload.getFileSize() > 0, "fileSize should be > 0");
+            softAssert.assertNotNull(upload.getCreation(), "creation is missing");
+            softAssert.assertNotNull(upload.getExpiration(), "expiration is missing");
 
-        softAssert.assertNotNull(metadata, "metadata is missing");
-        softAssert.assertNotNull(metadata.getFileName(), "fileName is missing in metadata");
-        softAssert.assertNotNull(metadata.getFileExtension(), "fileExtension is missing in metadata");
-        softAssert.assertNotNull(metadata.getUserId(), "userId is missing in metadata");
+            ResumableUploadMetadataDto metadata = upload.getMetadata();
+            softAssert.assertNotNull(metadata, "metadata is missing");
+            softAssert.assertNotNull(metadata.getFileName(), "fileName is missing in metadata");
+            softAssert.assertNotNull(metadata.getFileExtension(), "fileExtension is missing in metadata");
+            softAssert.assertNotNull(metadata.getUserId(), "userId is missing in metadata");
+        }
 
         softAssert.assertAll();
     }
