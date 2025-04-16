@@ -1,5 +1,7 @@
 package com.photopixels.api.tus;
 
+import com.photopixels.api.dtos.tus.ResumableUploadDto;
+import com.photopixels.api.dtos.tus.ResumableUploadMetadataDto;
 import com.photopixels.api.dtos.tus.ResumableUploadsResponseDto;
 import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
 import com.photopixels.base.ApiBaseTest;
@@ -33,7 +35,21 @@ public class GetResumableUploadsTests extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(responseBody, "Expected non-null response body");
-        softAssert.assertNotNull(responseBody.getUserUploads(), "userUploads list is null");
+        softAssert.assertFalse(responseBody.getUserUploads().isEmpty(), "userUploads list is empty");
+
+        ResumableUploadDto upload = responseBody.getUserUploads().get(0);
+
+        softAssert.assertNotNull(upload.getFileId(), "fileId is missing");
+        softAssert.assertTrue(upload.getFileSize() > 0, "fileSize should be > 0");
+        softAssert.assertNotNull(upload.getCreation(), "creation is missing");
+        softAssert.assertNotNull(upload.getExpiration(), "expiration is missing");
+
+        ResumableUploadMetadataDto metadata = upload.getMetadata();
+
+        softAssert.assertNotNull(metadata, "metadata is missing");
+        softAssert.assertNotNull(metadata.getFileName(), "fileName is missing in metadata");
+        softAssert.assertNotNull(metadata.getFileExtension(), "fileExtension is missing in metadata");
+        softAssert.assertNotNull(metadata.getUserId(), "userId is missing in metadata");
 
         softAssert.assertAll();
     }
@@ -41,11 +57,12 @@ public class GetResumableUploadsTests extends ApiBaseTest {
       @Test(description = "Get resumable uploads without token")
       @Description("Negative test: Access resumable uploads endpoint without authentication")
       @Story("Get Resumable Uploads")
-      @Severity(SeverityLevel.NORMAL)
+      @Severity(SeverityLevel.MINOR)
       public void getResumableUploadsWithoutToken() {
 
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(null);
 
+        // No response body expected, status code validation is enough
         getResumableUploadsSteps.getResumableUploadsError();
     }
 }
