@@ -10,6 +10,7 @@
             <class name="com.photopixels.api.objectoperations.PutUpdateObjectTests"/>
             <class name="com.photopixels.api.objectoperations.GetObjectDataTests"/>
             <class name="com.photopixels.api.objectoperations.PostGetObjectsDataTests"/>
+            <class name="com.photopixels.api.objectoperations.GetObjectsTests"/>
         </classes>
     </test>
 

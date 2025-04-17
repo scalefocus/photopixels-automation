@@ -4,6 +4,7 @@
     <test name="Status Tests" thread-count="1">
         <classes>
             <class name="com.photopixels.api.status.GetStatusTests"/>
+            <class name="com.photopixels.api.status.GetLogsTests"/>
         </classes>
     </test>
 

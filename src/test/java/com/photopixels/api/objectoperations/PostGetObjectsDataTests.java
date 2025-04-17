@@ -3,7 +3,6 @@ package com.photopixels.api.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostGetObjectsDataSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.base.ApiBaseTest;
@@ -45,11 +44,7 @@ public class PostGetObjectsDataTests extends ApiBaseTest {
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-
-        for (String objectId : objectIds) {
-            deleteObjectSteps.deleteObject(objectId);
-        }
+        deleteObjects(objectIds, token);
     }
 
     @Test(description = "Get objects data")

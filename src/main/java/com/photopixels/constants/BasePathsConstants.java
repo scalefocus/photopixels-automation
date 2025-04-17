@@ -4,6 +4,7 @@ public class BasePathsConstants {
 
     // Status
     public static String GET_STATUS = "/status";
+    public static String GET_LOGS = "/logs";
 
     // Users
     public static String POST_REGISTER_USER = "/user/register";
@@ -37,5 +38,9 @@ public class BasePathsConstants {
     public static String GET_OBJECT_DATA = "/object/{ObjectId}/data";
     public static String GET_OBJECTS_DATA = "/objects/data";
     public static String GET_OBJECTS = "/objects";
+
+    // TUS
+    public static String POST_CREATE_UPLOAD = "/create_upload";
+    public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
 
 }
