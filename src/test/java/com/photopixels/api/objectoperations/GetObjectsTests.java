@@ -70,10 +70,14 @@ public class GetObjectsTests extends ApiBaseTest {
 
         SoftAssert softAssert = new SoftAssert();
 
-        // TODO: Adjust the assertions when the endpoint functionality is fixed to not return the deleted objects
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels-backend-net/issues/45");
-
         softAssert.assertNotNull(getObjectsResponseDto, "Object response is not returned");
+
+        // Check object properties if any object is returned
+        for (PropertiesResponseDto property : getObjectsResponseDto.getProperties()) {
+            softAssert.assertFalse(property.getId().isEmpty(), "Object id is not returned");
+            softAssert.assertFalse(property.getDateCreated().isEmpty(), "Object date created is not returned");
+            softAssert.assertFalse(property.getMediaType().isEmpty(), "Object media type is not returned");
+        }
 
         softAssert.assertAll();
     }

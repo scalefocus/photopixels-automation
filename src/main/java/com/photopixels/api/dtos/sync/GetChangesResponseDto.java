@@ -16,5 +16,7 @@ public class GetChangesResponseDto {
     private String id;
     private Integer version;
     private JsonNode added;
+    private JsonNode addedTime;
+    private JsonNode trashed;
     private List<String> deleted;
 }

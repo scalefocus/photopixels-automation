@@ -12,5 +12,6 @@ public class PropertiesResponseDto {
 
     private String id;
     private String dateCreated;
+    private String mediaType;
 
 }

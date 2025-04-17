@@ -18,5 +18,6 @@ public class GetObjectDataResponseDto {
     private String androidCloudId;
     private int width;
     private int height;
+    private String dateCreated;
 
 }
