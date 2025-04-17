@@ -45,4 +45,20 @@ public class NavigationPage extends WaitOperationHelper {
 
         return userName.getText();
     }
+
+    @Step("Go to Create New User tab")
+    public CreateUserPage goToCreateNewUser() {
+        waitForElementToBeVisible(createUserMenu);
+        createUserMenu.click();
+
+        return new CreateUserPage(driver);
+    }
+
+    @Step("Go to Users tab")
+    public UsersPage goToUserTab() {
+        waitForElementToBeVisible(usersMenu);
+        usersMenu.click();
+
+        return new UsersPage(driver);
+    }
 }

@@ -7,6 +7,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
+import java.util.List;
 
 public class WaitOperationHelper {
 
@@ -32,4 +33,5 @@ public class WaitOperationHelper {
 	public void waitForElementToBeVisible(WebElement element) {
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
+
 }
