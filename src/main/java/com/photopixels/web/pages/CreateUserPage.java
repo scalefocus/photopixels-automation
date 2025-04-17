@@ -115,11 +115,4 @@ public class CreateUserPage extends NavigationPage {
                 .map(element -> element.getText().trim())
                 .collect(Collectors.toList());
     }
-//
-//    @Step("Return duplicate email element for verification")
-//    public String getDuplicateEmailRequirement() {
-//        waitForElementToBeVisible(duplicateEmailRequirement);
-//        return duplicateEmailRequirement.getText();
-//    }
-
 }
