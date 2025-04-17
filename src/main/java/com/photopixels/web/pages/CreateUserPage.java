@@ -19,10 +19,10 @@ public class CreateUserPage extends NavigationPage {
     private WebDriver driver;
     private JavascriptExecutor js;
 
-    @FindBy(xpath = "//div[1]/h5[contains(text(), 'Create A New User')]")
+    @FindBy(xpath = "//h5")
     private WebElement createUserHeader;
 
-    @FindBy(xpath = "//form//span[contains(text(), 'Admin')]")
+    @FindBy(xpath = "//form//input[@type='radio']")
     private WebElement selectAdminRole;
 
     @FindBy(xpath = "//*[@id='name']")
@@ -41,10 +41,7 @@ public class CreateUserPage extends NavigationPage {
     private WebElement userCreatedMsg;
 
     @FindBy(css = "form .MuiAlert-message li")
-    private List<WebElement> errorMessages;
-
-//    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li[1]")
-//    private WebElement duplicateEmailRequirement;
+    private List<WebElement> passwordErrorMessages;
 
     public CreateUserPage(WebDriver driver) {
         super(driver);
@@ -63,6 +60,9 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Create new user successfully")
     public void createUser(String name, String email, String password) {
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(newNameUser));
+        newNameUser.clear();
         newNameUser.sendKeys(name);
         newEmailAddress.sendKeys(email);
         newPassword.sendKeys(password);
@@ -111,7 +111,7 @@ public class CreateUserPage extends NavigationPage {
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.presenceOfAllElementsLocatedBy(
                 By.cssSelector("form .MuiAlert-message li")));
-        return errorMessages.stream()
+        return passwordErrorMessages.stream()
                 .map(element -> element.getText().trim())
                 .collect(Collectors.toList());
     }

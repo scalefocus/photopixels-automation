@@ -1,6 +1,7 @@
     package com.photopixels.web;
 
     import com.photopixels.base.WebBaseTest;
+    import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
     import com.photopixels.web.pages.CreateUserPage;
     import com.photopixels.web.pages.LoginPage;
@@ -17,7 +18,6 @@
     import java.util.List;
 
     import static com.photopixels.constants.Constants.*;
-    import static com.photopixels.constants.ErrorMessageConstants.*;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
 
     @Listeners(StatusTestListener.class)
@@ -31,6 +31,7 @@
         private String randomName;
         private String invalidEmail;
         private String invalidPassword;
+        private WaitOperationHelper waitHelper;
 
         @BeforeClass(alwaysRun = true)
         public void setup() {
@@ -40,6 +41,7 @@
             adminPassword = inputData.getPasswordAdmin();
             invalidEmail = inputData.getInvalidEmail();
             invalidPassword = inputData.getInvalidPassword();
+            waitHelper = new WaitOperationHelper(driver);
         }
 
         @Test(description = "Successful user creation")
@@ -198,11 +200,16 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, newEmail, password);
             createUserPage.goToCreateNewUser();
+
+            //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
+            waitHelper.waitMs();
             createUserPage.createUser(randomName, newEmail, password);
 
-            //Assertion fails, due to presented bug including additional username verification that should be removed in the system
             List<String> errorMessages = createUserPage.getErrorMessages();
-            Assert.assertTrue(errorMessages.contains(getDuplicateEmailError(newEmail)),
-                    "Duplicate email error message is incorrect. Expected: '" + getDuplicateEmailError(newEmail) + "', but found: '" + errorMessages + "'");
+            String expectedEmailError = String.format(DUPLICATE_EMAIL.getErrorMessage(), newEmail);
+            Assert.assertTrue(errorMessages.contains(expectedEmailError),
+                    "Expected email error message '" + expectedEmailError + "' not found. Actual error: " + errorMessages);
+            Assert.assertEquals(1, errorMessages.size(),
+                    "Expected exactly 1 error message (email), but found " + errorMessages.size() + ": " + errorMessages);
         }
     }

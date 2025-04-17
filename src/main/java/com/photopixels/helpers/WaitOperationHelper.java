@@ -34,8 +34,4 @@ public class WaitOperationHelper {
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
 
-	public void waitForElementsToBeVisible(List<WebElement> elements) {
-		wait.until(ExpectedConditions.visibilityOfAllElements(elements));
-	}
-
 }
