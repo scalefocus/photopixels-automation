@@ -1,7 +1,6 @@
 package com.photopixels.web.pages;
 
 import io.qameta.allure.Step;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 public class UsersPage extends NavigationPage {
 
     private WebDriver driver;
-    private JavascriptExecutor js;
 
     @FindBy(css = "input[placeholder='Search Users']")
     private WebElement usersSearchBarElement;
@@ -27,7 +25,6 @@ public class UsersPage extends NavigationPage {
     public UsersPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
-        this.js = (JavascriptExecutor) driver;
 
         PageFactory.initElements(driver, this);
     }

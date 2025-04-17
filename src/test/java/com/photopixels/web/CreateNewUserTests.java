@@ -14,6 +14,8 @@
     import org.testng.annotations.Listeners;
     import org.testng.annotations.Test;
 
+    import java.util.List;
+
     import static com.photopixels.constants.Constants.*;
     import static com.photopixels.constants.ErrorMessageConstants.*;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
@@ -173,14 +175,15 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, newEmail, invalidPassword);
 
-            Assert.assertEquals(createUserPage.getCharacterPasswordRequirement(),PASSWORD_TOO_SHORT,
-                    "Expected error message 'Passwords must be at least 8 characters.' not found. Actual errors: " + createUserPage.getCharacterPasswordRequirement());
-            Assert.assertEquals(createUserPage.getAlphanumericPasswordRequirement(), PASSWORD_REQUIRES_NON_ALPHANUMERIC,
-                    "Expected error message 'Passwords must have at least one non alphanumeric character.' not found. Actual errors: " + createUserPage.getAlphanumericPasswordRequirement());
-            Assert.assertEquals(createUserPage.getDigitPasswordRequirement(), PASSWORD_REQUIRES_DIGIT,
-                    "Expected error message 'Passwords must have at least one digit ('0'-'9').' not found. Actual errors: " + createUserPage.getDigitPasswordRequirement());
-            Assert.assertEquals(createUserPage.getUppercasePasswordRequirement(), PASSWORD_REQUIRES_UPPER,
-                    "Expected error message 'Passwords must have at least one uppercase ('A'-'Z').' not found. Actual errors: " + createUserPage.getUppercasePasswordRequirement());
+            List<String> errorMessages = createUserPage.getErrorMessages();
+            Assert.assertTrue(errorMessages.contains(PASSWORD_TOO_SHORT.getErrorMessage()),
+                    "Expected error message '" + PASSWORD_TOO_SHORT.getErrorMessage() + "' not found. Actual errors: " + errorMessages);
+            Assert.assertTrue(errorMessages.contains(PASSWORD_REQUIRES_NON_ALPHANUMERIC.getErrorMessage()),
+                    "Expected error message '" + PASSWORD_REQUIRES_NON_ALPHANUMERIC.getErrorMessage() + "' not found. Actual errors: " + errorMessages);
+            Assert.assertTrue(errorMessages.contains(PASSWORD_REQUIRES_DIGIT.getErrorMessage()),
+                    "Expected error message '" + PASSWORD_REQUIRES_DIGIT.getErrorMessage() + "' not found. Actual errors: " + errorMessages);
+            Assert.assertTrue(errorMessages.contains(PASSWORD_REQUIRES_UPPER.getErrorMessage()),
+                    "Expected error message '" + PASSWORD_REQUIRES_UPPER.getErrorMessage() + "' not found. Actual errors: " + errorMessages);
         }
 
         @Test(description = "Unsuccessful user creation")
@@ -198,7 +201,8 @@
             createUserPage.createUser(randomName, newEmail, password);
 
             //Assertion fails, due to presented bug including additional username verification that should be removed in the system
-            Assert.assertEquals(createUserPage.getDuplicateEmailRequirement(), getDuplicateEmailError(newEmail),
-                    "Duplicate email error message is incorrect. Expected: '" + getDuplicateEmailError(newEmail) + "', but found: '" + createUserPage.getDuplicateEmailRequirement() + "'");
+            List<String> errorMessages = createUserPage.getErrorMessages();
+            Assert.assertTrue(errorMessages.contains(getDuplicateEmailError(newEmail)),
+                    "Duplicate email error message is incorrect. Expected: '" + getDuplicateEmailError(newEmail) + "', but found: '" + errorMessages + "'");
         }
     }

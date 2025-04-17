@@ -1,12 +1,16 @@
 package com.photopixels.web.pages;
 
 import io.qameta.allure.Step;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,32 +40,11 @@ public class CreateUserPage extends NavigationPage {
     @FindBy(css = ".MuiAlert-standardSuccess .MuiAlert-message")
     private WebElement userCreatedMsg;
 
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li")
-    private List<WebElement> passwordFormatErrorMessages;
+    @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/form/div[5]//div[contains(@class, 'MuiAlert-message')]//li")
+    private List<WebElement> errorMessages;
 
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]/li[1]")
-    private  WebElement characterPasswordRequirement;
-
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]/li[2]")
-    private  WebElement alphanumericPasswordRequirement;
-
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]/li[3]")
-    private  WebElement digitPasswordRequirement;
-
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]/li[4]")
-    private  WebElement uppercasePasswordRequirement;
-
-    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li[1]")
-    private  WebElement duplicateEmailRequirement;
-
-    @FindBy(css = "input[placeholder='Search Users']")
-    private WebElement usersSearchBarElement;
-
-    @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(2)")
-    private List<WebElement> emailElements;
-
-    @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(3)")
-    private List<WebElement> roleElements;
+//    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li[1]")
+//    private WebElement duplicateEmailRequirement;
 
     public CreateUserPage(WebDriver driver) {
         super(driver);
@@ -103,19 +86,9 @@ public class CreateUserPage extends NavigationPage {
         return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 
-    @Step("Return name field attribute for verification")
-    public String getNewNameUser() {
-        return newNameUser.getAttribute("value");
-    }
-
     @Step("Get name field validation message")
     public String getNewNameUserValidationMessage() {
         return getValidationMessage(newNameUser);
-    }
-
-    @Step("Return email address field element for verification")
-    public String getEmailAddress() {
-        return newEmailAddress.getAttribute("value");
     }
 
     @Step("Get email address field validation message")
@@ -133,34 +106,21 @@ public class CreateUserPage extends NavigationPage {
         return getValidationMessage(newPassword);
     }
 
-    @Step("Return 8 character field text for verification")
-    public String getCharacterPasswordRequirement() {
-        waitForElementToBeVisible(characterPasswordRequirement);
-        return characterPasswordRequirement.getText();
+    @Step("Get all error messages")
+    public List<String> getErrorMessages() {
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+                        By.xpath("//*[@id='root']/div[1]/div/div[2]/div[2]/form/div[5]//div[contains(@class, 'MuiAlert-message')]//li")
+                ));
+        return errorMessages.stream()
+                .map(element -> element.getText().trim())
+                .collect(Collectors.toList());
     }
-
-    @Step("Return alphanumeric field element for verification")
-    public String getAlphanumericPasswordRequirement() {
-        waitForElementToBeVisible(alphanumericPasswordRequirement);
-        return alphanumericPasswordRequirement.getText();
-    }
-
-    @Step("Return one digit field element for verification")
-    public String getDigitPasswordRequirement() {
-        waitForElementToBeVisible(digitPasswordRequirement);
-        return digitPasswordRequirement.getText();
-    }
-
-    @Step("Return one uppercase field element for verification")
-    public String getUppercasePasswordRequirement() {
-        waitForElementToBeVisible(uppercasePasswordRequirement);
-        return uppercasePasswordRequirement.getText();
-    }
-
-    @Step("Return duplicate email element for verification")
-    public String getDuplicateEmailRequirement() {
-        waitForElementToBeVisible(duplicateEmailRequirement);
-        return duplicateEmailRequirement.getText();
-    }
+//
+//    @Step("Return duplicate email element for verification")
+//    public String getDuplicateEmailRequirement() {
+//        waitForElementToBeVisible(duplicateEmailRequirement);
+//        return duplicateEmailRequirement.getText();
+//    }
 
 }
