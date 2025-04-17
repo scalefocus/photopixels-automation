@@ -40,7 +40,7 @@ public class CreateUserPage extends NavigationPage {
     @FindBy(css = ".MuiAlert-standardSuccess .MuiAlert-message")
     private WebElement userCreatedMsg;
 
-    @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/form/div[5]//div[contains(@class, 'MuiAlert-message')]//li")
+    @FindBy(css = "form .MuiAlert-message li")
     private List<WebElement> errorMessages;
 
 //    @FindBy(xpath = "//div[contains(@class, 'MuiAlert-message')]//li[1]")
@@ -110,8 +110,7 @@ public class CreateUserPage extends NavigationPage {
     public List<String> getErrorMessages() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-                        By.xpath("//*[@id='root']/div[1]/div/div[2]/div[2]/form/div[5]//div[contains(@class, 'MuiAlert-message')]//li")
-                ));
+                By.cssSelector("form .MuiAlert-message li")));
         return errorMessages.stream()
                 .map(element -> element.getText().trim())
                 .collect(Collectors.toList());
