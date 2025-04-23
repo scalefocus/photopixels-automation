@@ -34,8 +34,9 @@ public class GetChangesTests extends ApiBaseTest {
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertFalse(getChangesResponseDto.getAdded().isEmpty(), "Added changes are returned");
-        softAssert.assertTrue(getChangesResponseDto.getDeleted().isEmpty(), "Deleted changes are returned");
+        softAssert.assertFalse(getChangesResponseDto.getId().isEmpty(), "Id is not returned");
+        softAssert.assertTrue(getChangesResponseDto.getVersion() > 0, "Version is not returned");
+        softAssert.assertFalse(getChangesResponseDto.getAdded().isEmpty(), "Added changes are not returned");
 
         softAssert.assertAll();
     }

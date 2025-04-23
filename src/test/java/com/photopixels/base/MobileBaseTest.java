@@ -26,11 +26,13 @@ public class MobileBaseTest extends BaseTest {
         screenshotHelper = new ScreenshotHelper();
 
         mobileDriverUtils.startService();
+
+        mobileDriver = mobileDriverUtils.getMobileDriver();
     }
 
     @BeforeMethod(alwaysRun = true)
     public void setupBaseMethodMobile() {
-        mobileDriver = mobileDriverUtils.getMobileDriver();
+        mobileDriverUtils.startActivity();
     }
 
     @AfterMethod(alwaysRun = true)
@@ -38,12 +40,16 @@ public class MobileBaseTest extends BaseTest {
         if (mobileDriver != null) {
             screenshotHelper.saveScreenshot(result, mobileDriver);
 
-            mobileDriver.quit();
+            mobileDriverUtils.clearApp();
         }
     }
 
     @AfterClass(alwaysRun = true)
     public void tearDownBaseClassMobile() {
+        if (mobileDriver != null) {
+            mobileDriver.quit();
+        }
+
         mobileDriverUtils.stopService();
     }
 
