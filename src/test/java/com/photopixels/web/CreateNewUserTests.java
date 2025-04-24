@@ -233,6 +233,9 @@
             List<String> errorMessages = createUserPage.getErrorMessages();
             String expectedEmailError = String.format(DUPLICATE_EMAIL.getErrorMessage(), newEmail);
 
+            // TODO: Remove when the bug is fixed
+            addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/74");
+            
             Assert.assertTrue(errorMessages.contains(expectedEmailError),
                     "Expected email error message '" + expectedEmailError + "' not found. Actual error: " + errorMessages);
             Assert.assertEquals(1, errorMessages.size(),
