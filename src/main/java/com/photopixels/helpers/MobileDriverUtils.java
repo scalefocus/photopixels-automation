@@ -12,6 +12,7 @@ import lombok.Getter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 
 public class MobileDriverUtils {
@@ -24,6 +25,8 @@ public class MobileDriverUtils {
     private String appiumHost;
     private int appiumPort;
     private String appName;
+    private String appPackage;
+    private String activityName;
     private String deviceName;
     private PlatformEnum platform;
     @Getter
@@ -85,6 +88,9 @@ public class MobileDriverUtils {
             appName = props.getProperty("appName");
         }
 
+        appPackage = props.getProperty("appPackage");
+        activityName = props.getProperty("activityName");
+
         String device = System.getProperty("deviceName");
 
         if (device == null) {
@@ -123,5 +129,22 @@ public class MobileDriverUtils {
         }
 
         return driver;
+    }
+
+
+    public void startActivity() {
+        driver.executeScript(
+                "mobile: startActivity",
+                Map.of(
+                        "component", String.format("%s/%s", appPackage, activityName)
+                ));
+    }
+
+    public void clearApp() {
+        driver.executeScript(
+                "mobile: clearApp",
+                Map.of(
+                        "appId", appPackage
+                ));
     }
 }

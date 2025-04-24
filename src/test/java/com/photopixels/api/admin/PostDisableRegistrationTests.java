@@ -63,8 +63,10 @@ public class PostDisableRegistrationTests extends ApiBaseTest {
 
         SoftAssert softAssert = new SoftAssert();
 
-        // TODO: BUG? - Registration can be disabled with not admin user
         softAssert.assertTrue(getStatusResponseDto.getRegistration(), "Registration is disabled!");
+
+        // TODO: Remove when the bug is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/75");
 
         softAssert.assertAll();
     }
