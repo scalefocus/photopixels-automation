@@ -38,6 +38,7 @@ public class BasePathsConstants {
     public static String GET_OBJECT_DATA = "/object/{ObjectId}/data";
     public static String GET_OBJECTS_DATA = "/objects/data";
     public static String GET_OBJECTS = "/objects";
+    public static String TRASH_OBJECT = "/object/{objectid}/trash";
 
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
