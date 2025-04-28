@@ -58,9 +58,6 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-
-    // TODO: API should return 404 Not Found instead of 400 Bad Request for invalid objectId.Issue № 77
-
     @Test(description = "Trash object with not existing id")
     @Description("Validation of trash object with not existing id")
     @Story("Trash Object")
@@ -75,6 +72,10 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
 
         softAssert.assertNotNull(response, "Error response is null");
         softAssert.assertNull(response.getTitle(), "Expected title to be null (empty body)");
+
+        // TODO: API should return 404 Not Found instead of 400 Bad Request for invalid objectId.Issue № 77
+        // TODO: Remove when the bug is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/77");
 
         softAssert.assertAll();
     }
