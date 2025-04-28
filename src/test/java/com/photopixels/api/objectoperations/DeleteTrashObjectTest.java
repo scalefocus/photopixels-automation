@@ -1,7 +1,7 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.objectoperations.TrashObjectResponseDto;
+import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
@@ -9,7 +9,6 @@ import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
-import io.restassured.response.Response;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -49,7 +48,7 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void trashObjectSuccessfullyTest() {
         DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
-        TrashObjectResponseDto trashResponse = deleteTrashObjectSteps.deleteTrashObject(objectId);
+        ObjectVersioningResponseDto trashResponse = deleteTrashObjectSteps.deleteTrashObject(objectId);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -58,6 +57,9 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
 
         softAssert.assertAll();
     }
+
+
+    // TODO: API should return 404 Not Found instead of 400 Bad Request for invalid objectId.Issue № 77
 
     @Test(description = "Trash object with not existing id")
     @Description("Validation of trash object with not existing id")

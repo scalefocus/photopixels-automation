@@ -1,7 +1,7 @@
 package com.photopixels.api.steps.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
-import com.photopixels.api.dtos.objectoperations.TrashObjectResponseDto;
+import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
@@ -12,7 +12,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.constants.BasePathsConstants.TRASH_OBJECT;
+import static com.photopixels.constants.BasePathsConstants.DELETE_TRASH_OBJECT;
 
 public class DeleteTrashObjectSteps {
 
@@ -24,7 +24,7 @@ public class DeleteTrashObjectSteps {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(TRASH_OBJECT);
+        requestSpecification.addBasePath(DELETE_TRASH_OBJECT);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
@@ -32,12 +32,12 @@ public class DeleteTrashObjectSteps {
     }
 
     @Step("Trash object with valid id: {objectId}")
-    public TrashObjectResponseDto deleteTrashObject(String objectId) {
+    public ObjectVersioningResponseDto deleteTrashObject(String objectId) {
         Response response = deleteTrashObjectResponse(objectId);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
-        return response.as(TrashObjectResponseDto.class);
+        return response.as(ObjectVersioningResponseDto.class);
     }
 
 
