@@ -12,6 +12,7 @@
             <class name="com.photopixels.api.objectoperations.PostGetObjectsDataTests"/>
             <class name="com.photopixels.api.objectoperations.GetObjectsTests"/>
             <class name="com.photopixels.api.objectoperations.DeleteTrashObjectTest"/>
+            <class name="com.photopixels.api.objectoperations.GetTrashedObjectsTests"/>
         </classes>
     </test>
 
