@@ -78,6 +78,8 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         String lastId = properties.get(properties.size() - 1).getId();
 
         // Step 3: Expect 204 No Content
+        // We use the last returned object's ID as lastId, so there should be no newer trashed objects.
+        // The API correctly returns 204 No Content when no more results are available.
         getTrashedObjectsSteps.getRawTrashedObjectsResponseExpectingNoContent(lastId, pageSize);
 
         softAssert.assertAll();
