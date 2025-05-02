@@ -12,7 +12,7 @@ import org.apache.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.photopixels.constants.BasePathsConstants.GET_OBJECTS_TRASHED;
+import static com.photopixels.constants.BasePathsConstants.GET_TRASHED_OBJECTS;
 
 public class GetTrashedObjectsSteps {
 
@@ -23,7 +23,7 @@ public class GetTrashedObjectsSteps {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(GET_OBJECTS_TRASHED);
+        requestSpecification.addBasePath(GET_TRASHED_OBJECTS);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
         requestSpecification.addCustomHeader("Authorization", token);
@@ -31,18 +31,7 @@ public class GetTrashedObjectsSteps {
 
     @Step("Get trashed objects with optional lastId: {lastId} and pageSize: {pageSize}")
     public GetTrashedObjectsResponseDto getTrashedObjects(String lastId, int pageSize) {
-        Map<String, String> queryParams = new HashMap<>();
-
-        queryParams.put("PageSize", String.valueOf(pageSize));
-
-        if (lastId != null && !lastId.isEmpty()) {
-            queryParams.put("lastId", lastId);
-        }
-
-        requestSpecification.addQueryParams(queryParams);
-
-        Response response = requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
+        Response response = getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
 
         response.then().statusCode(HttpStatus.SC_OK);
 
@@ -51,17 +40,39 @@ public class GetTrashedObjectsSteps {
 
     @Step("Get trashed objects with invalid pageSize: {pageSize}")
     public ErrorResponseDto getTrashedObjectsWithInvalidPageSize(String pageSize) {
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("PageSize", pageSize);
-
-        requestSpecification.addQueryParams(queryParams);
-
-        Response response = requestOperationsHelper
-                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
+        Response response = getRawTrashedObjectsResponse(null, pageSize);
 
         response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
 
         return response.as(ErrorResponseDto.class);
     }
 
+    @Step("Get trashed objects as raw response with optional lastId: {lastId} and pageSize: {pageSize}")
+    public Response getRawTrashedObjectsResponse(String lastId, int pageSize) {
+
+        return getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
+    }
+
+    @Step("Get trashed objects and expect 204 No Content with lastId: {lastId} and pageSize: {pageSize}")
+    public Response getRawTrashedObjectsResponseExpectingNoContent(String lastId, int pageSize) {
+        Response response = getRawTrashedObjectsResponse(lastId, pageSize);
+
+        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
+
+        return response;
+    }
+
+    private Response getRawTrashedObjectsResponse(String lastId, String pageSize) {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("PageSize", pageSize);
+
+        if (lastId != null && !lastId.isEmpty()) {
+            queryParams.put("lastId", lastId);
+        }
+
+        requestSpecification.addQueryParams(queryParams);
+
+        return requestOperationsHelper
+                .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
+    }
 }
