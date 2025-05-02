@@ -30,7 +30,7 @@ public enum ErrorMessagesEnum {
     OBJECT_IDS("ObjectIds", "The ObjectIds field is required."),
 
     // Object operations
-    PAGE_SIZE_INVALID("PageSize","The value 'avc' is not valid for PageSize.");
+    PAGE_SIZE_INVALID("PageSize","The value '%s' is not valid for PageSize.");
 
 
     private final String key;

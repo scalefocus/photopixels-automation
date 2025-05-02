@@ -80,14 +80,14 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         // Step 3: Expect 204 No Content
         // We use the last returned object's ID as lastId, so there should be no newer trashed objects.
         // The API correctly returns 204 No Content when no more results are available.
-        getTrashedObjectsSteps.getRawTrashedObjectsResponseExpectingNoContent(lastId, pageSize);
+        getTrashedObjectsSteps.getTrashedObjectsExpectingNoContent(lastId, pageSize);
 
         softAssert.assertAll();
     }
 
 
     @Test(description = "Get trashed objects with non-existing last object id")
-    @Description("Verify API returns no content when lastId does not exist in the system")
+    @Description("Verify API returns 204 No Content when lastId does not exist in the system")
     @Story("Get Trashed Objects")
     @Severity(SeverityLevel.MINOR)
     public void getTrashedObjectsWithNonExistingLastIdTest() {
@@ -95,8 +95,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
 
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
 
-        getTrashedObjectsSteps.getRawTrashedObjectsResponseExpectingNoContent(nonExistingId, pageSize);
-
+        getTrashedObjectsSteps.getTrashedObjectsExpectingNoContent(nonExistingId, pageSize);
     }
 
     @Test(description = "Get trashed objects with invalid page size")
@@ -113,8 +112,10 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
 
         softAssert.assertNotNull(response, "Error response is null");
         softAssert.assertEquals(response.getTitle(), VALIDATION_ERRORS_TITLE, "Unexpected error title");
-        softAssert.assertEquals(response.extractErrorMessageByKey(ErrorMessagesEnum.PAGE_SIZE_INVALID.getKey()), ErrorMessagesEnum.PAGE_SIZE_INVALID.getErrorMessage(),
-                "Unexpected validation message for PageSize");
+
+        String expectedMessage = String.format(ErrorMessagesEnum.PAGE_SIZE_INVALID.getErrorMessage(), invalidPageSize);
+
+        softAssert.assertEquals(response.extractErrorMessageByKey(ErrorMessagesEnum.PAGE_SIZE_INVALID.getKey()), expectedMessage, "Unexpected validation message for PageSize");
         softAssert.assertNotNull(response.getTraceId(), "traceId is null");
 
         softAssert.assertAll();

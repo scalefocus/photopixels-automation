@@ -47,19 +47,11 @@ public class GetTrashedObjectsSteps {
         return response.as(ErrorResponseDto.class);
     }
 
-    @Step("Get trashed objects as raw response with optional lastId: {lastId} and pageSize: {pageSize}")
-    public Response getRawTrashedObjectsResponse(String lastId, int pageSize) {
-
-        return getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
-    }
-
     @Step("Get trashed objects and expect 204 No Content with lastId: {lastId} and pageSize: {pageSize}")
-    public Response getRawTrashedObjectsResponseExpectingNoContent(String lastId, int pageSize) {
-        Response response = getRawTrashedObjectsResponse(lastId, pageSize);
+    public void getTrashedObjectsExpectingNoContent(String lastId, int pageSize) {
+        getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize))
 
-        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
-
-        return response;
+                .then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
     private Response getRawTrashedObjectsResponse(String lastId, String pageSize) {
@@ -75,4 +67,5 @@ public class GetTrashedObjectsSteps {
         return requestOperationsHelper
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
     }
+
 }
