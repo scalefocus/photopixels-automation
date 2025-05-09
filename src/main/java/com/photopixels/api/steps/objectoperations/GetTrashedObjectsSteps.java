@@ -54,6 +54,19 @@ public class GetTrashedObjectsSteps {
                 .then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
+    @Step("Get trashed objects allowing both 200 OK and 204 No Content for lastId: {lastId}")
+    public GetTrashedObjectsResponseDto getTrashedObjectsAllowingNoContent(String lastId, int pageSize) {
+        Response response = getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
+
+        int statusCode = response.getStatusCode();
+        if (statusCode == HttpStatus.SC_NO_CONTENT) {
+            return null;
+        }
+
+        response.then().statusCode(HttpStatus.SC_OK);
+        return response.as(GetTrashedObjectsResponseDto.class);
+    }
+
     private Response getRawTrashedObjectsResponse(String lastId, String pageSize) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("PageSize", pageSize);
@@ -67,5 +80,4 @@ public class GetTrashedObjectsSteps {
         return requestOperationsHelper
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
     }
-
 }
