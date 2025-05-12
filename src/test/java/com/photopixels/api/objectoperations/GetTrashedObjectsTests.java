@@ -110,14 +110,9 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
             softAssert.assertFalse(nextItems.isEmpty(), "Next page should not be empty");
             softAssert.assertFalse(nextItems.stream().anyMatch(p -> middleId.equals(p.getId())), "Next page should not contain the lastId used");
         }
-        else {
-
-            softAssert.assertTrue(true, "No more trashed objects after lastId – 204 No Content");
-        }
 
         softAssert.assertAll();
     }
-
 
     @Test(description = "Get trashed objects with valid page size")
     @Description("Positive test: Get trashed objects with only valid page size")
