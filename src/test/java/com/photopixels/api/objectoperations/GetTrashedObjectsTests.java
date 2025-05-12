@@ -3,11 +3,16 @@ package com.photopixels.api.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetTrashedObjectsResponseDto;
 import com.photopixels.api.dtos.objectoperations.TrashedObjectPropertyDto;
+import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
+import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
+import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.GetTrashedObjectsSteps;
+import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -15,6 +20,7 @@ import org.testng.asserts.SoftAssert;
 
 import java.util.List;
 
+import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -22,11 +28,90 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 public class GetTrashedObjectsTests extends ApiBaseTest {
 
     private String token;
-    int pageSize = 30;
+    private String objectId;
+    private final int pageSize = 30;
+    private final String fileName = TRAINING_FILE;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
+
+        String objectHash = getObjectHash(fileName);
+        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+        UploadObjectResponseDto uploadResponse = postUploadObjectSteps.uploadObject(fileName, objectHash);
+
+        objectId = uploadResponse.getId();
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void cleanup() {
+        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
+        deleteObjectSteps.deleteObject(objectId);
+    }
+
+    @Test(description = "Upload, trash and verify object appears in trash")
+    @Description("Positive test:Uploads object, trashes it (soft delete), and verifies it is in trash list")
+    @Story("Get Trashed Objects")
+    @Severity(SeverityLevel.CRITICAL)
+    public void uploadTrashAndVerifyObjectInTrashTest() {
+        // Step 1: Move object to trash
+        DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
+        deleteTrashObjectSteps.deleteTrashObject(objectId);
+
+        // Step 2: Get trashed objects
+        GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
+        GetTrashedObjectsResponseDto trashResponse = getTrashedObjectsSteps.getTrashedObjects(null, pageSize);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertNotNull(trashResponse, "Trash response is null");
+        softAssert.assertNotNull(trashResponse.getProperties(), "Trash properties list is null");
+
+        // Step 3: Check if the trashed objects list contains the uploaded object's ID
+        List<TrashedObjectPropertyDto> trashedObjects = trashResponse.getProperties();
+        boolean foundInTrash = false;
+
+        for (TrashedObjectPropertyDto object : trashedObjects) {
+            if (objectId.equals(object.getId())) {
+                foundInTrash = true;
+                break;
+            }
+        }
+
+        softAssert.assertTrue(foundInTrash, "The uploaded and trashed object was not found in the trash");
+
+        softAssert.assertAll();
+    }
+
+    @Test(description = "Get trashed objects with valid middle lastId")
+    @Description("Verify trashed objects after a middle lastId are returned or 204 is handled correctly")
+    @Story("Get Trashed Objects")
+    @Severity(SeverityLevel.NORMAL)
+    public void getTrashedObjectsWithMiddleLastIdTest() {
+
+        DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
+        deleteTrashObjectSteps.deleteTrashObject(objectId);
+
+        GetTrashedObjectsSteps steps = new GetTrashedObjectsSteps(token);
+        GetTrashedObjectsResponseDto fullResponse = steps.getTrashedObjects(null, pageSize);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        List<TrashedObjectPropertyDto> allObjects = fullResponse.getProperties();
+
+        softAssert.assertTrue(allObjects.size() >= 2, "At least 2 trashed objects are required");
+
+        String middleId = allObjects.get(allObjects.size() - 2).getId();
+        GetTrashedObjectsResponseDto nextPage = steps.getTrashedObjectsAllowingNoContent(middleId, pageSize);
+
+        if (nextPage != null) {
+            List<TrashedObjectPropertyDto> nextItems = nextPage.getProperties();
+
+            softAssert.assertFalse(nextItems.isEmpty(), "Next page should not be empty");
+            softAssert.assertFalse(nextItems.stream().anyMatch(p -> middleId.equals(p.getId())), "Next page should not contain the lastId used");
+        }
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Get trashed objects with valid page size")

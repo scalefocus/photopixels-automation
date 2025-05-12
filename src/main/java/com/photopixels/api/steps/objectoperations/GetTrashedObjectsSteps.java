@@ -54,6 +54,23 @@ public class GetTrashedObjectsSteps {
                 .then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
+
+    //Retrieves trashed objects while allowing both 200 OK and 204 No Content responses
+    //The API may return either a list of newer trashed objects (200 OK) or indicate there are no further results (204 No Content).
+    // Returning null in the 204 case allows the test to handle both flows.
+    @Step("Get trashed objects allowing both 200 OK and 204 No Content for lastId: {lastId}")
+    public GetTrashedObjectsResponseDto getTrashedObjectsAllowingNoContent(String lastId, int pageSize) {
+        Response response = getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
+
+        int statusCode = response.getStatusCode();
+        if (statusCode == HttpStatus.SC_NO_CONTENT) {
+            return null;
+        }
+
+        response.then().statusCode(HttpStatus.SC_OK);
+        return response.as(GetTrashedObjectsResponseDto.class);
+    }
+
     private Response getRawTrashedObjectsResponse(String lastId, String pageSize) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("PageSize", pageSize);
@@ -67,5 +84,4 @@ public class GetTrashedObjectsSteps {
         return requestOperationsHelper
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
     }
-
 }
