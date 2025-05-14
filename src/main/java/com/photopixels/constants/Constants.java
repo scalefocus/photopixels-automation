@@ -23,6 +23,8 @@ public class Constants {
 
     //Pop-up Messages
     public static final String USER_CREATED = "User Created.";
+    public static final String USER_DELETED = "Account Deleted.";
+    public static final String QUOTA_CHANGED = "Quota changed successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";

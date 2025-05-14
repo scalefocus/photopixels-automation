@@ -19,6 +19,7 @@
 
     import static com.photopixels.constants.Constants.*;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
+    import static com.photopixels.constants.ErrorMessageConstants.*;
 
     @Listeners(StatusTestListener.class)
     @Feature("Web")
@@ -44,8 +45,8 @@
             waitHelper = new WaitOperationHelper(driver);
         }
 
-        @Test(description = "Successful user creation")
-        @Description("Successful creation of a user with correct login rules")
+        @Test(description = "Successful creation of a user with correct login credential rules")
+        @Description("Successful creation of a user with correct login credential rules")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
         public void createUserSuccessfullyTest() {
@@ -69,9 +70,14 @@
                     "Expected email " + newEmail + " not found in search results. Found: " + usersPage.getEmailsFromResults());
             Assert.assertTrue(usersPage.hasSearchResultRole("User"),
                     "User role is not the expected one. Expected 'User', but found: " + usersPage.getRolesFromResults());
+
+            usersPage.editUser();
+            usersPage.deleteUser();
+            Assert.assertEquals(usersPage.getUserDeletedMsg(), USER_DELETED,
+                    "The message is not correct.");
         }
 
-        @Test(description = "Successful user creation")
+        @Test(description = "Successful creation of admin user with correct login rules")
         @Description("Successful creation of admin user with correct login rules")
         @Story("Create New user")
         @Severity(SeverityLevel.CRITICAL)
@@ -93,14 +99,20 @@
                     "Expected email " + newEmail + " not found in search results. Found: " + usersPage.getEmailsFromResults());
             Assert.assertTrue(usersPage.hasSearchResultRole("Admin"),
                     "User role is not the expected one. Expected 'Admin', but found: " + usersPage.getRolesFromResults());
+
+            usersPage.editUser();
+            usersPage.deleteUser();
+            Assert.assertEquals(usersPage.getUserDeletedMsg(), USER_DELETED,
+                    "The message is not correct.");
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user invoking name error message")
         @Description("Unsuccessful creation of a user invoking name error message")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
         public void emptyNameField() {
             String emptyName = "";
+            newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
 
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
@@ -109,11 +121,11 @@
             createUserPage.waitMs();
 
             String message = createUserPage.getNewNameUserValidationMessage();
-            Assert.assertEquals(message, "Please fill out this field.",
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR,
                     "Error message for empty name field is not correct. Expected 'Please fill out this field.', but found:" + message);
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user invoking email address error message")
         @Description("Unsuccessful creation of a user invoking email address error message")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -126,11 +138,11 @@
             createUserPage.createUser(randomName, emptyEmail, password);
 
             String message = createUserPage.getEmailAddressValidationMessage();
-            Assert.assertEquals(message, "Please fill out this field.",
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty email address field is not correct. Expected 'Please fill out this field.', but found:" + message);
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user invoking email format error message for missing @ sign")
         @Description("Unsuccessful creation of a user invoking email format error message for missing @ sign")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -146,7 +158,7 @@
                     "Error message for invalid email format field is not correct. Expected 'Please include an '@' in the email address. '" + invalidEmail + "' is missing an '@'.', but found:" + message);
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user invoking empty password error message")
         @Description("Unsuccessful creation of a user invoking empty password error message")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -161,11 +173,11 @@
             createUserPage.createUser(randomName, newEmail, emptyPassword);
 
             String message = createUserPage.getPasswordValidationMessage();
-            Assert.assertEquals(message, "Please fill out this field.",
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty password field is not correct. Expected 'Please fill out this field.', but found:" + message);
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user due to invalid password format")
         @Description("Unsuccessful creation of a user due to invalid password format")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -188,7 +200,7 @@
                     "Expected error message '" + PASSWORD_REQUIRES_UPPER.getErrorMessage() + "' not found. Actual errors: " + errorMessages);
         }
 
-        @Test(description = "Unsuccessful user creation")
+        @Test(description = "Unsuccessful creation of a user due to duplicate email")
         @Description("Unsuccessful creation of a user due to duplicate email")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -202,7 +214,7 @@
             createUserPage.goToCreateNewUser();
 
             //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
-            waitHelper.waitMs();
+            createUserPage.waitMs();
             createUserPage.createUser(randomName, newEmail, password);
 
             List<String> errorMessages = createUserPage.getErrorMessages();
@@ -210,6 +222,6 @@
             Assert.assertTrue(errorMessages.contains(expectedEmailError),
                     "Expected email error message '" + expectedEmailError + "' not found. Actual error: " + errorMessages);
             Assert.assertEquals(1, errorMessages.size(),
-                    "Expected exactly 1 error message (email), but found " + errorMessages.size() + ": " + errorMessages);
+                    "Expected exactly 1 error message (email), but found " + errorMessages.size() + ": " + errorMessages); // Test fails due to a bug with additional error message
         }
     }

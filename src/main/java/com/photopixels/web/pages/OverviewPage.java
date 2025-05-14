@@ -5,6 +5,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class OverviewPage extends NavigationPage {
 
@@ -12,6 +16,17 @@ public class OverviewPage extends NavigationPage {
 
     @FindBy(xpath = "//h5[contains(@class,'css-1ne0cvc')]")
     private WebElement overviewHeader;
+
+    @FindBy(css = "[data-testid='CloudUploadIcon']")
+    private WebElement uploadButton;
+
+    @FindBy(xpath = "//input[@type='file']")
+    private WebElement fileInput;
+
+    @FindBy(css = ".error-message")
+    private WebElement errorMessage;
+
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
     public OverviewPage(WebDriver driver) {
         super(driver);
@@ -26,4 +41,25 @@ public class OverviewPage extends NavigationPage {
 
         return overviewHeader.getText();
     }
+
+    @Step("Upload media")
+    public void uploadMedia() {
+        waitForElementToBeVisible(uploadButton);
+        uploadButton.click();
+    }
+
+    @Step("Upload media")
+    public void uploadMedia(String filePath) {
+        waitForElementToBeVisible(uploadButton);
+        uploadButton.click();
+        wait.until(ExpectedConditions.elementToBeClickable(fileInput));
+        fileInput.sendKeys(filePath);
+    }
+
+    @Step("Get upload error message")
+    public String getUploadErrorMessage() {
+        wait.until(ExpectedConditions.visibilityOf(errorMessage));
+        return errorMessage.getText();
+    }
+
 }

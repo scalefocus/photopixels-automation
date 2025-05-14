@@ -11,6 +11,7 @@ public enum ErrorMessagesEnum {
     PASSWORD_REQUIRES_DIGIT("PasswordRequiresDigit", "Passwords must have at least one digit ('0'-'9')."),
     PASSWORD_REQUIRES_UPPER("PasswordRequiresUpper", "Passwords must have at least one uppercase ('A'-'Z')."),
     PASSWORD("Password", "The Password field is required."),
+    EMPTY_FIELD_ERROR ("Empty field", "Please fill out this field."),
     NEW_PASSWORD("NewPassword", "The NewPassword field is required."),
     OLD_PASSWORD("OldPassword", "The OldPassword field is required."),
     PASSWORD_MISMATCH("PasswordMismatch", "Incorrect password."),
