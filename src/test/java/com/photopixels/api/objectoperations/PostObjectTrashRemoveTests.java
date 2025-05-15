@@ -4,9 +4,9 @@ import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
+import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostObjectTrashRemoveSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
-import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.constants.ErrorMessageConstants;
 import com.photopixels.listeners.StatusTestListener;
@@ -71,7 +71,6 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
                 {null, ErrorMessageConstants.OBJECT_ID_IS_NULL}};
     }
 
-    // TODO: Remove when the bug isaddIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/87");
     @Test(dataProvider = "invalidObjectIds", description = "Try to remove trashed object with invalid or empty ID")
     @Description("Validation of 400 Bad Request when invalid or empty object ID is passed")
     @Story("Remove Trashed Object")
@@ -83,6 +82,9 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(errorResponseDto, "Error response is null");
+
+        // TODO: Remove when the bug is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/87");
 
         // These asserts should be re-enabled once the backend returns proper validation messages
         //softAssert.assertNotNull(errorResponseDto.getErrors(), "Errors field should not be null");
