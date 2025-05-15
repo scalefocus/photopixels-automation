@@ -8,6 +8,7 @@ import com.photopixels.api.steps.objectoperations.PostObjectTrashRemoveSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.constants.ErrorMessageConstants;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.*;
@@ -65,12 +66,12 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
     @DataProvider(name = "invalidObjectIds")
     public Object[][] provideInvalidObjectIds() {
         return new Object[][] {
-                {"invalid_123", "Invalid object ID format"},
-                {"", "Object ID is empty"},
-                {null, "Object ID is null"}};
+                {"invalid_123", ErrorMessageConstants.INVALID_OBJECT_ID_FORMAT},
+                {"", ErrorMessageConstants.OBJECT_ID_IS_EMPTY},
+                {null, ErrorMessageConstants.OBJECT_ID_IS_NULL}};
     }
 
-    // TODO: Remove when the bug is fixed("https://github.com/scalefocus/photopixels/issues/87");
+    // TODO: Remove when the bug isaddIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/87");
     @Test(dataProvider = "invalidObjectIds", description = "Try to remove trashed object with invalid or empty ID")
     @Description("Validation of 400 Bad Request when invalid or empty object ID is passed")
     @Story("Remove Trashed Object")

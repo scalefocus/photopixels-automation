@@ -5,8 +5,8 @@ import com.photopixels.api.dtos.objectoperations.UpdateObjectTrashRemoveRequestD
 public class UpdateObjectTrashRemoveFactory {
 
     public UpdateObjectTrashRemoveRequestDto createUpdateObjectTrashRemoveRequestDto(String objectId) {
-        UpdateObjectTrashRemoveRequestDto requestDto = new UpdateObjectTrashRemoveRequestDto();
-        requestDto.setId(objectId);
-        return requestDto;
+        return UpdateObjectTrashRemoveRequestDto.builder()
+                .id(objectId)
+                .build();
     }
 }
