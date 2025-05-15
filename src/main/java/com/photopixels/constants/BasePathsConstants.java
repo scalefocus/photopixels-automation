@@ -40,6 +40,7 @@ public class BasePathsConstants {
     public static String GET_OBJECTS = "/objects";
     public static String DELETE_TRASH_OBJECT = "/object/{objectid}/trash";
     public static String GET_TRASHED_OBJECTS  ="/objects/trashed";
+    public static String POST_TRASH_OBJECT_REMOVE  ="/object/trash/remove";
 
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
