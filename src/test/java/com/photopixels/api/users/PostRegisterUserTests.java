@@ -30,7 +30,7 @@ public class PostRegisterUserTests extends ApiBaseTest {
     @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
-        name = "Test User" + random;
+        name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
     }
 
@@ -124,7 +124,7 @@ public class PostRegisterUserTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void registerUserDuplicateUserTest() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test " + random;
+        String name = "Test" + random;
         String email = "test" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
@@ -140,7 +140,7 @@ public class PostRegisterUserTests extends ApiBaseTest {
         softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
 
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_USER_NAME.getKey()),
-                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), email), "Error message is not correct");
+                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), name), "Error message is not correct");
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_EMAIL.getKey()),
                 String.format(ErrorMessagesEnum.DUPLICATE_EMAIL.getErrorMessage(), email), "Error message is not correct");
 

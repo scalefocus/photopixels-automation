@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 public class ObjectVersioningResponseDto {
 
-    private Integer revision ;
+    private Integer revision;
 
 }

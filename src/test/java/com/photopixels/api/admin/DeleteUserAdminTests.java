@@ -35,7 +35,7 @@ public class DeleteUserAdminTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void deleteUserAdminTest() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();

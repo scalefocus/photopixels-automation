@@ -39,7 +39,7 @@ public class PostUploadObjectTests extends ApiBaseTest {
         objectHash = getObjectHash(filePath);
 
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
