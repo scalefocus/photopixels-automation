@@ -10,12 +10,7 @@ import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
-import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
@@ -67,40 +62,30 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-    @Test(description = "Try to remove trashed object with invalid ID")
-    @Description("Validation of 400 Bad Request when invalid object ID is passed")
-    @Story("Remove Trashed Object")
-    @Severity(SeverityLevel.NORMAL)
-    public void removeTrashedObjectWithInvalidIdTest() {
-        String invalidId = "invalid_123";
-
-        PostObjectTrashRemoveSteps removeSteps = new PostObjectTrashRemoveSteps(token);
-        Response response = removeSteps.removeTrashedObjectExpectingBadRequest(invalidId);
-
-        SoftAssert softAssert = new SoftAssert();
-
-        softAssert.assertNotNull(response, "Response is null");
-        // Assert that the response body is exactly "{}" (empty JSON object)
-        softAssert.assertEquals(response.getBody().asString().trim(), "{}", "Expected minimal JSON body '{}'");
-
-        softAssert.assertAll();
+    @DataProvider(name = "invalidObjectIds")
+    public Object[][] provideInvalidObjectIds() {
+        return new Object[][] {
+                {"invalid_123", "Invalid object ID format"},
+                {"", "Object ID is empty"},
+                {null, "Object ID is null"}};
     }
 
-    @Test(description = "Try to remove trashed object with empty ID")
-    @Description("Validation of 400 Bad Request when empty object ID is passed")
+    // TODO: Remove when the bug is fixed("https://github.com/scalefocus/photopixels/issues/87");
+    @Test(dataProvider = "invalidObjectIds", description = "Try to remove trashed object with invalid or empty ID")
+    @Description("Validation of 400 Bad Request when invalid or empty object ID is passed")
     @Story("Remove Trashed Object")
     @Severity(SeverityLevel.NORMAL)
-    public void removeTrashedObjectWithEmptyIdTest() {
-        String emptyId = "";
-
+    public void removeTrashedObjectWithInvalidIdTest(String invalidId, String expectedErrorDescription) {
         PostObjectTrashRemoveSteps removeSteps = new PostObjectTrashRemoveSteps(token);
-        Response response = removeSteps.removeTrashedObjectExpectingBadRequest(emptyId);
+        ErrorResponseDto errorResponseDto = removeSteps.removeTrashedObjectExpectingBadRequest(invalidId);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertNotNull(response, "Response is null");
-        // Assert that the response body is exactly "{}" (empty JSON object)
-        softAssert.assertEquals(response.getBody().asString().trim(), "{}", "Expected minimal JSON body '{}'");
+        softAssert.assertNotNull(errorResponseDto, "Error response is null");
+
+        // These asserts should be re-enabled once the backend returns proper validation messages
+        //softAssert.assertNotNull(errorResponseDto.getErrors(), "Errors field should not be null");
+        //softAssert.assertTrue(errorResponseDto.getErrors().has("Id"), "Errors should contain a validation entry for 'Id'");
 
         softAssert.assertAll();
     }

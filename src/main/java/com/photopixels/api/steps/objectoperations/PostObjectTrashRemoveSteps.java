@@ -3,6 +3,7 @@ package com.photopixels.api.steps.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UpdateObjectTrashRemoveRequestDto;
+import com.photopixels.api.factories.objectoperations.UpdateObjectTrashRemoveFactory;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
@@ -17,9 +18,12 @@ public class PostObjectTrashRemoveSteps {
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
+    private final UpdateObjectTrashRemoveFactory factory;
+
     public PostObjectTrashRemoveSteps(String token) {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
+        factory = new UpdateObjectTrashRemoveFactory();
 
         requestSpecification.addBasePath(POST_TRASH_OBJECT_REMOVE);
         requestSpecification.setContentType(ContentType.JSON);
@@ -30,13 +34,7 @@ public class PostObjectTrashRemoveSteps {
 
     @Step("Remove object from trash with ID: {objectId}")
     public ObjectVersioningResponseDto removeTrashedObject(String objectId) {
-        UpdateObjectTrashRemoveRequestDto requestDto = new UpdateObjectTrashRemoveRequestDto();
-        requestDto.setId(objectId);
-
-        requestSpecification.addBodyToRequest(requestDto);
-
-        Response response = requestOperationsHelper
-                .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
+        Response response = sendRemoveTrashedObjectRequest(objectId);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
@@ -44,17 +42,20 @@ public class PostObjectTrashRemoveSteps {
     }
 
     @Step("Try to remove trashed object with invalid ID: {objectId} and expect 400 Bad Request")
-    public Response removeTrashedObjectExpectingBadRequest(String objectId) {
-        UpdateObjectTrashRemoveRequestDto requestDto = new UpdateObjectTrashRemoveRequestDto();
-        requestDto.setId(objectId);
-
-        requestSpecification.addBodyToRequest(requestDto);
-
-        Response response = requestOperationsHelper
-                .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
+    public ErrorResponseDto removeTrashedObjectExpectingBadRequest(String objectId) {
+        Response response = sendRemoveTrashedObjectRequest(objectId);
 
         response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
 
-        return response;
+        return response.as(ErrorResponseDto.class);
+    }
+
+    private Response sendRemoveTrashedObjectRequest(String objectId) {
+        UpdateObjectTrashRemoveRequestDto requestDto = factory.createUpdateObjectTrashRemoveRequestDto(objectId);
+        requestSpecification.addBodyToRequest(requestDto);
+
+        return requestOperationsHelper.sendPostRequest(
+                requestSpecification.getFilterableRequestSpecification()
+        );
     }
 }
