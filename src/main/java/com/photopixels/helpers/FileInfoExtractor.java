@@ -3,6 +3,7 @@ package com.photopixels.helpers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public class FileInfoExtractor {
 
-    public static Map<String, String> extractFileInfo(Path path) {
+    public Map<String, String> extractFileInfo(Path path) {
         File file = path.toFile();
         if (!file.exists()) {
             throw new RuntimeException("!!! File not found: " + path);
@@ -63,4 +64,13 @@ public class FileInfoExtractor {
     private static String base64(String input) {
         return Base64.getEncoder().encodeToString(input.getBytes());
     }
+
+    public long getFileSize(Path file) {
+        try {
+            return Files.size(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get file size for: " + file, e);
+        }
+    }
+
 }

@@ -3,14 +3,16 @@ package com.photopixels.api.steps.tus;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
-
 import io.restassured.response.Response;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 import static com.photopixels.constants.BasePathsConstants.PATCH_SEND_DATA;
-import static org.apache.hc.core5.http.HttpStatus.SC_NO_CONTENT;
+import static io.restassured.RestAssured.config;
+import static io.restassured.config.EncoderConfig.encoderConfig;
 
 public class PatchSendDataSteps {
 
@@ -25,47 +27,46 @@ public class PatchSendDataSteps {
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
-    public void sendDataLocationId(String locationId) {
-        requestSpecification.addPathParams(Map.of("locationId", locationId));
+    public void sendDataLocationFileId(String fileId) {
+        requestSpecification.addPathParams(Map.of("fileId", fileId));
     }
 
-    private Response sendDataHeaders(String locationId,
+    private Response sendFileChunkWithHeaders(String fileId,
                                      long uploadOffset,
                                      String uploadMetadata,
-                                     long contentLength,
                                      File filePart) {
-        // Add the location ID to the request path
-        requestSpecification.addPathParams(Map.of("locationId", locationId)); // Ensure this is set
 
-        // Add the required headers for the request
+        // Configure encoder to avoid appending charset to content type
+        config = config().encoderConfig(encoderConfig()
+                .appendDefaultContentCharsetToContentTypeIfUndefined(false));
+
+        // Set required TUS headers
+        requestSpecification.addPathParams(Map.of("fileId", fileId));
         requestSpecification.addCustomHeader("Tus-Resumable", "1.0.0");
         requestSpecification.addCustomHeader("Upload-Offset", String.valueOf(uploadOffset));
         requestSpecification.addCustomHeader("Upload-Metadata", uploadMetadata);
-        requestSpecification.addCustomHeader("Content-Length", String.valueOf(contentLength));
         requestSpecification.addCustomHeader("Content-Type", "application/offset+octet-stream");
 
-        // Send the PATCH request and return the response
-        return requestOperationsHelper
-                .sendPatchRequest(requestSpecification.getFilterableRequestSpecification());
+        // Set binary file part as raw stream in body
+        try {
+            requestSpecification.setRequestBodyStream(new FileInputStream(filePart));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("File not found: " + filePart.getAbsolutePath(), e);
+        }
+
+        // Send PATCH request
+        return requestOperationsHelper.sendPatchRequest(requestSpecification.getFilterableRequestSpecification());
     }
 
-    @Step("Send file chunk to Upload ID: {locationId} at offset: {uploadOffset}")
-    public Response sendFileChunk(String locationId,
+    @Step("Send file chunk to Upload ID: {locationFileId} at offset: {uploadOffset}")
+    public Response sendFileChunk(String fileId,
                                   long uploadOffset,
                                   String uploadMetadata,
-                                  long contentLength,
                                   File filePart) {
-        sendDataLocationId(locationId); // Add location ID path param
+        sendDataLocationFileId(fileId);
 
-        // Send the file chunk and capture the response
-        Response response = sendDataHeaders(locationId, uploadOffset, uploadMetadata, contentLength, filePart);
-        System.out.println(response);
-        response.then().statusCode(SC_NO_CONTENT);
-
+        Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
         return response;
     }
+
 }
-
-
-
-

@@ -5,6 +5,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.specification.FilterableRequestSpecification;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,4 +84,9 @@ public class CustomRequestSpecification {
 	public FilterableRequestSpecification getFilterableRequestSpecification() {
 		return filterableRequestSpecification;
 	}
+
+	public void setRequestBodyStream(InputStream stream) {
+		this.filterableRequestSpecification.body(stream);
+	}
+
 }

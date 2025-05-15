@@ -123,11 +123,4 @@ public class ApiBaseTest extends BaseTest{
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
     }
 
-    protected long getFileSize(Path file) {
-        try {
-            return Files.size(file);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to get file size for: " + file, e);
-        }
-    }
 }

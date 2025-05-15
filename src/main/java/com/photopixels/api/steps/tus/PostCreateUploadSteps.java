@@ -51,8 +51,8 @@ public class PostCreateUploadSteps {
                 .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
 
-    @Step("Create upload and retrieve Location ID")
-    public String tus_CreateUpload_GetLocationId_Successfully(String uploadMetadata, String uploadLength) {
+    @Step("Create upload and retrieve Location File ID")
+    public String createUploadAndGetLocationFileId(String uploadMetadata, String uploadLength) {
         Response response = createUpload(uploadMetadata, uploadLength);
         String uploadLocationId = response.getHeader("Location");
 
