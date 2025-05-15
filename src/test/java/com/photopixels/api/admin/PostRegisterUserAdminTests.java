@@ -157,9 +157,11 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
         softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
 
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_USER_NAME.getKey()),
-                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), name), "Error message is not correct");
+                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), name),
+                "Error message for username is not correct");
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_EMAIL.getKey()),
-                String.format(ErrorMessagesEnum.DUPLICATE_EMAIL.getErrorMessage(), email), "Error message is not correct");
+                String.format(ErrorMessagesEnum.DUPLICATE_EMAIL.getErrorMessage(), email),
+                "Error message for email is not correct");
 
         softAssert.assertAll();
     }
