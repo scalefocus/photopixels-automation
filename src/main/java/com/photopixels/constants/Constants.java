@@ -15,6 +15,8 @@ public class Constants {
     public static final String TRAINING_FILE = FILE_LOCATION + "training.jpg";
     public static final String UNNAMED_FILE = FILE_LOCATION + "unnamed.jpg";
     public static final String COCTAIL_FILE = FILE_LOCATION + "coctail.jpg";
+    public static final String PART1_SUFFIX = "_part1.jpg";
+    public static final String PART2_SUFFIX = "_part2.jpg";
 
     // TUS
     public static final String VALID_UPLOAD_METADATA = "fileExtension cG5n,fileName bmlrZTMucG5n,fileHash ZXhhbXBsZWhhc2g=,fileSize MzI0NDQ=,appleId ,androidId";

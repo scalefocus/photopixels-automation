@@ -39,13 +39,13 @@ public class FileInfoExtractor {
         }
     }
 
-    private static String getFileExtension(File file) {
+    private String getFileExtension(File file) {
         String fileName = file.getName();
         int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
 
-    private static String getFileHash(File file) throws NoSuchAlgorithmException, IOException {
+    private String getFileHash(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         FileInputStream fis = new FileInputStream(file);
         byte[] buffer = new byte[8192];
@@ -61,7 +61,7 @@ public class FileInfoExtractor {
         return Base64.getEncoder().encodeToString(hashBytes);
     }
 
-    private static String base64(String input) {
+    private String base64(String input) {
         return Base64.getEncoder().encodeToString(input.getBytes());
     }
 

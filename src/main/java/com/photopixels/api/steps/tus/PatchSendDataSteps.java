@@ -4,6 +4,7 @@ import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
+import org.apache.http.HttpStatus;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,13 +60,26 @@ public class PatchSendDataSteps {
     }
 
     @Step("Send file chunk to Upload ID: {locationFileId} at offset: {uploadOffset}")
-    public Response sendFileChunk(String fileId,
+    public void sendFileChunk(String fileId,
                                   long uploadOffset,
                                   String uploadMetadata,
                                   File filePart) {
         sendDataLocationFileId(fileId);
 
         Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
+        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
+    }
+
+    @Step("Send file chunk with error response")
+    public Response sendFileChunkError(String fileId,
+                                               long uploadOffset,
+                                               String uploadMetadata,
+                                               File filePart) {
+        sendDataLocationFileId(fileId);
+
+        Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
+        response.then().statusCode(HttpStatus.SC_CONFLICT);
+
         return response;
     }
 
