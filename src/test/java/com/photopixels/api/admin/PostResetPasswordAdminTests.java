@@ -34,7 +34,7 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
         token = getAdminToken();
 
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
@@ -56,7 +56,7 @@ public class PostResetPasswordAdminTests extends ApiBaseTest {
     public void resetPasswordAdminTest() {
         String newPassword = "Test12345!";
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();

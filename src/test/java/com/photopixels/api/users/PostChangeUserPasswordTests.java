@@ -32,7 +32,7 @@ public class PostChangeUserPasswordTests extends ApiBaseTest {
     @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
@@ -54,7 +54,7 @@ public class PostChangeUserPasswordTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void changeUserPasswordTest() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
         String newPassword = "!Test98765";
 
