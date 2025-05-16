@@ -56,7 +56,7 @@ public class PostDisableRegistrationTests extends ApiBaseTest {
         String token = getUserToken();
 
         PostDisableRegistrationSteps postDisableRegistrationSteps = new PostDisableRegistrationSteps(token);
-        postDisableRegistrationSteps.disableRegistration(false);
+        postDisableRegistrationSteps.disableRegistrationExpectingForbidden(false);
 
         GetStatusSteps getStatusSteps = new GetStatusSteps();
         GetStatusResponseDto getStatusResponseDto = getStatusSteps.getStatus();
@@ -64,9 +64,6 @@ public class PostDisableRegistrationTests extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertTrue(getStatusResponseDto.getRegistration(), "Registration is disabled!");
-
-        // TODO: Remove when the bug is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/75");
 
         softAssert.assertAll();
     }

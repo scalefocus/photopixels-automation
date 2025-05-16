@@ -37,13 +37,11 @@ public class PostDisableRegistrationSteps {
         // No response body is returned
     }
 
-    @Step("Disable registration with error response")
-    public ErrorResponseDto disableRegistrationError(Boolean value) {
+    @Step("Disable registration expecting 403 Forbidden")
+    public void disableRegistrationExpectingForbidden(Boolean value) {
         Response response = disableRegistrationResponse(value);
 
-        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
-
-        return response.as(ErrorResponseDto.class);
+        response.then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     private Response disableRegistrationResponse(Boolean value) {
