@@ -1,7 +1,6 @@
     package com.photopixels.web;
 
     import com.photopixels.base.WebBaseTest;
-    import com.photopixels.helpers.MediaGeneratorHelper;
     import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
     import com.photopixels.web.pages.CreateUserPage;
@@ -13,6 +12,8 @@
     import org.apache.commons.lang3.RandomStringUtils;
     import org.testng.Assert;
     import org.testng.annotations.*;
+
+    import java.io.File;
 
     import static com.photopixels.constants.Constants.*;
 
@@ -26,7 +27,6 @@
         private String adminPassword;
         private String randomName;
         private WaitOperationHelper waitHelper;
-        private MediaGeneratorHelper mediaGenerator;
         private static final String LARGE_IMAGE_PATH = "target/upload_files/test-large-image.png";
 
         @BeforeClass(alwaysRun = true)
@@ -37,8 +37,6 @@
             adminPassword = inputData.getPasswordAdmin();
             waitHelper = new WaitOperationHelper(driver);
             newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
-            mediaGenerator = new MediaGeneratorHelper(LARGE_IMAGE_PATH, 18560, 18560);
-            mediaGenerator.createLargeImage();
         }
 
         @Test(description = "Changing active user quota, setting to minimal value")
@@ -62,7 +60,7 @@
                     "The message is not correct. Expected: " + QUOTA_CHANGED + ", but found: " + actualMessage);
 
             String quotaText = usersPage.getQuotaParagraphText();
-            Assert.assertTrue(quotaText.contains("1.00 GB"), "Quota text should contain '1.00 GB'"); // Test fails die to bug with system unable to update the quote per user
+            Assert.assertTrue(quotaText.contains("1.00 GB"), "Quota text should contain '1.00 GB'");
 
             usersPage.goToUserTab();
             usersPage.searchUser(newEmail);
@@ -102,6 +100,9 @@
         @Story("Edit a user")
         @Severity(SeverityLevel.CRITICAL)
         public void uploadFileAboveThreshold() {
+            String imagePath = "src/test/resources/images/sample-image.jpg";
+            File imageFile = new File(imagePath);
+            String absoluteImagePath = imageFile.getAbsolutePath();
 
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
@@ -115,7 +116,7 @@
             usersPage.editUserQuota("1");
             usersPage.logOut();
             loginPage.login(newEmail, password);
-            overviewPage.uploadMedia(mediaGenerator.getFilePath());
+            overviewPage.uploadMedia(absoluteImagePath);
             String errorMessage = overviewPage.getUploadErrorMessage();
             Assert.assertEquals(errorMessage, "File size exceeds 1 GB quota.",
                     "Expected quota exceedance error. Found: " + errorMessage);
@@ -125,12 +126,5 @@
             usersPage.searchUser(newEmail);
             usersPage.editUser();
             usersPage.deleteUser();
-        }
-
-        @AfterMethod(alwaysRun = true)
-        public void tearDownTest() {
-            if (mediaGenerator != null) {
-                mediaGenerator.deleteLargeImage();
-            }
         }
     }
