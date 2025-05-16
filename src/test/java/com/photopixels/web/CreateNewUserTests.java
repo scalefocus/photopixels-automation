@@ -18,8 +18,7 @@
 
     import java.util.List;
 
-    import static com.photopixels.constants.Constants.CREATE_NEW_USER;
-    import static com.photopixels.constants.Constants.USER_CREATED;
+    import static com.photopixels.constants.Constants.*;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
 
     @Listeners(StatusTestListener.class)
@@ -27,10 +26,12 @@
     public class CreateNewUserTests extends WebBaseTest {
 
         private String newEmail;
+        private String newSecondEmail;
         private String password;
         private String adminEmail;
         private String adminPassword;
         private String randomName;
+        private String newRandomName;
         private String invalidEmail;
         private String invalidPassword;
         private WaitOperationHelper waitHelper;
@@ -216,6 +217,7 @@
         @Severity(SeverityLevel.CRITICAL)
         public void createUserDuplicateEmailErrorTest() {
             newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
+            newRandomName = "User_" + RandomString.make(5);
 
             LoginPage loginPage = loadPhotoPixelsApp();
 
@@ -228,17 +230,43 @@
             //No other way to handle the revisit of the site, due to the state and the way
             // webdriver interacts with the page.
             waitHelper.waitMs();
-            createUserPage.createUser(randomName, newEmail, password);
+            createUserPage.createUser(newRandomName, newEmail, password);
 
             List<String> errorMessages = createUserPage.getErrorMessages();
             String expectedEmailError = String.format(DUPLICATE_EMAIL.getErrorMessage(), newEmail);
 
-            // TODO: Remove when the bug is fixed
-            addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/74");
-            
             Assert.assertTrue(errorMessages.contains(expectedEmailError),
                     "Expected email error message '" + expectedEmailError + "' not found. Actual error: " + errorMessages);
             Assert.assertEquals(1, errorMessages.size(),
                     "Expected exactly 1 error message (email), but found " + errorMessages.size() + ": " + errorMessages);
+        }
+
+        @Test(description = "Unsuccessful creation of a user due to duplicate username")
+        @Description("Unsuccessful creation of a user due to duplicate username")
+        @Story("Create New User")
+        @Severity(SeverityLevel.CRITICAL)
+        public void createUserDuplicateNameError() {
+            newEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
+            newSecondEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
+
+            LoginPage loginPage = loadPhotoPixelsApp();
+
+            OverviewPage overviewPage = loginPage.login(adminEmail, adminPassword);
+
+            CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
+            createUserPage.createUser(randomName, newEmail, password);
+            createUserPage.goToCreateNewUser();
+
+            //No other way to handle the revisit of the site, due to the state and the way
+            // webdriver interacts with the page.
+            waitHelper.waitMs();
+            createUserPage.createUser(randomName, newSecondEmail, password);
+
+            List<String> errorMessages = createUserPage.getErrorMessages();
+            String expectedUsernameError = String.format(DUPLICATE_USER_NAME.getErrorMessage(), randomName);
+            Assert.assertTrue(errorMessages.contains(expectedUsernameError),
+                    "Expected username error message '" + expectedUsernameError + "' not found. Actual error: " + errorMessages);
+            Assert.assertEquals(1, errorMessages.size(),
+                    "Expected exactly 1 error message (username), but found " + errorMessages.size() + ": " + errorMessages);
         }
     }
