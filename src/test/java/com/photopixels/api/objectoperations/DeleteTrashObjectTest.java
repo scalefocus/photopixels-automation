@@ -7,6 +7,7 @@ import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.base.ApiBaseTest;
+import com.photopixels.constants.ErrorMessageConstants;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
@@ -71,7 +72,7 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(response, "Error response is null");
-        softAssert.assertEquals(response.getTitle(), "Not Found", "Expected title to be 'Not Found'");
+        softAssert.assertEquals(response.getTitle(), ErrorMessageConstants.NOT_FOUND_ERROR, "Expected title to match NOT_FOUND_ERROR");
         softAssert.assertFalse(response.getType().isEmpty(), "Expected 'type' field to not be empty");
         softAssert.assertNotNull(response.getTraceId(), "Expected traceId to be present");
 
