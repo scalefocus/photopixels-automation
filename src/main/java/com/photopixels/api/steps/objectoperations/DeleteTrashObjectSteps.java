@@ -45,7 +45,7 @@ public class DeleteTrashObjectSteps {
     public ErrorResponseDto deleteTrashObjectExpectingError(String objectId) {
         Response response = deleteTrashObjectResponse(objectId);
 
-        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        response.then().statusCode(HttpStatus.SC_NOT_FOUND);
 
         return response.as(ErrorResponseDto.class);
     }

@@ -71,11 +71,9 @@ public class DeleteTrashObjectTest extends ApiBaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(response, "Error response is null");
-        softAssert.assertNull(response.getTitle(), "Expected title to be null (empty body)");
-
-        // TODO: API should return 404 Not Found instead of 400 Bad Request for invalid objectId.Issue № 77
-        // TODO: Remove when the bug is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/77");
+        softAssert.assertEquals(response.getTitle(), "Not Found", "Expected title to be 'Not Found'");
+        softAssert.assertFalse(response.getType().isEmpty(), "Expected 'type' field to not be empty");
+        softAssert.assertNotNull(response.getTraceId(), "Expected traceId to be present");
 
         softAssert.assertAll();
     }
