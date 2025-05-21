@@ -71,16 +71,16 @@ public class PatchSendDataSteps {
     }
 
     @Step("Send file chunk with error response")
-    public Response sendFileChunkError(String fileId,
-                                               long uploadOffset,
-                                               String uploadMetadata,
-                                               File filePart) {
+    public String sendFileChunkError(String fileId,
+                                     long uploadOffset,
+                                     String uploadMetadata,
+                                     File filePart) {
         sendDataLocationFileId(fileId);
 
         Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
         response.then().statusCode(HttpStatus.SC_CONFLICT);
 
-        return response;
+        return response.asString();
     }
 
 }

@@ -45,6 +45,7 @@ public class FileInfoExtractor {
         return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
 
+    //TODO we already have getFileHash in BaseApi (we need to see how to include here)!!!
     private String getFileHash(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
         FileInputStream fis = new FileInputStream(file);

@@ -1,13 +1,8 @@
 package com.photopixels.constants;
 
-import java.nio.file.Path;
-
 public class Constants {
 
     public static final String PASSWORD = "Test12345!";
-
-    // Base directory for uploads
-    public static final Path UPLOAD_FILES_DIR = Path.of("upload_files");
 
     // Object Paths
     public static final String FILE_LOCATION = "upload_files/";

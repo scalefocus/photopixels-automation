@@ -6,11 +6,14 @@ import com.photopixels.api.steps.tus.PostCreateUploadSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
 import com.photopixels.helpers.SplitBinaryImage;
-import io.restassured.response.Response;
+import io.qameta.allure.Description;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -41,7 +44,7 @@ public class PatchSendDataTests extends ApiBaseTest {
     private long uploadOffset = 0;
     private String uploadLocationId;
 
-    @BeforeClass(alwaysRun = true)
+    @BeforeMethod(alwaysRun = true)
     public void setup() {
 
             // 1. Create a random photopixel user
@@ -63,8 +66,9 @@ public class PatchSendDataTests extends ApiBaseTest {
             // 2 Generate dynamic split file names
             Path originalImage = Path.of(COCTAIL_FILE);
             String baseName = removeExtension(originalImage.getFileName().toString());
-            part1Image = UPLOAD_FILES_DIR.resolve(baseName + PART1_SUFFIX);
-            part2Image = UPLOAD_FILES_DIR.resolve(baseName + PART2_SUFFIX);
+            part1Image = Path.of(FILE_LOCATION + baseName + PART1_SUFFIX);
+            part2Image = Path.of(FILE_LOCATION + baseName + PART2_SUFFIX);
+
 
             // 2.1. Split the image into two parts
             SplitBinaryImage splitter = new SplitBinaryImage();
@@ -79,9 +83,6 @@ public class PatchSendDataTests extends ApiBaseTest {
             fileInfo = extractor.extractFileInfo(originalImage);
             part1ImageSize = extractor.getFileSize(part1Image);
             part2ImageSize = extractor.getFileSize(part2Image);
-
-            String hashFromBase = getObjectHash(originalImage.toString());
-            System.out.println("SHA-1 Hash from ApiBaseTest: " + hashFromBase);
 
             // 3.1 Build dynamic Upload-Metadata
             uploadMetadata = String.format(
@@ -98,6 +99,8 @@ public class PatchSendDataTests extends ApiBaseTest {
             // 4. Create Upload Tus
             PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
             String fullUploadLocation = steps.createUploadAndGetLocationFileId(uploadMetadata, uploadLength);
+            Assert.assertNotNull(fullUploadLocation, "'Location' header is missing in the upload response.");
+            Assert.assertFalse(fullUploadLocation.isEmpty(), "'Location' header is empty in the upload response.");
             uploadLocationId = fullUploadLocation.substring(fullUploadLocation.lastIndexOf('/') + 1);
 
         } catch (Exception e) {
@@ -106,15 +109,21 @@ public class PatchSendDataTests extends ApiBaseTest {
         }
     }
 
-
     @AfterClass(alwaysRun = true)
     public void cleanup() {
         deleteRegisteredUsersAdmin(registeredUsersList);
     }
 
-    @Test
+    @Test(description = "Successfully uploads file in multiple chunks")
+    @Description("Positive Test: Verify that file chunks are successfully uploaded")
+    @Story("Upload Chunks")
+    @Severity(SeverityLevel.CRITICAL)
     public void sendDataFileIdSuccessfully() {
         PatchSendDataSteps sendDataSteps = new PatchSendDataSteps(token);
+        // Each call to sendFileChunk includes an internal assertion that verifies
+        // the response returns HTTP 204 No Content, meaning the chunk upload succeeded.
+        // Therefore, no additional assertions are needed in this test method.
+
         // send Image Part 1
         sendDataSteps.sendFileChunk(
                 uploadLocationId,
@@ -131,7 +140,10 @@ public class PatchSendDataTests extends ApiBaseTest {
         );
     }
 
-    @Test
+    @Test(description = "Fails to upload file chunk due to incorrect upload offset")
+    @Description("Negative Test: Verify that the server responds with a conflict error when a chunk is uploaded with a mismatched byte offset")
+    @Story("Upload Chunks")
+    @Severity(SeverityLevel.NORMAL)
     public void sendDataFileIdSConflictOffsetError() {
         PatchSendDataSteps sendDataSteps = new PatchSendDataSteps(token);
         // send Image Part 1 with correct upload offset
@@ -142,15 +154,14 @@ public class PatchSendDataTests extends ApiBaseTest {
                 part1Image.toFile()
         );
         // send Image part 2 with wrong upload offset
-        Response response = sendDataSteps.sendFileChunkError(
+        String responseBody = sendDataSteps.sendFileChunkError(
                 uploadLocationId,
                 5000,
                 uploadMetadata,
                 part2Image.toFile()
-
         );
+
         SoftAssert softAssert = new SoftAssert();
-        String responseBody = response.getBody().asString();
         softAssert.assertTrue(responseBody.contains(CONFLICT_BYTE_OFFSET),
                 "Expected conflict message not found in response body");
         softAssert.assertAll();

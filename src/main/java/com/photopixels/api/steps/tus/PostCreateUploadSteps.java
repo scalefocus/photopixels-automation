@@ -54,13 +54,7 @@ public class PostCreateUploadSteps {
     @Step("Create upload and retrieve Location File ID")
     public String createUploadAndGetLocationFileId(String uploadMetadata, String uploadLength) {
         Response response = createUpload(uploadMetadata, uploadLength);
-        String uploadLocationId = response.getHeader("Location");
-
-        if (uploadLocationId == null || uploadLocationId.isEmpty()) {
-            throw new AssertionError("'Location' header is missing in the upload response.");
-        }
-
-        return uploadLocationId;
+        return response.getHeader("Location");
     }
 
 }
