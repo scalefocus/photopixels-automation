@@ -50,5 +50,12 @@ public class PostCreateUploadSteps {
         return requestOperationsHelper
                 .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
+
+    @Step("Create upload and retrieve Location File ID")
+    public String createUploadAndGetLocationFileId(String uploadMetadata, String uploadLength) {
+        Response response = createUpload(uploadMetadata, uploadLength);
+        return response.getHeader("Location");
+    }
+
 }
 
