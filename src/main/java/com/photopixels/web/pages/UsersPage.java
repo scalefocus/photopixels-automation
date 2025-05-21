@@ -5,6 +5,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -57,6 +58,26 @@ public class UsersPage extends NavigationPage {
 
     @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/div[2]/p")
     private WebElement quotaValue;
+
+    @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/div[5]/div/div[1]/div[1]")
+    private WebElement resetUserPassword;
+
+    @FindBy(css = "#root input[name='password']")
+    private WebElement newUserPassword;
+
+    @FindBy(css = "#root input[name='confirmPassword']")
+    private WebElement confirmNewPassword;
+
+    @FindBy(css = "button[data-testid='button-reset-password']")
+    private WebElement resetPasswordBtn;
+
+    @FindBy(xpath = "//div[contains(text(), 'Password changed successfully')]")
+    private WebElement passwordResetConfirmation;
+
+
+    @FindBy(css = "div[role='status'][aria-live='polite']")
+    private WebElement passwordErrorMessage;
+
 
     public UsersPage(WebDriver driver) {
         super(driver);
@@ -171,5 +192,41 @@ public class UsersPage extends NavigationPage {
             return parts[2] + " GB";
         }
         return "";
+    }
+
+    @Step("Click password reset drop down")
+    public void userPasswordReset() {
+        waitForElementToBeVisible(resetUserPassword);
+        resetUserPassword.click();
+    }
+
+    @Step("Enter new User password")
+    public void newUserPassword(String newPassword, String newConfirmedPassword) {
+        waitForElementToBeVisible(newUserPassword);
+        newUserPassword.click();
+        newUserPassword.sendKeys(newPassword);
+        confirmNewPassword.clear();
+        confirmNewPassword.click();
+        confirmNewPassword.sendKeys(newConfirmedPassword);
+    }
+
+    @Step("Click password reset")
+    public void clickPasswordReset() {
+        waitForElementToBeVisible(resetPasswordBtn);
+        resetPasswordBtn.click();
+    }
+
+    @Step("Get password changed message")
+    public String getPasswordChangedMessage() {
+        waitForElementToBeVisible(passwordResetConfirmation);
+
+        return passwordResetConfirmation.getText().trim();
+    }
+
+    @Step("Get password changed incorrectly message")
+    public String getPasswordChangedErrorMessage() {
+        waitForElementToBeVisible(passwordErrorMessage);
+
+        return passwordErrorMessage.getText().trim();
     }
 }

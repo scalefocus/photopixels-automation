@@ -37,6 +37,10 @@ public class InputDataHelper {
         return getProperty("password");
     }
 
+    public String getNewPassword() {
+        return getProperty("newPassword");
+    }
+
     public String getUsernameAdmin() {
         return getProperty("usernameAdmin");
     }
