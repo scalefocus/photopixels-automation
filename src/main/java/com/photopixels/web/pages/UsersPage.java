@@ -5,7 +5,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -130,7 +129,7 @@ public class UsersPage extends NavigationPage {
     }
 
     @Step("Edit user element")
-    public void editUser() {
+    public void clickEditUser() {
         waitForElementToBeVisible(editUserButton);
         editUserButton.click();
     }
@@ -151,13 +150,13 @@ public class UsersPage extends NavigationPage {
     }
 
     @Step("Edit user quote")
-    public void editUserQuota(String string) {
+    public void editUserQuota(String quotaValue) {
         waitForElementToBeVisible(userQuotaText);
         userQuotaEdit.click();
         waitForElementToBeVisible(quotaValueSetter);
         quotaValueSetter.click();
         quotaValueSetter.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-        quotaValueSetter.sendKeys(string);
+        quotaValueSetter.sendKeys(quotaValue);
         quotaFormSubmit.click();
     }
 
@@ -169,7 +168,7 @@ public class UsersPage extends NavigationPage {
     }
 
     @Step("Get validation message for a field using JavaScript")
-    public String getValidationMessage(WebElement element) {
+    private String getValidationMessage(WebElement element) {
         return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 
@@ -185,15 +184,6 @@ public class UsersPage extends NavigationPage {
         return quotaValue.getText().trim();
     }
 
-    @Step("Extract quota value from paragraph")
-    public String extractQuotaValue(String quotaText) {
-        String[] parts = quotaText.split("\n");
-        if (parts.length >= 3) {
-            return parts[2] + " GB";
-        }
-        return "";
-    }
-
     @Step("Click password reset drop down")
     public void userPasswordReset() {
         waitForElementToBeVisible(resetUserPassword);
@@ -201,7 +191,7 @@ public class UsersPage extends NavigationPage {
     }
 
     @Step("Enter new User password")
-    public void newUserPassword(String newPassword, String newConfirmedPassword) {
+    public void enterNewUserPassword(String newPassword, String newConfirmedPassword) {
         waitForElementToBeVisible(newUserPassword);
         newUserPassword.click();
         newUserPassword.sendKeys(newPassword);

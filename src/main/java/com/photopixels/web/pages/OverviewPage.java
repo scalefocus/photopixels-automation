@@ -26,8 +26,6 @@ public class OverviewPage extends NavigationPage {
     @FindBy(css = ".error-message")
     private WebElement errorMessage;
 
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
     public OverviewPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
@@ -43,7 +41,7 @@ public class OverviewPage extends NavigationPage {
     }
 
     @Step("Upload media")
-    public void uploadMedia() {
+    public void clickUploadMedia() {
         waitForElementToBeVisible(uploadButton);
         uploadButton.click();
     }
@@ -52,13 +50,14 @@ public class OverviewPage extends NavigationPage {
     public void uploadMedia(String filePath) {
         waitForElementToBeVisible(uploadButton);
         uploadButton.click();
-        wait.until(ExpectedConditions.elementToBeClickable(fileInput));
+        waitForElementToBeClickable(fileInput);
         fileInput.sendKeys(filePath);
     }
 
     @Step("Get upload error message")
     public String getUploadErrorMessage() {
-        wait.until(ExpectedConditions.visibilityOf(errorMessage));
+        waitForElementToBeVisible(errorMessage);
+
         return errorMessage.getText();
     }
 
