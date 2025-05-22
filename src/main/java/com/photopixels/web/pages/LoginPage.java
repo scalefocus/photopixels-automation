@@ -23,6 +23,9 @@ public class LoginPage extends WaitOperationHelper {
 	@FindBy(xpath = "//div[@role='status']")
 	private WebElement errorMessage;
 
+	@FindBy(xpath = "//a[@href='/register']//p[contains(@class, 'css-1fsf1k1')]")
+	private WebElement signUpLink;
+
 	public LoginPage(WebDriver driver) {
 		super(driver);
 		this.driver = driver;
@@ -62,5 +65,14 @@ public class LoginPage extends WaitOperationHelper {
 	@Step("Check if login button is enabled")
 	public boolean isLoginButtonEnabled() {
 		return loginButton.isEnabled();
+	}
+
+	@Step("Open Sign up page")
+	public SignUpUserPage openSignUpUserPage() {
+		waitForElementToBeVisible(signUpLink);
+
+		signUpLink.click();
+
+		return new SignUpUserPage(driver);
 	}
 }
