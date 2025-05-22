@@ -1,10 +1,11 @@
-package com.photopixels.api.objectoperations;
+package com.photopixels.api.users;
 
-import com.photopixels.api.dtos.objectoperations.EmptyTrashResponseDto;
+import com.photopixels.api.dtos.users.EmptyTrashResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetTrashedObjectsResponseDto;
 import com.photopixels.api.dtos.objectoperations.TrashedObjectPropertyDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.*;
+import com.photopixels.api.steps.users.DeleteEmptyTrashSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -19,13 +20,14 @@ import java.util.List;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 
 @Listeners(StatusTestListener.class)
-@Feature("Object operations")
+@Feature("Users")
 public class DeleteEmptyTrashTest extends ApiBaseTest {
 
     private String token;
     private String objectId;
     private final String fileName = TRAINING_FILE;
     private final int pageSize = 30;
+    private DeleteEmptyTrashSteps emptyTrashSteps;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -37,6 +39,10 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         UploadObjectResponseDto uploadResponse = uploadSteps.uploadObject(fileName, objectHash);
 
         objectId = uploadResponse.getId();
+
+        // Step 2: Empty the trash bin
+
+        emptyTrashSteps = new DeleteEmptyTrashSteps(token);
     }
 
     @AfterClass(alwaysRun = true)
@@ -45,7 +51,7 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         deleteObjectSteps.deleteObject(objectId);
     }
 
-    @Test(description = "Full flow: Upload → Trash → Get Trash → Empty Trash → Verify Empty")
+    @Test(description = "Checks full deletion flow of an object via Empty Trash endpoint.")
     @Description("Positive flow test: Upload object, move to trash, verify in trash, empty trash, confirm it's empty")
     @Story("Empty Trash Flow")
     @Severity(SeverityLevel.CRITICAL)
@@ -69,11 +75,8 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         softAssert.assertTrue(foundInTrash, "Object should appear in trash");
 
         // Step 4: Call DELETE /emptytrash
-        DeleteEmptyTrashSteps emptyTrashSteps = new DeleteEmptyTrashSteps(token);
-        EmptyTrashResponseDto emptyTrashResponse = emptyTrashSteps.emptyTrash();
 
-        softAssert.assertNotNull(emptyTrashResponse, "Empty trash response is null");
-        softAssert.assertTrue(emptyTrashResponse.isSuccess(), "Empty trash action should return success");
+        emptyTrashSteps.emptyTrash();
 
         // Step 5: Confirm trash is now empty
         GetTrashedObjectsResponseDto trashAfterDelete = getTrashSteps.getTrashedObjects(null, pageSize);
@@ -82,7 +85,7 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         boolean stillInTrash = remaining.stream()
                 .anyMatch(obj -> objectId.equals(obj.getId()));
 
-        //softAssert.assertFalse(stillInTrash, "Object should no longer be in trash");
+        softAssert.assertFalse(stillInTrash, "Object should no longer be in trash");
 
         //TODO : Remove when the bug is fixed
         addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/92");

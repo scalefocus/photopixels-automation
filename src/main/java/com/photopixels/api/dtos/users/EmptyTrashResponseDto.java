@@ -1,4 +1,4 @@
-package com.photopixels.api.dtos.objectoperations;
+package com.photopixels.api.dtos.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

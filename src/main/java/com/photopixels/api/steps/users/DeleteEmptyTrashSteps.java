@@ -1,6 +1,6 @@
-package com.photopixels.api.steps.objectoperations;
+package com.photopixels.api.steps.users;
 
-import com.photopixels.api.dtos.objectoperations.EmptyTrashResponseDto;
+import com.photopixels.api.dtos.users.EmptyTrashResponseDto;
 import com.photopixels.helpers.CustomRequestSpecification;
 import com.photopixels.helpers.RequestOperationsHelper;
 import io.qameta.allure.Step;
