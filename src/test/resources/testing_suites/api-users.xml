@@ -11,6 +11,7 @@
             <class name="com.photopixels.api.users.PostResetUserPasswordTests"/>
             <class name="com.photopixels.api.users.PostForgotUserPasswordTests"/>
             <class name="com.photopixels.api.users.PostChangeUserPasswordTests"/>
+            <class name="com.photopixels.api.users.DeleteEmptyTrashTest"/>
         </classes>
     </test>
 
