@@ -33,11 +33,11 @@ public class SignUpNewUserTests extends WebBaseTest {
     }
 
 
-    @Test(description = "Successful creation of a user and login")
-    @Description("Successful creation of a user and login")
-    @Story("Create New User")
+    @Test(description = "Successful creation of a user on Sign Up and login")
+    @Description("Successful creation of a user on Sign Up and login")
+    @Story("Create New User on Sign Up")
     @Severity(SeverityLevel.CRITICAL)
-    public void createUserAndLoginSuccessfullyTest() {
+    public void createUserOnSignUpAndLoginSuccessfullyTest() {
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
