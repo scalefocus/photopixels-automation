@@ -63,8 +63,8 @@ public class GetObjectDataTests extends ApiBaseTest {
         softAssert.assertNotNull(getObjectDataResponseDto.getContentType(), "Object data content type is not returned");
         softAssert.assertNotNull(getObjectDataResponseDto.getDateCreated(), "Date created should not be null");
 
-        softAssert.assertTrue(getObjectDataResponseDto.getOriginalHash().endsWith("="),
-                "Original hash should end with '=' padding character");
+        softAssert.assertEquals(getObjectDataResponseDto.getOriginalHash(), objectHash,
+                "Original hash does not match expected object hash");
 
         softAssert.assertEquals(getObjectDataResponseDto.getHash(), objectHash.substring(0, objectHash.length() - 1),
                 "Object data hash is not correct");
