@@ -25,31 +25,31 @@ public class UsersPage extends NavigationPage {
     @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(3)")
     private List<WebElement> roleElements;
 
-    @FindBy(css = "table tbody tr:first-child td:nth-child(6) button")
+    @FindBy(css = "[data-testid='button-edit-user']")
     private WebElement editUserButton;
 
     @FindBy(css = "#root h5")
     private WebElement editUserHeader;
 
-    @FindBy(xpath = "//div[@id='root']/div[1]/div/div[2]/div[2]/div[6]/div/div[1]")
+    @FindBy(xpath = "//p[contains(text(), 'Delete User')]")
     private WebElement deleteUserOption;
 
-    @FindBy(xpath = "//div[@id='root']//div[6]//div[2]//button[2]")
+    @FindBy(css = "[data-testid='DeleteIcon']")
     private WebElement deleteUserButton;
 
     @FindBy(xpath = "//*[contains(normalize-space(text()), 'Account Deleted.')]")
     private WebElement userDeletedMessage;
 
-    @FindBy(css = "#root div:nth-child(2) div:nth-child(2) div:nth-child(1) p")
+    @FindBy(css = "#root p")
     private WebElement userQuotaText;
 
-    @FindBy(xpath = "//div[@id='root']//div[2]//div[3]//div[1]/div[2]")
+    @FindBy(xpath = "//p[contains(text(), 'Change User Quota')]")
     private WebElement userQuotaEdit;
 
     @FindBy(css = ".MuiFormControl-root input[type='number']")
     private WebElement quotaValueSetter;
 
-    @FindBy(xpath = "//div[@id='root']//div[2]//div[3]//div[2]//form//div[2]/button[2]")
+    @FindBy(css = "[data-testid='button-change-new-quota']")
     private WebElement quotaFormSubmit;
 
     @FindBy(xpath = "//div[contains(@class, 'go') and contains(text(), 'Quota changed successfully')]") //No other way to handle the locator, due to the lack of attributes that could be handled by selenium.
@@ -58,7 +58,7 @@ public class UsersPage extends NavigationPage {
     @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/div[2]/p")
     private WebElement quotaValue;
 
-    @FindBy(xpath = "//*[@id='root']/div[1]/div/div[2]/div[2]/div[5]/div/div[1]/div[1]")
+    @FindBy(xpath = "//p[contains(text(), 'Reset Password')]")
     private WebElement resetUserPassword;
 
     @FindBy(css = "#root input[name='password']")
@@ -72,7 +72,6 @@ public class UsersPage extends NavigationPage {
 
     @FindBy(xpath = "//div[contains(text(), 'Password changed successfully')]")
     private WebElement passwordResetConfirmation;
-
 
     @FindBy(css = "div[role='status'][aria-live='polite']")
     private WebElement passwordErrorMessage;
