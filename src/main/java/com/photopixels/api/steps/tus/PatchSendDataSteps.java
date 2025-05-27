@@ -33,22 +33,26 @@ public class PatchSendDataSteps {
     }
 
     private Response sendFileChunkWithHeaders(String fileId,
-                                     long uploadOffset,
-                                     String uploadMetadata,
-                                     File filePart) {
+                                              Long uploadOffset,
+                                              String uploadMetadata,
+                                              File filePart) {
 
-        // Configure encoder to avoid appending charset to content type
         config = config().encoderConfig(encoderConfig()
                 .appendDefaultContentCharsetToContentTypeIfUndefined(false));
 
-        // Set required TUS headers
         requestSpecification.addPathParams(Map.of("fileId", fileId));
         requestSpecification.addCustomHeader("Tus-Resumable", "1.0.0");
-        requestSpecification.addCustomHeader("Upload-Offset", String.valueOf(uploadOffset));
-        requestSpecification.addCustomHeader("Upload-Metadata", uploadMetadata);
         requestSpecification.addCustomHeader("Content-Type", "application/offset+octet-stream");
 
-        // Set binary file part as raw stream in body
+        // Only add header if not null
+        if (uploadOffset != null) {
+            requestSpecification.addCustomHeader("Upload-Offset", String.valueOf(uploadOffset));
+        }
+
+        if (uploadMetadata != null) {
+            requestSpecification.addCustomHeader("Upload-Metadata", uploadMetadata);
+        }
+
         try {
             requestSpecification.setRequestBodyStream(new FileInputStream(filePart));
         } catch (FileNotFoundException e) {
@@ -70,15 +74,16 @@ public class PatchSendDataSteps {
         response.then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
-    @Step("Send file chunk with error response")
-    public String sendFileChunkError(String fileId,
-                                     long uploadOffset,
-                                     String uploadMetadata,
-                                     File filePart) {
+    @Step("Send file chunk with error response (nullable headers allowed)")
+    public String sendFileChunkErrorWithExpectedStatus(String fileId,
+                                               Long uploadOffset,
+                                               String uploadMetadata,
+                                               File filePart,
+                                               int expectedStatusCode) {
         sendDataLocationFileId(fileId);
 
         Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
-        response.then().statusCode(HttpStatus.SC_CONFLICT);
+        response.then().statusCode(expectedStatusCode);
 
         return response.asString();
     }

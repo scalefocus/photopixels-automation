@@ -6,6 +6,8 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.apache.hc.core5.http.HttpStatus;
 
+import java.util.List;
+
 import static com.photopixels.constants.BasePathsConstants.POST_CREATE_UPLOAD;
 
 public class PostCreateUploadSteps {

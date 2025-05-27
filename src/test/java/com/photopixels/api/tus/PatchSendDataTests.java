@@ -11,6 +11,7 @@ import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.hc.core5.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -23,9 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.photopixels.constants.Constants.*;
-import static com.photopixels.constants.ErrorMessageConstants.CONFLICT_BYTE_OFFSET;
+import static com.photopixels.constants.ErrorMessageConstants.*;
 import static com.photopixels.enums.UserRolesEnum.ADMIN;
-
 
 public class PatchSendDataTests extends ApiBaseTest {
 
@@ -154,11 +154,12 @@ public class PatchSendDataTests extends ApiBaseTest {
                 part1Image.toFile()
         );
         // send Image part 2 with wrong upload offset
-        String responseBody = sendDataSteps.sendFileChunkError(
+        String responseBody = sendDataSteps.sendFileChunkErrorWithExpectedStatus(
                 uploadLocationId,
-                5000,
+                5000L,
                 uploadMetadata,
-                part2Image.toFile()
+                part2Image.toFile(),
+                HttpStatus.SC_CONFLICT
         );
 
         SoftAssert softAssert = new SoftAssert();
@@ -167,4 +168,25 @@ public class PatchSendDataTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
+    @Test(description = "Fails to upload file chunk due to Missing Upload-Offset header")
+    @Description("Negative Test: Verify that the server responds with a Bad Request Missing Upload-Offset header")
+    @Story("Upload Chunks")
+    @Severity(SeverityLevel.NORMAL)
+    public void sendDataFileIdSMissingUploadOffsetHeader() {
+        PatchSendDataSteps sendDataSteps = new PatchSendDataSteps(token);
+
+        // send Image part 1 without upload offset
+        String responseBody = sendDataSteps.sendFileChunkErrorWithExpectedStatus(
+                uploadLocationId,
+                null,
+                uploadMetadata,
+                part1Image.toFile(),
+                HttpStatus.SC_BAD_REQUEST
+        );
+
+        SoftAssert softAssert = new SoftAssert();
+        softAssert.assertEquals(responseBody, MISSING_UPLOAD_OFFSET_ERROR,
+                "Expected conflict message not found in response body");
+        softAssert.assertAll();
+    }
 }
