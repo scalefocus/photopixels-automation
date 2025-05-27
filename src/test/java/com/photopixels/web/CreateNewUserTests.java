@@ -3,10 +3,7 @@
     import com.photopixels.base.WebBaseTest;
     import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
-    import com.photopixels.web.pages.CreateUserPage;
-    import com.photopixels.web.pages.LoginPage;
-    import com.photopixels.web.pages.OverviewPage;
-    import com.photopixels.web.pages.UsersPage;
+    import com.photopixels.web.pages.*;
     import io.qameta.allure.*;
     import net.bytebuddy.utility.RandomString;
     import org.apache.commons.lang3.RandomStringUtils;
@@ -73,9 +70,10 @@
             Assert.assertTrue(usersPage.hasSearchResultRole("User"),
                     "User role is not the expected one. Expected 'User', but found: " + usersPage.getRolesFromResults());
 
-            usersPage.clickEditUser();
-            usersPage.deleteUser();
-            Assert.assertEquals(usersPage.getUserDeletedMsg(), USER_DELETED,
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.deleteUser();
+            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
                     "The message is not correct.");
         }
 
@@ -102,9 +100,10 @@
             Assert.assertTrue(usersPage.hasSearchResultRole("Admin"),
                     "User role is not the expected one. Expected 'Admin', but found: " + usersPage.getRolesFromResults());
 
-            usersPage.clickEditUser();
-            usersPage.deleteUser();
-            Assert.assertEquals(usersPage.getUserDeletedMsg(), USER_DELETED,
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.deleteUser();
+            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
                     "The message is not correct.");
         }
 

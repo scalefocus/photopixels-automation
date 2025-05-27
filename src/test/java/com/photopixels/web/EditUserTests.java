@@ -3,10 +3,7 @@
     import com.photopixels.base.WebBaseTest;
     import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
-    import com.photopixels.web.pages.CreateUserPage;
-    import com.photopixels.web.pages.LoginPage;
-    import com.photopixels.web.pages.OverviewPage;
-    import com.photopixels.web.pages.UsersPage;
+    import com.photopixels.web.pages.*;
     import io.qameta.allure.*;
     import net.bytebuddy.utility.RandomString;
     import org.apache.commons.lang3.RandomStringUtils;
@@ -27,12 +24,13 @@
         private String randomName;
         private WaitOperationHelper waitHelper;
         private UsersPage usersPage;
+        private EditUserPage editUserPage;
         private OverviewPage overviewPage;
 
         @BeforeClass(alwaysRun = true)
         public void setup() throws Exception {
             randomName = "User_" + RandomString.make(5);
-            password = inputData.getPassword();
+            password = "Temp12345!";
             adminEmail = inputData.getUsernameAdmin();
             adminPassword = inputData.getPasswordAdmin();
             waitHelper = new WaitOperationHelper(driver);
@@ -44,6 +42,7 @@
             LoginPage loginPage = loadPhotoPixelsApp();
             overviewPage = loginPage.login(adminEmail, adminPassword);
             usersPage = overviewPage.goToUserTab();
+            editUserPage = new EditUserPage(driver);
         }
 
         @Test(description = "Changing active user quota, setting to minimal value")
@@ -61,14 +60,16 @@
 
             UsersPage usersPage = overviewPage.goToUserTab();
             usersPage.searchUser(newEmail);
-            usersPage.clickEditUser();
-            usersPage.editUserQuota(quotaValue);
 
-            String actualMessage = usersPage.getUserQuotaChangedMessage();
-            Assert.assertEquals(usersPage.getUserQuotaChangedMessage(), QUOTA_CHANGED,
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.editUserQuota(quotaValue);
+
+            String actualMessage = editUserPage.getUserQuotaChangedMessage();
+            Assert.assertEquals(editUserPage.getUserQuotaChangedMessage(), QUOTA_CHANGED,
                     "The message is not correct. Expected: " + QUOTA_CHANGED + ", but found: " + actualMessage);
 
-            String quotaText = usersPage.getQuotaParagraphText();
+            String quotaText = editUserPage.getQuotaParagraphText();
             Assert.assertTrue(quotaText.contains(expectedQuota), "Quota text should contain " + expectedQuota);
         }
 
@@ -89,10 +90,11 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            usersPage.clickEditUser();
-            usersPage.editUserQuota(quotaValue);
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.editUserQuota(quotaValue);
 
-            String message = usersPage.getQuotaValueValidationMessage();
+            String message = editUserPage.getQuotaValueValidationMessage();
             Assert.assertEquals(message, "Please enter a valid value. The two nearest valid values are 0 and 1.",
                     "Error message for minimal quota value is not correct. Expected 'Please enter a valid value. " + "The two nearest valid values are 0 and 1.', but found:" + message);
         }
@@ -112,15 +114,16 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            usersPage.clickEditUser();
-            usersPage.userPasswordReset();
-            usersPage.enterNewUserPassword(newRandomPassword, newRandomPassword);
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.userPasswordReset();
+            editUserPage.enterNewUserPassword(newRandomPassword, newRandomPassword);
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            usersPage.clickPasswordReset();
+            editUserPage.clickPasswordReset();
 
-            String actualMessage = usersPage.getPasswordChangedMessage();
+            String actualMessage = editUserPage.getPasswordChangedMessage();
             Assert.assertEquals(actualMessage, PASSWORD_CHANGED,
                     "The message is not correct. Expected: " + PASSWORD_CHANGED + ", but found: " + actualMessage);
         }
@@ -142,12 +145,13 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            usersPage.clickEditUser();
-            usersPage.userPasswordReset();
-            usersPage.enterNewUserPassword(faultyPassword, faultyPassword);
-            usersPage.clickPasswordReset();
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.userPasswordReset();
+            editUserPage.enterNewUserPassword(faultyPassword, faultyPassword);
+            editUserPage.clickPasswordReset();
 
-            String actualMessage = usersPage.getPasswordChangedErrorMessage();
+            String actualMessage = editUserPage.getPasswordChangedErrorMessage();
             Assert.assertEquals(actualMessage, PASSWORD_CHANGED_INCORRECTLY,
                     "The message is not correct. Expected: " + PASSWORD_CHANGED_INCORRECTLY + ", but found: " + actualMessage);
             // TODO: Remove when issue is fixed addIssueLinkToAllureReport("93");
@@ -172,12 +176,13 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            usersPage.clickEditUser();
-            usersPage.userPasswordReset();
-            usersPage.enterNewUserPassword(newRandomPassword, faultyPassword);
-            usersPage.clickPasswordReset();
+            EditUserPage editUserPage = new EditUserPage(driver);
+            editUserPage.clickEditUser();
+            editUserPage.userPasswordReset();
+            editUserPage.enterNewUserPassword(newRandomPassword, faultyPassword);
+            editUserPage.clickPasswordReset();
 
-            String actualMessage = usersPage.getPasswordChangedErrorMessage();
+            String actualMessage = editUserPage.getPasswordChangedErrorMessage();
             Assert.assertEquals(actualMessage, PASSWORD_MISMATCH,
                     "The message is not correct. Expected: " + PASSWORD_MISMATCH + ", but found: " + actualMessage);
         }
@@ -186,7 +191,7 @@
         public void cleanupUser() {
             usersPage.goToUserTab();
             usersPage.searchUser(newEmail);
-            usersPage.clickEditUser();
-            usersPage.deleteUser();
+            editUserPage.clickEditUser();
+            editUserPage.deleteUser();
         }
     }
