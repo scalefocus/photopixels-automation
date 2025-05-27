@@ -61,4 +61,12 @@ public class NavigationPage extends WaitOperationHelper {
 
         return new UsersPage(driver);
     }
+
+    @Step("Log out of main application")
+    public LoginPage logOut() {
+        waitForElementToBeVisible(logoutButton);
+        logoutButton.click();
+
+        return new LoginPage(driver);
+    }
 }

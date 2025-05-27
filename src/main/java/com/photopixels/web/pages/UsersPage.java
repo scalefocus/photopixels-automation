@@ -1,6 +1,7 @@
 package com.photopixels.web.pages;
 
 import io.qameta.allure.Step;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -22,7 +23,10 @@ public class UsersPage extends NavigationPage {
     @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(3)")
     private List<WebElement> roleElements;
 
-    public UsersPage(WebDriver driver) {
+    @FindBy(css = "[data-testid='button-edit-user']")
+    private WebElement editUserButton;
+
+   public UsersPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
 
@@ -64,10 +68,22 @@ public class UsersPage extends NavigationPage {
     @Step("Verify search result role is expected role")
     public boolean hasSearchResultRole(String expectedRole) {
         List<String> roles = getRolesFromResults();
+
         if (roles.isEmpty()) {
             return false;
         }
+
         String actualRole = roles.get(0); // Since we expect exactly one result
+
         return actualRole.equalsIgnoreCase(expectedRole);
+    }
+
+
+    @Step("Click edit user button")
+    public EditUserPage clickEditUser() {
+        waitForElementToBeVisible(editUserButton);
+        editUserButton.click();
+
+        return new EditUserPage(driver);
     }
 }

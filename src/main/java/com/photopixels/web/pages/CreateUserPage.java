@@ -58,7 +58,7 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Create new user successfully")
     public void createUser(String name, String email, String password) {
-        waitForElementToBeClickable(newNameUser);
+        waitForElementToBeVisible(newNameUser);
 
         newNameUser.clear();
         newNameUser.sendKeys(name);

@@ -5,10 +5,7 @@
     import com.photopixels.enums.UserRolesEnum;
     import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
-    import com.photopixels.web.pages.CreateUserPage;
-    import com.photopixels.web.pages.LoginPage;
-    import com.photopixels.web.pages.OverviewPage;
-    import com.photopixels.web.pages.UsersPage;
+    import com.photopixels.web.pages.*;
     import io.qameta.allure.*;
     import net.bytebuddy.utility.RandomString;
     import org.apache.commons.lang3.RandomStringUtils;
@@ -22,6 +19,7 @@
 
     import static com.photopixels.constants.Constants.*;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
+    import static com.photopixels.constants.ErrorMessageConstants.*;
 
     @Listeners(StatusTestListener.class)
     @Feature("Web")
@@ -46,8 +44,8 @@
             randomEmail = "test_" + random + "@test.com";
         }
 
-        @Test(description = "Successful user creation")
-        @Description("Successful creation of a user with correct login rules")
+        @Test(description = "Successful creation of a user with correct login credential rules")
+        @Description("Successful creation of a user with correct login credential rules")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
         public void createUserSuccessfullyTest() {
@@ -74,9 +72,15 @@
             Assert.assertTrue(usersPage.hasSearchResultRole(UserRolesEnum.USER.getText()),
                     "User role is not the expected one. Expected 'User', but found: "
                             + usersPage.getRolesFromResults());
+
+            EditUserPage editUserPage = usersPage.clickEditUser();
+            editUserPage.deleteUser();
+
+            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
+                "The message is not correct.");
         }
 
-        @Test(description = "Successful admin user creation")
+        @Test(description = "Successful creation of admin user with correct login rules")
         @Description("Successful creation of admin user with correct login rules")
         @Story("Create New User")
         @Severity(SeverityLevel.CRITICAL)
@@ -93,6 +97,7 @@
                     "User is successfully created" );
 
             UsersPage usersPage = overviewPage.goToUserTab();
+
             usersPage.searchUser(randomEmail);
 
             Assert.assertTrue(usersPage.hasSearchResultEmail(randomEmail),
@@ -101,7 +106,13 @@
             Assert.assertTrue(usersPage.hasSearchResultRole(UserRolesEnum.ADMIN.getText()),
                     "User role is not the expected one. Expected 'Admin', but found: "
                             + usersPage.getRolesFromResults());
-        }
+
+            EditUserPage editUserPage = usersPage.clickEditUser();
+            editUserPage.deleteUser();
+
+            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
+                "The message is not correct.");
+    }
 
         @Test(description = "Unsuccessful user creation with empty name")
         @Description("Unsuccessful creation of a user invoking name error message")
@@ -120,7 +131,7 @@
 
             String message = createUserPage.getNewNameUserValidationMessage();
 
-            Assert.assertEquals(message, "Please fill out this field.",
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty name field is not correct. " +
                             "Expected 'Please fill out this field.', but found:" + message);
         }
@@ -141,7 +152,7 @@
 
             String message = createUserPage.getEmailAddressValidationMessage();
 
-            Assert.assertEquals(message, "Please fill out this field.",
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty email address field is not correct. " +
                             "Expected 'Please fill out this field.', but found:" + message);
         }
@@ -185,7 +196,8 @@
             createUserPage.createUser(randomName, randomEmail, emptyPassword);
 
             String message = createUserPage.getPasswordValidationMessage();
-            Assert.assertEquals(message, "Please fill out this field.",
+
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty password field is not correct. " +
                             "Expected 'Please fill out this field.', but found:" + message);
         }
@@ -234,7 +246,8 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
 
-            createUserPage.goToCreateNewUser();
+            //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
+            createUserPage.waitMs();
 
             createUserPage.createUser(newRandomName, randomEmail, Constants.PASSWORD);
 
@@ -263,7 +276,8 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
 
-            createUserPage.goToCreateNewUser();
+            //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
+            createUserPage.waitMs();
 
             createUserPage.createUser(randomName, newSecondEmail, Constants.PASSWORD);
 
