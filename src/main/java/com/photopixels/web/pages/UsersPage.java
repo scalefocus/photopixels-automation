@@ -27,7 +27,6 @@ public class UsersPage extends NavigationPage {
    public UsersPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
-        this.js = (JavascriptExecutor) driver;
 
         PageFactory.initElements(driver, this);
     }
