@@ -41,6 +41,9 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         UploadObjectResponseDto uploadResponse = postUploadObjectSteps.uploadObject(fileName, objectHash);
 
         objectId = uploadResponse.getId();
+
+        DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
+        deleteTrashObjectSteps.deleteTrashObject(objectId);
     }
 
     @AfterClass(alwaysRun = true)
@@ -54,11 +57,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     @Story("Get Trashed Objects")
     @Severity(SeverityLevel.CRITICAL)
     public void uploadTrashAndVerifyObjectInTrashTest() {
-        // Step 1: Move object to trash
-        DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
-        deleteTrashObjectSteps.deleteTrashObject(objectId);
-
-        // Step 2: Get trashed objects
+        // Get trashed objects
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
         GetTrashedObjectsResponseDto trashResponse = getTrashedObjectsSteps.getTrashedObjects(null, pageSize);
 
@@ -67,7 +66,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         softAssert.assertNotNull(trashResponse, "Trash response is null");
         softAssert.assertNotNull(trashResponse.getProperties(), "Trash properties list is null");
 
-        // Step 3: Check if the trashed objects list contains the uploaded object's ID
+        // Check if the trashed objects list contains the uploaded object's ID
         List<TrashedObjectPropertyDto> trashedObjects = trashResponse.getProperties();
         boolean foundInTrash = false;
 
@@ -88,16 +87,12 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     @Story("Get Trashed Objects")
     @Severity(SeverityLevel.NORMAL)
     public void getTrashedObjectsWithMiddleLastIdTest() {
-
-        DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
-        deleteTrashObjectSteps.deleteTrashObject(objectId);
-
         GetTrashedObjectsSteps steps = new GetTrashedObjectsSteps(token);
         GetTrashedObjectsResponseDto fullResponse = steps.getTrashedObjects(null, pageSize);
 
-        SoftAssert softAssert = new SoftAssert();
-
         List<TrashedObjectPropertyDto> allObjects = fullResponse.getProperties();
+
+        SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertTrue(allObjects.size() >= 2, "At least 2 trashed objects are required");
 
@@ -119,7 +114,6 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     @Story("Get Trashed Objects")
     @Severity(SeverityLevel.CRITICAL)
     public void getTrashedObjectsSuccessfullyTest() {
-
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
         GetTrashedObjectsResponseDto response = getTrashedObjectsSteps.getTrashedObjects(null, pageSize);
 
@@ -152,6 +146,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
 
         // Step 1: Get initial list of trashed objects
         GetTrashedObjectsResponseDto initialResponse = getTrashedObjectsSteps.getTrashedObjects(null, pageSize);
+
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(initialResponse, "Initial response is null");
@@ -179,8 +174,9 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         String nonExistingId = "nonExisting_123";
 
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
-
         getTrashedObjectsSteps.getTrashedObjectsExpectingNoContent(nonExistingId, pageSize);
+
+        // No response body is returned
     }
 
     @Test(description = "Get trashed objects with invalid page size")

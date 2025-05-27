@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class CreateUserPage extends NavigationPage {
 
     private WebDriver driver;
-    private JavascriptExecutor js;
 
     @FindBy(xpath = "//h5")
     private WebElement createUserHeader;
@@ -46,7 +45,6 @@ public class CreateUserPage extends NavigationPage {
     public CreateUserPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
-        this.js = (JavascriptExecutor) driver;
 
         PageFactory.initElements(driver, this);
     }
@@ -60,12 +58,14 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Create new user successfully")
     public void createUser(String name, String email, String password) {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(newNameUser));
+        waitForElementToBeClickable(newNameUser);
+
         newNameUser.clear();
         newNameUser.sendKeys(name);
+
         newEmailAddress.sendKeys(email);
         newPassword.sendKeys(password);
+
         createNewUserButton.click();
     }
 
@@ -83,6 +83,8 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Get validation message for a field using JavaScript")
     public String getValidationMessage(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
         return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 
@@ -108,9 +110,8 @@ public class CreateUserPage extends NavigationPage {
 
     @Step("Get all error messages")
     public List<String> getErrorMessages() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-                By.cssSelector("form .MuiAlert-message li")));
+        waitForAllElementsToBeVisible(passwordErrorMessages);
+
         return passwordErrorMessages.stream()
                 .map(element -> element.getText().trim())
                 .collect(Collectors.toList());
