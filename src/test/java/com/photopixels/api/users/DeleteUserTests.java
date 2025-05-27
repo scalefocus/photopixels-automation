@@ -34,7 +34,7 @@ public class DeleteUserTests extends ApiBaseTest {
     @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
-        name = "Test User" + random;
+        name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
@@ -57,7 +57,7 @@ public class DeleteUserTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void deleteUserTest() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();

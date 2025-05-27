@@ -4,7 +4,9 @@
     <test name="Web Tests" thread-count="1">
         <classes>
             <class name="com.photopixels.web.LoginTests"/>
+            <class name="com.photopixels.web.CreateNewUserTests"/>
             <class name="com.photopixels.web.EditUserTests"/>
+            <class name="com.photopixels.web.SignUpNewUserTests"/>
         </classes>
     </test>
 

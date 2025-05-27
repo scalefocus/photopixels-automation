@@ -56,14 +56,13 @@ public class PostDisableRegistrationTests extends ApiBaseTest {
         String token = getUserToken();
 
         PostDisableRegistrationSteps postDisableRegistrationSteps = new PostDisableRegistrationSteps(token);
-        postDisableRegistrationSteps.disableRegistration(false);
+        postDisableRegistrationSteps.disableRegistrationExpectingForbidden(false);
 
         GetStatusSteps getStatusSteps = new GetStatusSteps();
         GetStatusResponseDto getStatusResponseDto = getStatusSteps.getStatus();
 
         SoftAssert softAssert = new SoftAssert();
 
-        // TODO: BUG? - Registration can be disabled with not admin user
         softAssert.assertTrue(getStatusResponseDto.getRegistration(), "Registration is disabled!");
 
         softAssert.assertAll();

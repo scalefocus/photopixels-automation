@@ -31,7 +31,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
-        name = "Test User" + random;
+        name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
 
         token = getAdminToken();
@@ -54,7 +54,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void registerUserAdminTest(UserRolesEnum role) {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
@@ -140,7 +140,7 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void registerUserAdminDuplicateUserTest() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test " + random;
+        String name = "Test" + random;
         String email = "test" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
@@ -157,9 +157,11 @@ public class PostRegisterUserAdminTests extends ApiBaseTest {
         softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST, "Error status is not correct");
 
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_USER_NAME.getKey()),
-                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), email), "Error message is not correct");
+                String.format(ErrorMessagesEnum.DUPLICATE_USER_NAME.getErrorMessage(), name),
+                "Error message for username is not correct");
         softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.DUPLICATE_EMAIL.getKey()),
-                String.format(ErrorMessagesEnum.DUPLICATE_EMAIL.getErrorMessage(), email), "Error message is not correct");
+                String.format(ErrorMessagesEnum.DUPLICATE_EMAIL.getErrorMessage(), email),
+                "Error message for email is not correct");
 
         softAssert.assertAll();
     }

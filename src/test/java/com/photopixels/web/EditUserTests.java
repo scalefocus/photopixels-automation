@@ -45,6 +45,14 @@
             editUserPage = new EditUserPage(driver);
         }
 
+        @AfterMethod(alwaysRun = true)
+        public void cleanupUser() {
+            usersPage.goToUserTab();
+            usersPage.searchUser(newEmail);
+            usersPage.clickEditUser();
+            editUserPage.deleteUser();
+        }
+
         @Test(description = "Changing active user quota, setting to minimal value")
         @Description("Changing active user quota, setting to minimal value")
         @Story("Edit a user")
@@ -61,8 +69,7 @@
             UsersPage usersPage = overviewPage.goToUserTab();
             usersPage.searchUser(newEmail);
 
-            EditUserPage editUserPage = new EditUserPage(driver);
-            editUserPage.clickEditUser();
+            EditUserPage editUserPage = usersPage.clickEditUser();
             editUserPage.editUserQuota(quotaValue);
 
             String actualMessage = editUserPage.getUserQuotaChangedMessage();
@@ -90,8 +97,7 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            EditUserPage editUserPage = new EditUserPage(driver);
-            editUserPage.clickEditUser();
+            EditUserPage editUserPage = usersPage.clickEditUser();
             editUserPage.editUserQuota(quotaValue);
 
             String message = editUserPage.getQuotaValueValidationMessage();
@@ -114,8 +120,7 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            EditUserPage editUserPage = new EditUserPage(driver);
-            editUserPage.clickEditUser();
+            EditUserPage editUserPage = usersPage.clickEditUser();
             editUserPage.userPasswordReset();
             editUserPage.enterNewUserPassword(newRandomPassword, newRandomPassword);
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
@@ -145,8 +150,7 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            EditUserPage editUserPage = new EditUserPage(driver);
-            editUserPage.clickEditUser();
+            EditUserPage editUserPage = usersPage.clickEditUser();
             editUserPage.userPasswordReset();
             editUserPage.enterNewUserPassword(faultyPassword, faultyPassword);
             editUserPage.clickPasswordReset();
@@ -176,8 +180,7 @@
             waitHelper.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
 
-            EditUserPage editUserPage = new EditUserPage(driver);
-            editUserPage.clickEditUser();
+            EditUserPage editUserPage = usersPage.clickEditUser();
             editUserPage.userPasswordReset();
             editUserPage.enterNewUserPassword(newRandomPassword, faultyPassword);
             editUserPage.clickPasswordReset();
@@ -187,11 +190,4 @@
                     "The message is not correct. Expected: " + PASSWORD_MISMATCH + ", but found: " + actualMessage);
         }
 
-        @AfterMethod(alwaysRun = true)
-        public void cleanupUser() {
-            usersPage.goToUserTab();
-            usersPage.searchUser(newEmail);
-            editUserPage.clickEditUser();
-            editUserPage.deleteUser();
-        }
     }

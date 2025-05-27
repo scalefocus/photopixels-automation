@@ -14,6 +14,7 @@ public class GetObjectDataResponseDto {
     private String thumbnail;
     private String contentType;
     private String hash;
+    private String originalHash; // Added field to support BE change task-#72
     private String appleCloudId;
     private String androidCloudId;
     private int width;

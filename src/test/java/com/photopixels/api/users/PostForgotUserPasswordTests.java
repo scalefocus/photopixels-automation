@@ -32,7 +32,7 @@ public class PostForgotUserPasswordTests extends ApiBaseTest {
     @BeforeClass(alwaysRun = true)
     public void setup() {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         email = "testuser" + random + "@test.com";
 
         PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();

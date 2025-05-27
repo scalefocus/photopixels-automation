@@ -8,8 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class ObjectVersioningResponseDto {
+public class TrashedObjectPropertyDto {
 
-    private Integer revision;
+    private String id;
+    private String dateCreated;
+    private String dateTrashed;
 
 }

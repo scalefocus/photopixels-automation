@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class UsersPage extends NavigationPage {
 
     private WebDriver driver;
-    private JavascriptExecutor js;
 
     @FindBy(css = "input[placeholder='Search Users']")
     private WebElement usersSearchBarElement;
@@ -23,6 +22,9 @@ public class UsersPage extends NavigationPage {
 
     @FindBy(css = "tbody tr.MuiTableRow-root td:nth-child(3)")
     private List<WebElement> roleElements;
+
+    @FindBy(css = "[data-testid='button-edit-user']")
+    private WebElement editUserButton;
 
    public UsersPage(WebDriver driver) {
         super(driver);
@@ -66,10 +68,22 @@ public class UsersPage extends NavigationPage {
     @Step("Verify search result role is expected role")
     public boolean hasSearchResultRole(String expectedRole) {
         List<String> roles = getRolesFromResults();
+
         if (roles.isEmpty()) {
             return false;
         }
+
         String actualRole = roles.get(0); // Since we expect exactly one result
+
         return actualRole.equalsIgnoreCase(expectedRole);
+    }
+
+
+    @Step("Click edit user button")
+    public EditUserPage clickEditUser() {
+        waitForElementToBeVisible(editUserButton);
+        editUserButton.click();
+
+        return new EditUserPage(driver);
     }
 }

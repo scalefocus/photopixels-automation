@@ -14,10 +14,6 @@ import java.util.stream.Collectors;
 public class EditUserPage extends NavigationPage {
 
     private WebDriver driver;
-    private JavascriptExecutor js;
-
-    @FindBy(css = "[data-testid='button-edit-user']")
-    private WebElement editUserButton;
 
     @FindBy(css = "#root h5")
     private WebElement editUserHeader;
@@ -71,22 +67,16 @@ public class EditUserPage extends NavigationPage {
     public EditUserPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
-        this.js = (JavascriptExecutor) driver;
 
         PageFactory.initElements(driver, this);
     }
 
-    @Step("Edit user element")
-    public EditUserPage clickEditUser() {
-        waitForElementToBeVisible(editUserButton);
-        editUserButton.click();
-        return new EditUserPage(driver);
-    }
 
     @Step("Delete user function")
     public void deleteUser() {
-        waitForElementToBeVisible(editUserHeader);
+        waitForElementToBeVisible(deleteUserOption);
         deleteUserOption.click();
+
         waitForElementToBeVisible(deleteUserButton);
         deleteUserButton.click();
     }
@@ -120,6 +110,7 @@ public class EditUserPage extends NavigationPage {
 
     @Step("Get validation message for a field using JavaScript")
     private String getValidationMessage(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
         return (String) js.executeScript("return arguments[0].validationMessage;", element);
     }
 

@@ -38,4 +38,8 @@ public class WaitOperationHelper {
 		wait.until(ExpectedConditions.elementToBeClickable(element));
 	}
 
+	public void waitForAllElementsToBeVisible(List<WebElement> elements) {
+		wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+	}
+
 }

@@ -38,7 +38,7 @@ public class PostChangeUserRoleTests extends ApiBaseTest {
         token = getAdminToken();
 
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
 
         PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
@@ -66,7 +66,7 @@ public class PostChangeUserRoleTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void changeUserRoleTest(UserRolesEnum originalRole, UserRolesEnum expectedRole) {
         String random = RandomStringUtils.randomNumeric(6);
-        String name = "Test User" + random;
+        String name = "TestUser" + random;
         String email = "testuser" + random + "@test.com";
         String password = "Test12345!";
 

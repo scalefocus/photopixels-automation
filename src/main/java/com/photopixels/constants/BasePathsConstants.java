@@ -15,6 +15,7 @@ public class BasePathsConstants {
     public static String POST_RESET_USER_PASSWORD = "/user/resetpassword";
     public static String POST_FORGOT_USER_PASSWORD = "/user/forgotpassword";
     public static String POST_REFRESH_TOKEN = "/user/refresh";
+    public static final String DELETE_EMPTY_TRASH = "/emptytrash";
 
     // Admin
     public static String POST_DISABLE_REGISTRATION = "/registration";
@@ -38,9 +39,13 @@ public class BasePathsConstants {
     public static String GET_OBJECT_DATA = "/object/{ObjectId}/data";
     public static String GET_OBJECTS_DATA = "/objects/data";
     public static String GET_OBJECTS = "/objects";
+    public static String DELETE_TRASH_OBJECT = "/object/{objectid}/trash";
+    public static String GET_TRASHED_OBJECTS  ="/objects/trashed";
+    public static String POST_TRASH_OBJECT_REMOVE  ="/object/trash/remove";
 
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
     public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
+    public static String PATCH_SEND_DATA = "send_data/{fileId}";
 
 }

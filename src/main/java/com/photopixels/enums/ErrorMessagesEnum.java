@@ -28,7 +28,11 @@ public enum ErrorMessagesEnum {
     FILE("File", "The File field is required."),
     OBJECT_HASH("ObjectHash", "The ObjectHash field is required."),
     OBJECT_HASH_NOT_MATCH("ObjectHash", "Object hash does not match"),
-    OBJECT_IDS("ObjectIds", "The ObjectIds field is required.");
+    OBJECT_IDS("ObjectIds", "The ObjectIds field is required."),
+
+    // Object operations
+    PAGE_SIZE_INVALID("PageSize","The value '%s' is not valid for PageSize.");
+
 
     private final String key;
 

@@ -15,8 +15,6 @@ import java.time.ZoneId;
 @Feature("Status")
 public class GetLogsTests extends ApiBaseTest {
 
-    private LocalDateTime objectDateTime;
-
     @Test(description = "Get logs")
     @Description("Get logs")
     @Story("Get logs")
@@ -24,11 +22,12 @@ public class GetLogsTests extends ApiBaseTest {
     public void getLogsTest(){
 
         // TODO: Determine if authentication token is needed and which type (user/admin).
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/73");
 
         GetLogsSteps getLogsSteps = new GetLogsSteps();
         String logs = getLogsSteps.getLogs();
 
-        objectDateTime = LocalDateTime.now(ZoneId.of("UTC"));
+        LocalDateTime objectDateTime = LocalDateTime.now(ZoneId.of("UTC"));
         String expectedDate = objectDateTime.toString().substring(0, 10);
 
         SoftAssert softAssert = new SoftAssert();
