@@ -27,7 +27,6 @@ import static com.photopixels.constants.Constants.*;
 import static com.photopixels.constants.ErrorMessageConstants.*;
 import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
-
 public class PatchSendDataTests extends ApiBaseTest {
 
     private String name;
@@ -155,11 +154,12 @@ public class PatchSendDataTests extends ApiBaseTest {
                 part1Image.toFile()
         );
         // send Image part 2 with wrong upload offset
-        String responseBody = sendDataSteps.sendFileChunkError(
+        String responseBody = sendDataSteps.sendFileChunkErrorWithExpectedStatus(
                 uploadLocationId,
-                5000,
+                5000L,
                 uploadMetadata,
-                part2Image.toFile()
+                part2Image.toFile(),
+                HttpStatus.SC_CONFLICT
         );
 
         SoftAssert softAssert = new SoftAssert();
@@ -191,10 +191,12 @@ public class PatchSendDataTests extends ApiBaseTest {
         );
         // Create Upload -The photo has already been uploaded
         PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
-        String fullUploadLocation = steps.createUploadError(uploadMetadata, uploadLength);
+        List<String> responseMessages = steps.createUploadErrorAsList(uploadMetadata, uploadLength);
+
+        String actualMessage = responseMessages.get(0);
 
         SoftAssert softAssert = new SoftAssert();
-        softAssert.assertTrue(fullUploadLocation.contains(PHOTO_HAS_ALREADY_BEEN_APLOADED),
+        softAssert.assertEquals(actualMessage, PHOTO_HAS_ALREADY_BEEN_UPLOADED,
                 "Expected conflict message not found in response body");
         softAssert.assertAll();
     }
@@ -207,7 +209,7 @@ public class PatchSendDataTests extends ApiBaseTest {
         PatchSendDataSteps sendDataSteps = new PatchSendDataSteps(token);
 
         // send Image part 1 without upload offset
-        String responseBody = sendDataSteps.sendFileChunkBadRequestError(
+        String responseBody = sendDataSteps.sendFileChunkErrorWithExpectedStatus(
                 uploadLocationId,
                 null,
                 uploadMetadata,
@@ -216,7 +218,7 @@ public class PatchSendDataTests extends ApiBaseTest {
         );
 
         SoftAssert softAssert = new SoftAssert();
-        softAssert.assertTrue(responseBody.contains(MISSING_UPLOAD_OFFSET_ERROR),
+        softAssert.assertEquals(responseBody, MISSING_UPLOAD_OFFSET_ERROR,
                 "Expected conflict message not found in response body");
         softAssert.assertAll();
     }

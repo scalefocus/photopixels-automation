@@ -7,7 +7,7 @@ public class ErrorMessageConstants {
 	public static final String NOT_FOUND_ERROR = "Not Found";
 	public static final String CONFLICT_ERROR = "Conflict";
 	public static final String CONFLICT_BYTE_OFFSET = "Conflicting file byte offset";
-	public static final String PHOTO_HAS_ALREADY_BEEN_APLOADED = "The photo has already been uploaded";
+	public static final String PHOTO_HAS_ALREADY_BEEN_UPLOADED = "The photo has already been uploaded";
 	public static final String MISSING_UPLOAD_OFFSET_ERROR = "Missing Upload-Offset header";
 
 }

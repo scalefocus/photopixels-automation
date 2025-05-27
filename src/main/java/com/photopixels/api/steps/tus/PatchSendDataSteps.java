@@ -74,22 +74,8 @@ public class PatchSendDataSteps {
         response.then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
-    @Step("Send file chunk with error response")
-    public String sendFileChunkError(String fileId,
-                                     long uploadOffset,
-                                     String uploadMetadata,
-                                     File filePart
-                                    ) {
-        sendDataLocationFileId(fileId);
-
-        Response response = sendFileChunkWithHeaders(fileId, uploadOffset, uploadMetadata, filePart);
-        response.then().statusCode(HttpStatus.SC_CONFLICT);
-
-        return response.asString();
-    }
-
     @Step("Send file chunk with error response (nullable headers allowed)")
-    public String sendFileChunkBadRequestError(String fileId,
+    public String sendFileChunkErrorWithExpectedStatus(String fileId,
                                                Long uploadOffset,
                                                String uploadMetadata,
                                                File filePart,

@@ -6,6 +6,8 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.apache.hc.core5.http.HttpStatus;
 
+import java.util.List;
+
 import static com.photopixels.constants.BasePathsConstants.POST_CREATE_UPLOAD;
 
 public class PostCreateUploadSteps {
@@ -55,6 +57,17 @@ public class PostCreateUploadSteps {
     public String createUploadAndGetLocationFileId(String uploadMetadata, String uploadLength) {
         Response response = createUpload(uploadMetadata, uploadLength);
         return response.getHeader("Location");
+    }
+
+    // parse JSON array response and return List<String>
+    @Step("Create upload resource with error response as list of messages")
+    public List<String> createUploadErrorAsList(String uploadMetadata, String uploadLength) {
+        Response response = createUploadResponse(uploadMetadata, uploadLength);
+
+        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
+
+        // Parse response JSON array to List<String>
+        return response.jsonPath().getList("$", String.class);
     }
 
 }
