@@ -59,16 +59,5 @@ public class PostCreateUploadSteps {
         return response.getHeader("Location");
     }
 
-    // parse JSON array response and return List<String>
-    @Step("Create upload resource with error response as list of messages")
-    public List<String> createUploadErrorAsList(String uploadMetadata, String uploadLength) {
-        Response response = createUploadResponse(uploadMetadata, uploadLength);
-
-        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
-
-        // Parse response JSON array to List<String>
-        return response.jsonPath().getList("$", String.class);
-    }
-
 }
 

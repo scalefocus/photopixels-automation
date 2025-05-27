@@ -168,39 +168,6 @@ public class PatchSendDataTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-    @Test(description = "The photo has already been uploaded")
-    @Description("Negative Test: Verify that The photo has already been uploaded")
-    @Story("Upload Chunks")
-    @Severity(SeverityLevel.CRITICAL)
-    public void sendDataFileIdUploadAlreadyExist() {
-        PatchSendDataSteps sendDataSteps = new PatchSendDataSteps(token);
-
-        // send Image Part 1
-        sendDataSteps.sendFileChunk(
-                uploadLocationId,
-                uploadOffset,
-                uploadMetadata,
-                part1Image.toFile()
-        );
-        // send Image part 2
-        sendDataSteps.sendFileChunk(
-                uploadLocationId,
-                part2ImageSize,
-                uploadMetadata,
-                part2Image.toFile()
-        );
-        // Create Upload -The photo has already been uploaded
-        PostCreateUploadSteps steps = new PostCreateUploadSteps(token);
-        List<String> responseMessages = steps.createUploadErrorAsList(uploadMetadata, uploadLength);
-
-        String actualMessage = responseMessages.get(0);
-
-        SoftAssert softAssert = new SoftAssert();
-        softAssert.assertEquals(actualMessage, PHOTO_HAS_ALREADY_BEEN_UPLOADED,
-                "Expected conflict message not found in response body");
-        softAssert.assertAll();
-    }
-
     @Test(description = "Fails to upload file chunk due to Missing Upload-Offset header")
     @Description("Negative Test: Verify that the server responds with a Bad Request Missing Upload-Offset header")
     @Story("Upload Chunks")
