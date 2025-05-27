@@ -122,7 +122,7 @@
             createUserPage.waitMs();
 
             String message = createUserPage.getNewNameUserValidationMessage();
-            Assert.assertEquals(message, EMPTY_FIELD_ERROR,
+            Assert.assertEquals(message, EMPTY_FIELD_ERROR.getErrorMessage(),
                     "Error message for empty name field is not correct. Expected 'Please fill out this field.', but found:" + message);
         }
 

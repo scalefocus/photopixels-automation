@@ -22,7 +22,7 @@ public class EditUserPage extends NavigationPage {
     @FindBy(css = "#root h5")
     private WebElement editUserHeader;
 
-    @FindBy(xpath = "//p[contains(text(), 'Delete User')]")
+    @FindBy(xpath = "//*[contains(text(), 'Delete User')]/ancestor::div[@role='button']")
     private WebElement deleteUserOption;
 
     @FindBy(css = "[data-testid='DeleteIcon']")
