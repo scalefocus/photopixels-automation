@@ -76,6 +76,7 @@ public class PostGetObjectsDataTests extends ApiBaseTest {
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getThumbnail(), "Object data thumbnail is not returned");
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getContentType(), "Object data content type is not returned");
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getHash(), "Object data hash is not returned");
+            softAssert.assertNotNull(getObjectsDataResponseDto[i].getDateCreated(), "Object data dateCreated is not returned");
         }
 
         softAssert.assertAll();
