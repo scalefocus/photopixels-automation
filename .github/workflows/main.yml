@@ -1,0 +1,28 @@
+name: Self-Hosted Runner Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    # This ensures the job runs on your self-hosted runner(s)
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Display Runner Environment
+        run: |
+          echo "Runner OS Information:"
+          uname -a
+          echo "Environment Variables:"
+          env
+
+      - name: Create Test File
+        run: touch /tmp/test.txt
+
+      - name: List Current Directory Contents
+        run: ls -la
