@@ -19,8 +19,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
-import static com.photopixels.constants.Constants.TRAINING_FILE;
+import static com.photopixels.constants.Constants.*;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 @Listeners(StatusTestListener.class)
@@ -30,7 +29,7 @@ public class GetObjectsTests extends ApiBaseTest {
     private String token;
     private String objectId;
     private String fileName = TRAINING_FILE;
-    private String newFileName = FRENCH_FRIES_FILE;
+    private String newFileName = COCTAIL_FILE;
     private int pageSize = 10;
     private LocalDateTime objectDateTime;
     private List<String> objectIdsForDeletion;
@@ -147,11 +146,12 @@ public class GetObjectsTests extends ApiBaseTest {
         for (PropertiesResponseDto property : getObjectsResponseDto.getProperties()) {
             propertyDateTime = LocalDateTime.parse(property.getDateCreated(), ISO_OFFSET_DATE_TIME);
 
-            // The created date of the all returned items needs to be bigger or equal than
+            // The created date of the all returned items needs to be less than
             // the created date of the item with id = LastId
-            softAssert.assertTrue(propertyDateTime.isAfter(objectDateTime),
-                    "Date created of object is not before current date");
+            softAssert.assertTrue(propertyDateTime.isBefore(objectDateTime),
+                    "Date created of object is not before the provided last id date");
             softAssert.assertNotNull(property.getId(), "Object property id is not returned");
+            softAssert.assertNotEquals(property.getId(), newerObjectId, "Newer object property id is returned");
         }
 
         // TODO: Remove when issue is fixed

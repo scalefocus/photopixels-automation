@@ -24,9 +24,6 @@ public class EditUserPage extends NavigationPage {
     @FindBy(css = "[data-testid='DeleteIcon']")
     private WebElement deleteUserButton;
 
-    @FindBy(xpath = "//*[contains(normalize-space(text()), 'Account Deleted.')]")
-    private WebElement userDeletedMessage;
-
     @FindBy(css = "#root p")
     private WebElement userQuotaText;
 
@@ -39,10 +36,7 @@ public class EditUserPage extends NavigationPage {
     @FindBy(css = "[data-testid='button-change-new-quota']")
     private WebElement quotaFormSubmit;
 
-    @FindBy(xpath = "//div[contains(@class, 'go') and contains(text(), 'Quota changed successfully')]") //No other way to handle the locator, due to the lack of attributes that could be handled by selenium.
-    private WebElement quotaChangedValidationMessage;
-
-    @FindBy(xpath = "//p[contains(normalize-space(.), 'of') and contains(normalize-space(.), 'GB')]") //No other way to handle this locator, given it's inner properties needed to check the values of storage per user.
+    @FindBy(xpath = "//p[contains(@class,'css-1bfbqgm')]")
     private WebElement quotaValue;
 
     @FindBy(xpath = "//p[contains(text(), 'Reset Password')]")
@@ -56,9 +50,6 @@ public class EditUserPage extends NavigationPage {
 
     @FindBy(css = "button[data-testid='button-reset-password']")
     private WebElement resetPasswordBtn;
-
-    @FindBy(xpath = "//div[contains(text(), 'Password changed successfully')]")
-    private WebElement passwordResetConfirmation;
 
     @FindBy(css = "div[role='status'][aria-live='polite']")
     private WebElement passwordErrorMessage;
@@ -83,14 +74,12 @@ public class EditUserPage extends NavigationPage {
 
     @Step("Get user deleted message")
     public String getUserDeletedMsg() {
-        waitForElementToBeVisible(userDeletedMessage);
-
-        return userDeletedMessage.getText();
+        return getStatusMessage();
     }
 
     @Step("Edit user quote")
     public void editUserQuota(String quotaValue) {
-        waitForElementToBeVisible(userQuotaText);
+        waitForElementToBeVisible(userQuotaEdit);
         userQuotaEdit.click();
         waitForElementToBeVisible(quotaValueSetter);
         quotaValueSetter.click();
@@ -103,9 +92,7 @@ public class EditUserPage extends NavigationPage {
 
     @Step("Get user quota changed message")
     public String getUserQuotaChangedMessage() {
-        waitForElementToBeVisible(quotaChangedValidationMessage);
-
-        return quotaChangedValidationMessage.getText().trim();
+        return getStatusMessage();
     }
 
     @Step("Get validation message for a field using JavaScript")
@@ -150,9 +137,7 @@ public class EditUserPage extends NavigationPage {
 
     @Step("Get password changed message")
     public String getPasswordChangedMessage() {
-        waitForElementToBeVisible(passwordResetConfirmation);
-
-        return passwordResetConfirmation.getText().trim();
+        return getStatusMessage();
     }
 
     @Step("Get password changed incorrectly message")

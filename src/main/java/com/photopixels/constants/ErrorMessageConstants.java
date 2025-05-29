@@ -10,6 +10,7 @@ public class ErrorMessageConstants {
 	// Web
 	public static final String PASSWORD_CHANGED_INCORRECTLY = "Your password does not match the criteria. Please enter new password.";
 	public static final String PASSWORD_MISMATCH = "The new password does not match the confirmed password.";
+	public static final String INVALID_QUOTA = "Please enter a valid value. The two nearest valid values are 0 and 1.";
 
 	public static final String CONFLICT_BYTE_OFFSET = "Conflicting file byte offset";
 	public static final String PHOTO_HAS_ALREADY_BEEN_UPLOADED = "The photo has already been uploaded";
