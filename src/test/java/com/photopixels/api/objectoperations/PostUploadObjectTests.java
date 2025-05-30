@@ -53,8 +53,8 @@ public class PostUploadObjectTests extends ApiBaseTest {
         deleteRegisteredUsers(registeredUsersList);
     }
 
-    @Test(description = "Upload object")
-    @Description("Successful upload of object")
+    @Test(description = "Upload photo object")
+    @Description("Successful upload of photo object")
     @Story("Upload Object")
     @Severity(SeverityLevel.CRITICAL)
     public void uploadObjectTest() {
@@ -135,18 +135,21 @@ public class PostUploadObjectTests extends ApiBaseTest {
     @DataProvider(name = "invalidHashFiles")
     public Object[][] provideInvalidHashFiles() {
         return new Object[][]{
-                {TRAINING_FILE, "invalidHash", ErrorMessagesEnum.OBJECT_HASH_NOT_MATCH.getErrorMessage()},  // upload an image
-                {SAMPLE_VIDEO_FILE, "invalidHash", ErrorMessagesEnum.OBJECT_HASH_NOT_MATCH.getErrorMessage()}    // upload a video
+                {TRAINING_FILE},  // upload an image
+                {SAMPLE_VIDEO_FILE}    // upload a video
         };
     }
     @Test(dataProvider = "invalidHashFiles", description = "Upload object with invalid object hash (image/video)")
     @Description("Upload image or video with invalid object hash - should return 400 Bad Request")
     @Story("Upload Object")
     @Severity(SeverityLevel.MINOR)
-    public void uploadObjectInvalidObjectHashTest(String filePath, String invalidObjectHash, String expectedErrorMessage) {
+    public void uploadObjectInvalidObjectHashTest(String filePath) {
+
+        String invalidObjectHash = "invalidHash";
+        String expectedErrorMessage = ErrorMessagesEnum.OBJECT_HASH_NOT_MATCH.getErrorMessage();
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(filePath, invalidObjectHash, HttpStatus.SC_BAD_REQUEST);
+        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(filePath,invalidObjectHash,HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
