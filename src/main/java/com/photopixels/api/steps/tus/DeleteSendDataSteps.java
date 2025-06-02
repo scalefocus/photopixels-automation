@@ -56,12 +56,8 @@ public class DeleteSendDataSteps {
     @Step("Attempt to delete file with file ID: {fileId}")
     public void deleteFileExpectingError(String fileId) {
         Response response = sendFileIdWithHeaders(fileId);
+            response.then().statusCode(HttpStatus.SC_NOT_FOUND);
 
-        if (fileId == null || fileId.isBlank()) {
-            response.then().statusCode(HttpStatus.SC_NOT_FOUND);
-        } else {
-            response.then().statusCode(HttpStatus.SC_NOT_FOUND);
-        }
     }
 
 }
