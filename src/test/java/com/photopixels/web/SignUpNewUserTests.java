@@ -60,13 +60,12 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Story("Create New User on Sign Up")
     @Severity(SeverityLevel.CRITICAL)
     public void createUserEmptyFieldSignUpTest() {
-        String emptyName = "";
 
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
 
-        signUpUserPage.fillCredentials(emptyName, randomEmail, PASSWORD);
+        signUpUserPage.fillCredentials(null, randomEmail, PASSWORD);
 
         Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
     }

@@ -52,15 +52,15 @@ public class SignUpUserPage extends NavigationPage {
     @Step("Fill credentials")
     public void fillCredentials(String name, String email, String password) {
 
-        if (name != null) {
+        if ( name != null ) {
             newNameUser.sendKeys(name);
         }
 
-        if (email != null) {
+        if ( email != null ) {
             newEmailAddress.sendKeys(email);
         }
 
-        if(password != null){
+        if ( password != null ) {
             newPassword.sendKeys(password);
         }
     }
