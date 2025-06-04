@@ -48,4 +48,25 @@ public class SignUpUserPage extends NavigationPage {
 
         return new LoginPage(driver);
     }
+
+    @Step("Fill credentials")
+    public void fillCredentials(String name, String email, String password) {
+
+        if (name != null) {
+            newNameUser.sendKeys(name);
+        }
+
+        if (email != null) {
+            newEmailAddress.sendKeys(email);
+        }
+
+        if(password != null){
+            newPassword.sendKeys(password);
+        }
+    }
+
+    @Step("Check if Sign Up button is enabled")
+    public boolean isSignUpButtonEnabled() {
+        return signUpNewUserButton.isEnabled();
+    }
 }

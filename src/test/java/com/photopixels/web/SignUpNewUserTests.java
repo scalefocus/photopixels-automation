@@ -55,5 +55,19 @@ public class SignUpNewUserTests extends WebBaseTest {
 
     }
 
+    @Test(description = "Unsuccessful creation of a user with empty name on Sign up")
+    @Description("Unsuccessful creation of a user with empty name on Sign up")
+    @Story("Create New User on Sign Up")
+    @Severity(SeverityLevel.CRITICAL)
+    public void createUserEmptyFieldSignUpTest() {
+        String emptyName = "";
 
+        LoginPage loginPage = loadPhotoPixelsApp();
+
+        SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
+
+        signUpUserPage.fillCredentials(emptyName, randomEmail, PASSWORD);
+
+        Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
+    }
 }
