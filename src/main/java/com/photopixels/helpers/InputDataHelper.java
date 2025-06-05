@@ -44,12 +44,4 @@ public class InputDataHelper {
     public String getPasswordAdmin() {
         return getProperty("passwordAdmin");
     }
-
-    public String getInvalidEmail() {
-        return getProperty("invalidEmail");
-    }
-
-    public String getInvalidPassword() {
-        return getProperty("invalidPassword");
-    }
 }

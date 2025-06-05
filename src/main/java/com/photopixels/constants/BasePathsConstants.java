@@ -15,6 +15,7 @@ public class BasePathsConstants {
     public static String POST_RESET_USER_PASSWORD = "/user/resetpassword";
     public static String POST_FORGOT_USER_PASSWORD = "/user/forgotpassword";
     public static String POST_REFRESH_TOKEN = "/user/refresh";
+    public static final String DELETE_EMPTY_TRASH = "/emptytrash";
 
     // Admin
     public static String POST_DISABLE_REGISTRATION = "/registration";
@@ -45,5 +46,6 @@ public class BasePathsConstants {
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
     public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
+    public static String PATCH_SEND_DATA = "send_data/{fileId}";
 
 }

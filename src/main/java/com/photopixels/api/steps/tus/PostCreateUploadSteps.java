@@ -6,6 +6,8 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.apache.hc.core5.http.HttpStatus;
 
+import java.util.List;
+
 import static com.photopixels.constants.BasePathsConstants.POST_CREATE_UPLOAD;
 
 public class PostCreateUploadSteps {
@@ -50,5 +52,12 @@ public class PostCreateUploadSteps {
         return requestOperationsHelper
                 .sendPostRequest(requestSpecification.getFilterableRequestSpecification());
     }
+
+    @Step("Create upload and retrieve Location File ID")
+    public String createUploadAndGetLocationFileId(String uploadMetadata, String uploadLength) {
+        Response response = createUpload(uploadMetadata, uploadLength);
+        return response.getHeader("Location");
+    }
+
 }
 

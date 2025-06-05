@@ -32,6 +32,10 @@ public class NavigationPage extends WaitOperationHelper {
     @FindBy(xpath = "//nav/div[@role='button']")
     private WebElement logoutButton;
 
+    // This element is used for info messages that are displayed for successful operations like save and create
+    @FindBy(xpath = "//div[@role='status']")
+    private WebElement statusMessage;
+
     public NavigationPage(WebDriver driver) {
         super(driver);
         this.driver = driver;
@@ -60,5 +64,20 @@ public class NavigationPage extends WaitOperationHelper {
         usersMenu.click();
 
         return new UsersPage(driver);
+    }
+
+    @Step("Log out of main application")
+    public LoginPage logOut() {
+        waitForElementToBeVisible(logoutButton);
+        logoutButton.click();
+
+        return new LoginPage(driver);
+    }
+
+    @Step("Get status message")
+    public String getStatusMessage() {
+        waitForElementToBeVisible(statusMessage);
+
+        return statusMessage.getText().trim();
     }
 }
