@@ -59,7 +59,7 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Description("Unsuccessful creation of a user with empty name on Sign up")
     @Story("Create New User on Sign Up")
     @Severity(SeverityLevel.CRITICAL)
-    public void createUserEmptyFieldSignUpTest() {
+    public void createUserEmptyNameFieldSignUpTest() {
 
         LoginPage loginPage = loadPhotoPixelsApp();
 
