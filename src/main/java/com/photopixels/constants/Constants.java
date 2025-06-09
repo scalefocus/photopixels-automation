@@ -29,6 +29,8 @@ public class Constants {
     public static final String USER_DELETED = "Account Deleted.";
     public static final String QUOTA_CHANGED = "Quota changed successfully.";
     public static final String PASSWORD_CHANGED = "Password changed successfully.";
+    public static final String FILE_UPLOADED = "1 image uploaded successfully";
+    public static final String FILE_DELETED = "Object(s) trashed successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";
