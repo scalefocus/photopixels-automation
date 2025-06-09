@@ -20,7 +20,6 @@ import static com.photopixels.constants.Constants.PASSWORD;
 public class SignUpNewUserTests extends WebBaseTest {
     private String randomName;
     private String randomEmail;
-
     private WaitOperationHelper waitHelper;
 
     @BeforeClass(alwaysRun = true)
@@ -31,8 +30,6 @@ public class SignUpNewUserTests extends WebBaseTest {
 
         waitHelper = new WaitOperationHelper(driver);
     }
-
-
     @Test(description = "Successful creation of a user on Sign Up and login")
     @Description("Successful creation of a user on Sign Up and login")
     @Story("Create New User on Sign Up")
@@ -54,7 +51,6 @@ public class SignUpNewUserTests extends WebBaseTest {
                 "The header after login is not correct");
 
     }
-
     @Test(description = "Unsuccessful creation of a user with empty name on Sign up")
     @Description("Unsuccessful creation of a user with empty name on Sign up")
     @Story("Create New User on Sign Up")
@@ -97,7 +93,48 @@ public class SignUpNewUserTests extends WebBaseTest {
 
         Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
     }
+    @Test(description = "Unsuccessful creation of a user with empty fields on Sign up")
+    @Description("Unsuccessful creation of a user with empty fields on Sign up")
+    @Story("Create New User on Sign Up")
+    @Severity(SeverityLevel.CRITICAL)
+    public void createUserEmptyFieldsSignUpTest() {
 
-    
+        LoginPage loginPage = loadPhotoPixelsApp();
 
+        SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
+
+        signUpUserPage.fillCredentials(null, null, null);
+
+        Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
+    }
+    @Test(description = "Unsuccessful creation of a user with invalid email format on Sign up")
+    @Description("Unsuccessful creation of a user with invalid email format on Sign up")
+    @Story("Create New User on Sign Up")
+    @Severity(SeverityLevel.CRITICAL)
+    public void createUserInvalidEmailSignUpTest() {
+        String invalidEmail = "IN2valid@COM";
+
+        LoginPage loginPage = loadPhotoPixelsApp();
+
+        SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
+
+        signUpUserPage.fillCredentials(randomName, invalidEmail, PASSWORD);
+
+        Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
+    }
+    @Test(description = "Unsuccessful creation of a user with invalid password format on Sign up")
+    @Description("Unsuccessful creation of a user with invalid password format on Sign up")
+    @Story("Create New User on Sign Up")
+    @Severity(SeverityLevel.CRITICAL)
+    public void createUserInvalidPasswordSignUpTest() {
+        String invalidPassword = "abc";
+
+        LoginPage loginPage = loadPhotoPixelsApp();
+
+        SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
+
+        signUpUserPage.fillCredentials(randomName, randomEmail, invalidPassword);
+
+        Assert.assertFalse(signUpUserPage.isSignUpButtonEnabled(), "Sign Up button is enabled!");
+    }
 }
