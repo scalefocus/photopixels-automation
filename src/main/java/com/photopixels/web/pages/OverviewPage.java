@@ -37,10 +37,10 @@ public class OverviewPage extends NavigationPage {
     @FindBy(css = "[data-testid='DeleteIcon']")
     private WebElement deleteMediaButton;
 
-    @FindBy(xpath = "//body/div[2]/div[3]//button[2]")
+    @FindBy(xpath = "//button[normalize-space()='Move to Trash']")
     private WebElement moveToTrashButton;
 
-    @FindBy(xpath = "//*[@id='root']/div[2]/div/div/div[2]")
+    @FindBy(xpath = "//div[contains(text(), '1 image uploaded successfully')]")
     private WebElement successfulUploadMessage;
 
     @FindBy(xpath = "//*[contains(text(), 'Object(s) trashed successfully')]")
