@@ -26,7 +26,7 @@ public class DeleteSendDataSteps {
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
-    private Response sendFileIdWithHeaders(String fileId) {
+    private Response sendUploadFileIdResponse(String fileId) {
         config = config().encoderConfig(encoderConfig()
                 .appendDefaultContentCharsetToContentTypeIfUndefined(false));
 
@@ -49,15 +49,14 @@ public class DeleteSendDataSteps {
 
     @Step("Delete file with ID: {fileId}")
     public void deleteFileById(String fileId) {
-        Response response = sendFileIdWithHeaders(fileId);
-        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
+        Response response = sendUploadFileIdResponse(fileId);
+        response.then().statusCode(HttpStatus.SC_OK);
     }
 
-    @Step("Attempt to delete file with file ID: {fileId}")
-    public void deleteFileExpectingError(String fileId) {
-        Response response = sendFileIdWithHeaders(fileId);
-            response.then().statusCode(HttpStatus.SC_NOT_FOUND);
-
+    @Step("Delete Upload FileId Error")
+    public void deleteFileExpectingError(String fileId, int expectedStatusCode) {
+        Response response = sendUploadFileIdResponse(fileId);
+        response.then().statusCode(expectedStatusCode);
     }
 
 }
