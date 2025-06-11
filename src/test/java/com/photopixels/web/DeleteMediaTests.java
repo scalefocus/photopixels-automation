@@ -14,10 +14,8 @@
     @Feature("Web")
     public class DeleteMediaTests extends WebBaseTest {
 
-        private String newEmail;
-        private String adminEmail;
-        private String adminPassword;
-        private String randomName;
+        private String username;
+        private String password;
         private UsersPage usersPage;
         private EditUserPage editUserPage;
         private OverviewPage overviewPage;
@@ -25,34 +23,8 @@
 
         @BeforeClass(alwaysRun = true)
         public void setup() throws Exception {
-            String random = RandomString.make(5);
-            randomName = "User_" + random;
-            newEmail = "test_" + random + "@test.com";
-
-            adminEmail = inputData.getUsernameAdmin();
-            adminPassword = inputData.getPasswordAdmin();
-        }
-
-        @BeforeMethod(alwaysRun = true)
-        public void initializePages() {
-            LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(adminEmail, adminPassword);
-            usersPage = overviewPage.goToUserTab();
-            editUserPage = new EditUserPage(driver);
-            CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
-            createUserPage.createUser(randomName, newEmail, PASSWORD);
-            createUserPage.waitMs();
-            createUserPage.logOut();
-        }
-
-        @AfterMethod(alwaysRun = true)
-        public void cleanupUser() {
-            LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(adminEmail, adminPassword);
-            usersPage.goToUserTab();
-            usersPage.searchUser(newEmail);
-            usersPage.clickEditUser();
-            editUserPage.deleteUser();
+            username = inputData.getUsername();
+            password = inputData.getPassword();
         }
 
         @Test(description = "Successful upload, selection and moving to trash for selected media")
@@ -60,16 +32,24 @@
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
         public void deleteMedia() {
-            String filePath = "C:/Users/nebojsha.stamenkov/Documents/photopixels-test-automation/upload_files/coctail.jpg";
 
             LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(newEmail, PASSWORD);
-            overviewPage.uploadMedia(filePath);
+            overviewPage = loginPage.login(username, password);
+            overviewPage.uploadMedia(TRAINING_FILE);
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
 
             Assert.assertEquals(overviewPage.getUploadSuccessMessage(), FILE_UPLOADED,
                     "The message is not correct.");
 
+
+
             overviewPage.selectMedia(0);
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
             overviewPage.deleteMedia();
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_DELETED,

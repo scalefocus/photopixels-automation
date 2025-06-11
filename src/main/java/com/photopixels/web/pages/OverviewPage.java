@@ -9,6 +9,7 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.List;
 
@@ -40,11 +41,11 @@ public class OverviewPage extends NavigationPage {
     @FindBy(xpath = "//button[normalize-space()='Move to Trash']")
     private WebElement moveToTrashButton;
 
-    @FindBy(xpath = "//div[contains(text(), '1 image uploaded successfully')]")
-    private WebElement successfulUploadMessage;
-
-    @FindBy(xpath = "//*[contains(text(), 'Object(s) trashed successfully')]")
-    private WebElement deleteSuccessMessage;
+//    @FindBy(xpath = "//div[contains(text(), '1 image uploaded successfully')]")
+//    private WebElement successfulUploadMessage;
+//
+//    @FindBy(xpath = "//*[contains(text(), 'Object(s) trashed successfully')]")
+//    private WebElement deleteSuccessMessage;
 
 
     public OverviewPage(WebDriver driver) {
@@ -61,16 +62,13 @@ public class OverviewPage extends NavigationPage {
         return overviewHeader.getText();
     }
 
-    @Step("Click upload media button")
-    public void clickUploadMedia() {
-        waitForElementToBeVisible(uploadButton);
-        uploadButton.click();
-    }
-
     @Step("Upload media")
     public void uploadMedia(String filePath) {
         waitForElementToBeVisible(uploadButton);
-        fileInput.sendKeys(filePath);
+
+        File file = new File(filePath);
+        String absolutePath = file.getAbsolutePath();
+        fileInput.sendKeys(absolutePath);
     }
 
     @Step("Get upload error message")
@@ -104,17 +102,27 @@ public class OverviewPage extends NavigationPage {
         moveToTrashButton.click();
     }
 
+//    @Step("Get upload success message")
+//    public String getUploadSuccessMessage() {
+//        waitForElementToBeVisible(successfulUploadMessage);
+//
+//        return successfulUploadMessage.getText();
+//    }
+
     @Step("Get upload success message")
     public String getUploadSuccessMessage() {
-        waitForElementToBeVisible(successfulUploadMessage);
-
-        return successfulUploadMessage.getText();
+        return getStatusMessage();
     }
+
+//    @Step("Get delete media message")
+//    public String getDeleteMediaMessage() {
+//        waitForElementToBeVisible(deleteSuccessMessage);
+//
+//        return deleteSuccessMessage.getText();
+//    }
 
     @Step("Get delete media message")
     public String getDeleteMediaMessage() {
-        waitForElementToBeVisible(deleteSuccessMessage);
-
-        return deleteSuccessMessage.getText();
+        return getStatusMessage();
     }
 }

@@ -10,15 +10,6 @@ public class TrashPage extends NavigationPage {
 
     private WebDriver driver;
 
-    @FindBy(xpath = "//h5[contains(@class,'css-1ne0cvc')]")
-    private WebElement overviewHeader;
-
-    @FindBy(css = "[data-testid='CloudUploadIcon']")
-    private WebElement uploadButton;
-
-    @FindBy(xpath = "//input[@type='file']")
-    private WebElement fileInput;
-
     @FindBy(css = ".error-message")
     private WebElement errorMessage;
 
@@ -27,27 +18,6 @@ public class TrashPage extends NavigationPage {
         this.driver = driver;
 
         PageFactory.initElements(driver, this);
-    }
-
-    @Step("Get overview header")
-    public String getOverviewHeader() {
-        waitForElementToBeVisible(overviewHeader);
-
-        return overviewHeader.getText();
-    }
-
-    @Step("Upload media")
-    public void clickUploadMedia() {
-        waitForElementToBeVisible(uploadButton);
-        uploadButton.click();
-    }
-
-    @Step("Upload media")
-    public void uploadMedia(String filePath) {
-        waitForElementToBeVisible(uploadButton);
-        uploadButton.click();
-        waitForElementToBeClickable(fileInput);
-        fileInput.sendKeys(filePath);
     }
 
     @Step("Get upload error message")
