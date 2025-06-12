@@ -41,11 +41,11 @@ public class PostObjectTrashRemoveSteps {
         return response.as(ObjectVersioningResponseDto.class);
     }
 
-    @Step("Try to remove trashed object with invalid ID: {objectId} and expect 400 Bad Request")
-    public ErrorResponseDto removeTrashedObjectExpectingBadRequest(String objectId) {
+    @Step("Remove trashed object with invalid ID: {objectId}")
+    public ErrorResponseDto removeTrashedObjectExpectingBadRequest(String objectId, int statusCode) {
         Response response = sendRemoveTrashedObjectRequest(objectId);
 
-        response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        response.then().statusCode(statusCode);
 
         return response.as(ErrorResponseDto.class);
     }

@@ -3,18 +3,19 @@ package com.photopixels.api.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
-import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
-import com.photopixels.api.steps.objectoperations.PostObjectTrashRemoveSteps;
-import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
+import com.photopixels.api.steps.objectoperations.*;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.constants.ErrorMessageConstants;
+import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
+import org.apache.http.HttpStatus;
 import org.testng.annotations.*;
 import org.testng.asserts.SoftAssert;
 
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
+import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
+import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 
 @Listeners(StatusTestListener.class)
@@ -65,30 +66,49 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
 
     @DataProvider(name = "invalidObjectIds")
     public Object[][] provideInvalidObjectIds() {
-        return new Object[][] {
-                {"invalid_123", ErrorMessageConstants.INVALID_OBJECT_ID_FORMAT},
-                {"", ErrorMessageConstants.OBJECT_ID_IS_EMPTY},
-                {null, ErrorMessageConstants.OBJECT_ID_IS_NULL}};
+        return new Object[][] { {""}, {null}};
     }
 
-    @Test(dataProvider = "invalidObjectIds", description = "Try to remove trashed object with invalid or empty ID")
-    @Description("Validation of 400 Bad Request when invalid or empty object ID is passed")
+    @Test(dataProvider = "invalidObjectIds", description = "Remove trashed object with empty ID")
+    @Description("Validation of 400 Bad Request when empty object ID is provided")
     @Story("Remove Trashed Object")
     @Severity(SeverityLevel.NORMAL)
-    public void removeTrashedObjectWithInvalidIdTest(String invalidId, String expectedErrorDescription) {
+    public void removeTrashedObjectInvalidIdTest(String invalidId) {
         PostObjectTrashRemoveSteps removeSteps = new PostObjectTrashRemoveSteps(token);
-        ErrorResponseDto errorResponseDto = removeSteps.removeTrashedObjectExpectingBadRequest(invalidId);
+        ErrorResponseDto errorResponseDto = removeSteps
+                .removeTrashedObjectExpectingBadRequest(invalidId, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertNotNull(errorResponseDto, "Error response is null");
+        softAssert.assertEquals(errorResponseDto.getTitle(), VALIDATION_ERRORS_TITLE,
+                "Error title is not correct");
+        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_BAD_REQUEST,
+                "Error status is not correct");
 
-        // TODO: Remove when the bug is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/87");
+        softAssert.assertEquals(errorResponseDto.extractErrorMessageByKey(ErrorMessagesEnum.ID.getKey()),
+                ErrorMessagesEnum.ID.getErrorMessage(), "Error message is not correct");
 
-        // These asserts should be re-enabled once the backend returns proper validation messages
-        //softAssert.assertNotNull(errorResponseDto.getErrors(), "Errors field should not be null");
-        //softAssert.assertTrue(errorResponseDto.getErrors().has("Id"), "Errors should contain a validation entry for 'Id'");
+        softAssert.assertAll();
+    }
+
+
+    @Test(description = "Remove trashed object with invalid ID")
+    @Description("Validation of 400 Bad Request when invalid object ID is provided")
+    @Story("Remove Trashed Object")
+    @Severity(SeverityLevel.NORMAL)
+    public void removeTrashedObjectNotExistingIdTest() {
+        String notExistingId = "NotExisting";
+
+        PostObjectTrashRemoveSteps removeSteps = new PostObjectTrashRemoveSteps(token);
+        ErrorResponseDto errorResponseDto = removeSteps
+                .removeTrashedObjectExpectingBadRequest(notExistingId, HttpStatus.SC_NOT_FOUND);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertEquals(errorResponseDto.getTitle(), NOT_FOUND_ERROR,
+                "Error title is not correct");
+        softAssert.assertEquals(errorResponseDto.getStatus(), HttpStatus.SC_NOT_FOUND,
+                "Error status is not correct");
 
         softAssert.assertAll();
     }
