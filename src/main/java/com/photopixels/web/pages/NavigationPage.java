@@ -29,6 +29,9 @@ public class NavigationPage extends WaitOperationHelper {
     @FindBy(xpath = "//a[@href='/admin-settings']")
     private WebElement adminSettingsMenu;
 
+    @FindBy(xpath = "//a[@href='/trash']")
+    private WebElement trashMenu;
+
     @FindBy(xpath = "//nav/div[@role='button']")
     private WebElement logoutButton;
 
@@ -64,6 +67,14 @@ public class NavigationPage extends WaitOperationHelper {
         usersMenu.click();
 
         return new UsersPage(driver);
+    }
+
+    @Step("Go to Trash tab")
+    public TrashPage goToTrashTab() {
+        waitForElementToBeVisible(trashMenu);
+        trashMenu.click();
+
+        return new TrashPage(driver);
     }
 
     @Step("Log out of main application")
