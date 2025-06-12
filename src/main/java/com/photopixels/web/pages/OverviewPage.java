@@ -41,12 +41,6 @@ public class OverviewPage extends NavigationPage {
     @FindBy(xpath = "//button[normalize-space()='Move to Trash']")
     private WebElement moveToTrashButton;
 
-//    @FindBy(xpath = "//div[contains(text(), '1 image uploaded successfully')]")
-//    private WebElement successfulUploadMessage;
-//
-//    @FindBy(xpath = "//*[contains(text(), 'Object(s) trashed successfully')]")
-//    private WebElement deleteSuccessMessage;
-
 
     public OverviewPage(WebDriver driver) {
         super(driver);
@@ -102,24 +96,10 @@ public class OverviewPage extends NavigationPage {
         moveToTrashButton.click();
     }
 
-//    @Step("Get upload success message")
-//    public String getUploadSuccessMessage() {
-//        waitForElementToBeVisible(successfulUploadMessage);
-//
-//        return successfulUploadMessage.getText();
-//    }
-
     @Step("Get upload success message")
     public String getUploadSuccessMessage() {
         return getStatusMessage();
     }
-
-//    @Step("Get delete media message")
-//    public String getDeleteMediaMessage() {
-//        waitForElementToBeVisible(deleteSuccessMessage);
-//
-//        return deleteSuccessMessage.getText();
-//    }
 
     @Step("Get delete media message")
     public String getDeleteMediaMessage() {

@@ -19,12 +19,4 @@ public class TrashPage extends NavigationPage {
 
         PageFactory.initElements(driver, this);
     }
-
-    @Step("Get upload error message")
-    public String getUploadErrorMessage() {
-        waitForElementToBeVisible(errorMessage);
-
-        return errorMessage.getText();
-    }
-
 }
