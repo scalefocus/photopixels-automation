@@ -1,5 +1,6 @@
 package com.photopixels.api.tus;
 
+import com.photopixels.api.dtos.tus.ResumableUploadsResponseDto;
 import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.tus.DeleteSendDataSteps;
 import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
@@ -116,9 +117,11 @@ public class DeleteSendDataTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void deleteSendDataFileIdSuccessfully() {
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(token);
+        ResumableUploadsResponseDto responseBefore = getResumableUploadsSteps.getResumableUploads();
         // Step 1: Verify file ID is present before deletion
-        boolean isPresent = getResumableUploadsSteps.getResumableUploadsFileIdPresent(uploadCoctailLocationId);
-        Assert.assertTrue(isPresent, "Expected file ID to be present");
+        boolean isPresentBefore = responseBefore.getUserUploads().stream()
+                .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
+        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 2: Perform file deletion
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
@@ -127,7 +130,8 @@ public class DeleteSendDataTests extends ApiBaseTest {
         deleteFileById.deleteFileById(uploadCoctailLocationId);
 
         // Step 3: Verify file ID is no longer present after deletion
-        boolean isStillPresent = getResumableUploadsSteps.getResumableUploadsFileIdPresent(uploadCoctailLocationId);
+        boolean isStillPresent = responseBefore.getUserUploads().stream()
+                .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
         Assert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
     }
 
@@ -150,9 +154,11 @@ public class DeleteSendDataTests extends ApiBaseTest {
     @Severity(SeverityLevel.NORMAL)
     public void deleteSendDataFileIdInvalidId() {
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(token);
+        ResumableUploadsResponseDto responseBefore = getResumableUploadsSteps.getResumableUploads();
         // Step 1: Verify file ID Does Not Exist for the user
-        boolean isPresent = getResumableUploadsSteps.getResumableUploadsFileIdPresent(invalidFileId);
-        Assert.assertFalse(isPresent, "Expected file ID to not be present");
+        boolean isPresentBefore = responseBefore.getUserUploads().stream()
+                .anyMatch(upload -> invalidFileId.equals(upload.getFileId()));
+        Assert.assertFalse(isPresentBefore, "Expected file ID to not be present");
 
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
         // Currently we have a bug task https://github.com/scalefocus/photopixels/issues/112
@@ -178,9 +184,11 @@ public class DeleteSendDataTests extends ApiBaseTest {
         userTokenB = getToken(emailB, passwordB);
 
         GetResumableUploadsSteps getResumableUploadsSteps = new GetResumableUploadsSteps(token);
-        // Step 2: Verify the file ID exists for the original (authorized) user
-        boolean isPresent = getResumableUploadsSteps.getResumableUploadsFileIdPresent(uploadFrenchLocationId);
-        Assert.assertTrue(isPresent, "Expected file ID to be present");
+        ResumableUploadsResponseDto responseBefore = getResumableUploadsSteps.getResumableUploads();
+        // Step 2: Verify file ID is present before deletion
+        boolean isPresentBefore = responseBefore.getUserUploads().stream()
+                .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
+        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 3: Attempt deletion with User B (who does not own the file)
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(userTokenB);
@@ -191,7 +199,8 @@ public class DeleteSendDataTests extends ApiBaseTest {
         );
 
         // Step 4: Verify the file is still present for the original (authorized) user after the unauthorized deletion attempt
-        boolean isStillPresent = getResumableUploadsSteps.getResumableUploadsFileIdPresent(uploadFrenchLocationId);
+        boolean isStillPresent = responseBefore.getUserUploads().stream()
+                .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
         Assert.assertTrue(isStillPresent, "Expected file ID to be present");
     }
 }

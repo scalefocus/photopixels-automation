@@ -6,9 +6,9 @@ import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 
-import static io.restassured.RestAssured.config;
-import static io.restassured.config.EncoderConfig.encoderConfig;
+import java.util.Map;
 
+import static com.photopixels.constants.BasePathsConstants.DELETE_SEND_DATA;
 
 public class DeleteSendDataSteps {
 
@@ -18,19 +18,18 @@ public class DeleteSendDataSteps {
     public DeleteSendDataSteps(String token) {
         this.requestOperationsHelper = new RequestOperationsHelper();
         this.requestSpecification = new CustomRequestSpecification();
+        requestSpecification.addBasePath(DELETE_SEND_DATA);
         requestSpecification.setRelaxedHttpsValidation();
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
     private Response deleteUploadFileIdResponse(String fileId) {
-        config = config().encoderConfig(encoderConfig()
-                .appendDefaultContentCharsetToContentTypeIfUndefined(false));
-        // Dynamically build base path
-        String basePath = (fileId == null || fileId.isEmpty())
-                ? "/send_data"
-                : "/send_data/" + fileId;
-
-        requestSpecification.addBasePath(basePath);
+        if (fileId != null && !fileId.isBlank()) {
+            requestSpecification.addPathParams(Map.of("fileId", fileId));
+        } else {
+            // Remove the {fileId} segment manually
+            requestSpecification.addBasePath("send_data");
+        }
         requestSpecification.addCustomHeader("Tus-Resumable", "1.0.0");
 
         return requestOperationsHelper.sendDeleteRequest(requestSpecification.getFilterableRequestSpecification());
