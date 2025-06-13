@@ -13,7 +13,7 @@ jobs:
   #     - name: Checkout Repository
   #       uses: actions/checkout@v3
   #       with:
-  #         repository: "scalefocus/photopixels-"
+  #         repository: "scalefocus/photopixels-web"
   #     - name: Build docker image
   #       working-directory: ""
   #       run: |
@@ -30,11 +30,7 @@ jobs:
 
       - name: Build docker image
         run: |
-          ls -al
-      # - name: Build docker image
-      #   working-directory: "photopixels-backend-net"
-      #   run: |
-      #     docker build \
-      #      --no-cache \
-      #      -t scalefocusad/photopixels-backend-net:automation \
-      #      -f ./src/SF.PhotoPixels.API/Dockerfile .
+          docker build \
+           --no-cache \
+           -t scalefocusad/photopixels-backend-net:automation \
+           -f ./src/SF.PhotoPixels.API/Dockerfile .
