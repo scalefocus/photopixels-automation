@@ -47,5 +47,5 @@ public class BasePathsConstants {
     public static String POST_CREATE_UPLOAD = "/create_upload";
     public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
     public static String PATCH_SEND_DATA = "send_data/{fileId}";
-
+    public static String DELETE_SEND_DATA = "send_data/{fileId}";
 }
