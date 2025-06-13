@@ -1,28 +1,71 @@
-name: Self-Hosted Runner Test
+name: Photopixels automated tests
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
+env:
+  COMPOSE_FILE: ./utils/docker-compose.yml
+  FRONTEND_TAG: scalefocusad/photopixels-web:automation
+  BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
+  AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
+
 jobs:
-  test:
-    # This ensures the job runs on your self-hosted runner(s)
+  build-fe:
     runs-on: self-hosted
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Display Runner Environment
+        with:
+          repository: "scalefocus/photopixels-web"
+      - name: Build docker image
         run: |
-          echo "Runner OS Information:"
-          uname -a
-          echo "Environment Variables:"
-          env
+          docker build -t $FRONTEND_TAG -f ./Dockerfile .
 
-      - name: Create Test File
-        run: touch /tmp/test.txt
+  build-be:
+    runs-on: self-hosted
 
-      - name: List Current Directory Contents
-        run: ls -la
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          repository: "scalefocus/photopixels-backend-net"
+          submodules: "recursive"
+
+      - name: Build docker image
+        run: |
+          docker build \
+           --no-cache \
+           --build-arg VERSION="1.0.0" \
+           --build-arg VERSION_SUFFIX="" \
+           -t $BACKEND_TAG \
+           -f ./src/SF.PhotoPixels.API/Dockerfile .
+  build-automation:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build docker image
+        # run: docker build -f ./Dockerfile -t $AUTOMATION_TAG .
+        run: echo "Build simulation"
+
+  automation:
+    runs-on: self-hosted
+    needs: [build-fe, build-be, build-automation]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Start environment
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
+          ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
+
+      - name: Run tests
+        run: sleep 5
+
+      - name: Cleanup environment
+        if: always()
+        run: docker compose -f $COMPOSE_FILE down -v

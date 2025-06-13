@@ -1,0 +1,48 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <compose-file>"
+    exit 1
+fi
+
+sleep 2
+
+docker compose -f $1 up -d
+
+# Check if all services had started
+service_count=$(docker compose -f "$1" ps --services | wc -l)
+if [ "$service_count" -ne 3 ]; then
+    echo "All services didn't start"
+    exit 1
+fi
+
+i=10         # number of retries
+sleep_time=1 # initial sleep time in seconds
+max_sleep=30 # max sleep time in seconds
+
+while ((i >= 0)); do
+    wget_result=$(wget -NS --no-check-certificate http://localhost:8888/health -O /dev/null 2>&1 |
+        grep "HTTP/" |
+        awk '{print $2}' |
+        tail -n 1)
+
+    if [ "$wget_result" = "200" ]; then
+        echo "Services started successfully."
+        exit 0
+    fi
+
+    ((i--))
+
+    echo "Services not ready. Waiting for $sleep_time seconds..."
+    sleep "$sleep_time"
+
+    # Exponential backoff with cap
+    sleep_time=$((sleep_time * 2))
+    if ((sleep_time > max_sleep)); then
+        sleep_time=$max_sleep
+    fi
+done
+
+docker compose -f $1 logs
+echo "Services did not become healthy in time."
+exit 1
