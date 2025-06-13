@@ -6,23 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    # This ensures the job runs on your self-hosted runner(s)
+  # build-fe:
+  #   runs-on: self-hosted
+
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: "scalefocus/photopixels-"
+  #     - name: Build docker image
+  #       working-directory: ""
+  #       run: |
+  #         docker build -t scalefocusad/photopixels-backend-net -f ./src/SF.PhotoPixels.API/Dockerfile .
+
+  build-be:
     runs-on: self-hosted
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          repository: "scalefocus/photopixels-backend-net"
 
-      - name: Display Runner Environment
+      - name: Build docker image
+        working-directory: "./photopixels-backend-net"
         run: |
-          echo "Runner OS Information:"
-          uname -a
-          echo "Environment Variables:"
-          env
-
-      - name: Create Test File
-        run: touch /tmp/test.txt
-
-      - name: List Current Directory Contents
-        run: ls -la
+          docker build \
+           --no-cache \
+           -t scalefocusad/photopixels-backend-net:automation \
+           -f ./src/SF.PhotoPixels.API/Dockerfile .

@@ -1,0 +1,35 @@
+services:
+  frontend:
+    image: scalefocusad/photopixels-web:${FRONTEND_DOCKER_VERSION}
+    ports: 
+      - '8080:80'
+    environment:
+      SERVER_URL: 'http://localhost:8888'
+    restart: always
+
+  backend:
+    image: scalefocusad/photopixels-backend-net:automation
+    ports: 
+      - '8888:8080'
+    networks:
+      - sf-photos-db
+    volumes:
+      - "${BACKEND_LOGS_LOCATION}:/var/log/photopixels"
+    environment:
+      ConnectionStrings__PhotosMetadata: '${DB_CONNECTION_STRING}'
+      Admin__Email: '${ADMIN_EMAIL}'
+      Admin__Password: '${ADMIN_PASSWORD}'
+      EmailConfiguration__Host: '${EMAIL_HOST}'
+      EmailConfiguration__Port: ${EMAIL_PORT}
+      EmailConfiguration__Username: '${EMAIL_USERNAME}'
+  db:
+    image: postgres:14.3
+    networks:
+      - sf-photos-db
+    environment:
+      POSTGRES_DB: '${DATABASE}'
+      POSTGRES_PASSWORD: '${DATABASE_PASSWORD}'
+    restart: always
+
+networks:
+  sf-photos-db:
