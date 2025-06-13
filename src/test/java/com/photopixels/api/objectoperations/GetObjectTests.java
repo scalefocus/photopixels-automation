@@ -15,6 +15,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
@@ -23,33 +26,34 @@ import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 public class GetObjectTests extends ApiBaseTest {
 
     private String token;
-    private String objectId;
-    private String fileName = TRAINING_FILE;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
 
-        String objectHash = getObjectHash(fileName);
-
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(fileName, objectHash);
-
-        objectId = uploadObjectResponseDto.getId();
+        objectIds =  new ArrayList<>();
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
+        deleteObjects(objectIds, token);
     }
 
-    @Test(description = "Get object")
+    @Test(dataProvider = "files", description = "Get object")
     @Description("Successful get of an object")
     @Story("Get Object")
     @Severity(SeverityLevel.CRITICAL)
-    public void getObjectTest() {
+    public void getObjectTest(String filePath) {
+        String objectHash = getObjectHash(filePath);
+
+        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
+                .uploadObject(filePath, objectHash);
+
+        String objectId = uploadObjectResponseDto.getId();
+        objectIds.add(objectId);
+
         GetObjectSteps getObjectSteps = new GetObjectSteps(token);
         String object = getObjectSteps.getObject(objectId, null);
 

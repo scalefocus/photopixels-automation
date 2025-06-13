@@ -26,6 +26,7 @@ public class GetTrashedObjectsSteps {
         requestSpecification.addBasePath(GET_TRASHED_OBJECTS);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
+
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
@@ -38,37 +39,20 @@ public class GetTrashedObjectsSteps {
         return response.as(GetTrashedObjectsResponseDto.class);
     }
 
-    @Step("Get trashed objects with invalid pageSize: {pageSize}")
-    public ErrorResponseDto getTrashedObjectsWithInvalidPageSize(String pageSize) {
-        Response response = getRawTrashedObjectsResponse(null, pageSize);
+    @Step("Get trashed objects with error")
+    public ErrorResponseDto getTrashedObjectsWithError(String lastId, String pageSize) {
+        Response response = getRawTrashedObjectsResponse(lastId, pageSize);
 
         response.then().statusCode(HttpStatus.SC_BAD_REQUEST);
 
         return response.as(ErrorResponseDto.class);
     }
 
-    @Step("Get trashed objects and expect 204 No Content with lastId: {lastId} and pageSize: {pageSize}")
+    @Step("Get trashed objects and expect 204 No Content")
     public void getTrashedObjectsExpectingNoContent(String lastId, int pageSize) {
-        getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize))
+        Response response =getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
 
-                .then().statusCode(HttpStatus.SC_NO_CONTENT);
-    }
-
-
-    //Retrieves trashed objects while allowing both 200 OK and 204 No Content responses
-    //The API may return either a list of newer trashed objects (200 OK) or indicate there are no further results (204 No Content).
-    // Returning null in the 204 case allows the test to handle both flows.
-    @Step("Get trashed objects allowing both 200 OK and 204 No Content for lastId: {lastId}")
-    public GetTrashedObjectsResponseDto getTrashedObjectsAllowingNoContent(String lastId, int pageSize) {
-        Response response = getRawTrashedObjectsResponse(lastId, String.valueOf(pageSize));
-
-        int statusCode = response.getStatusCode();
-        if (statusCode == HttpStatus.SC_NO_CONTENT) {
-            return null;
-        }
-
-        response.then().statusCode(HttpStatus.SC_OK);
-        return response.as(GetTrashedObjectsResponseDto.class);
+        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
     private Response getRawTrashedObjectsResponse(String lastId, String pageSize) {

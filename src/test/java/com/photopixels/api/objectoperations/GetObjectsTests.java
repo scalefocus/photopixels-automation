@@ -154,9 +154,6 @@ public class GetObjectsTests extends ApiBaseTest {
             softAssert.assertNotEquals(property.getId(), newerObjectId, "Newer object property id is returned");
         }
 
-        // TODO: Remove when issue is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/41");
-
         softAssert.assertAll();
     }
 

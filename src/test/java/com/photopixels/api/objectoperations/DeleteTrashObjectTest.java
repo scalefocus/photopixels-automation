@@ -16,6 +16,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 
 @Listeners(StatusTestListener.class)
@@ -23,31 +26,32 @@ import static com.photopixels.constants.Constants.TRAINING_FILE;
 public class DeleteTrashObjectTest extends ApiBaseTest {
 
     private String token;
-    private String objectId;
-    private final String fileName = TRAINING_FILE;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
 
-        String objectHash = getObjectHash(fileName);
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObject = postUploadObjectSteps.uploadObject(fileName, objectHash);
-
-        objectId = uploadObject.getId();
+        objectIds = new ArrayList<>();
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
+        deleteObjects(objectIds, token);
     }
 
-    @Test(description = "Trash object by id")
+    @Test(dataProvider = "files", description = "Trash object by id")
     @Description("Positive test: Successfully trash an uploaded object by id")
     @Story("Trash Object")
     @Severity(SeverityLevel.CRITICAL)
-    public void trashObjectSuccessfullyTest() {
+    public void trashObjectSuccessfullyTest(String filePath) {
+        String objectHash = getObjectHash(filePath);
+        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+        UploadObjectResponseDto uploadObject = postUploadObjectSteps.uploadObject(filePath, objectHash);
+
+        String objectId = uploadObject.getId();
+        objectIds.add(objectId);
+
         DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
         ObjectVersioningResponseDto trashResponse = deleteTrashObjectSteps.deleteTrashObject(objectId);
 
