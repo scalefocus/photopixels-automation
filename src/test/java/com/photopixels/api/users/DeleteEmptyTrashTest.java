@@ -27,7 +27,6 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
     private String objectId;
     private final String fileName = TRAINING_FILE;
     private final int pageSize = 30;
-    private DeleteEmptyTrashSteps emptyTrashSteps;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -39,25 +38,13 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         UploadObjectResponseDto uploadResponse = uploadSteps.uploadObject(fileName, objectHash);
 
         objectId = uploadResponse.getId();
-
-        // Step 2: Empty the trash bin
-
-        emptyTrashSteps = new DeleteEmptyTrashSteps(token);
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
     }
 
     @Test(description = "Checks full deletion flow of an object via Empty Trash endpoint.")
     @Description("Positive flow test: Upload object, move to trash, verify in trash, empty trash, confirm it's empty")
     @Story("Empty Trash Flow")
     @Severity(SeverityLevel.CRITICAL)
-    public void fullTrashFlowTest() {
-        SoftAssert softAssert = new SoftAssert();
-
+    public void emptyTrashFlowTest() {
         // Step 2: Move object to trash
         DeleteTrashObjectSteps deleteTrashSteps = new DeleteTrashObjectSteps(token);
         deleteTrashSteps.deleteTrashObject(objectId);
@@ -66,6 +53,8 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         GetTrashedObjectsSteps getTrashSteps = new GetTrashedObjectsSteps(token);
         GetTrashedObjectsResponseDto trashedObjects = getTrashSteps.getTrashedObjects(null, pageSize);
 
+        SoftAssert softAssert = new SoftAssert();
+        
         softAssert.assertNotNull(trashedObjects, "Trash response is null");
         softAssert.assertNotNull(trashedObjects.getProperties(), "Trash properties list is null");
 
@@ -75,20 +64,15 @@ public class DeleteEmptyTrashTest extends ApiBaseTest {
         softAssert.assertTrue(foundInTrash, "Object should appear in trash");
 
         // Step 4: Call DELETE /emptytrash
+        DeleteEmptyTrashSteps emptyTrashSteps = new DeleteEmptyTrashSteps(token);
+        EmptyTrashResponseDto emptyTrashResponseDto = emptyTrashSteps.emptyTrash();
 
-        emptyTrashSteps.emptyTrash();
+        softAssert.assertTrue(emptyTrashResponseDto.isSuccess(), "Object should appear in trash");
 
         // Step 5: Confirm trash is now empty
-        GetTrashedObjectsResponseDto trashAfterDelete = getTrashSteps.getTrashedObjects(null, pageSize);
-        List<TrashedObjectPropertyDto> remaining = trashAfterDelete.getProperties();
+        getTrashSteps.getTrashedObjectsExpectingNoContent(null, pageSize);
 
-        boolean stillInTrash = remaining.stream()
-                .anyMatch(obj -> objectId.equals(obj.getId()));
-
-        softAssert.assertFalse(stillInTrash, "Object should no longer be in trash");
-
-        //TODO : Remove when the bug is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/92");
+        // No response content in case of empty trash
 
         softAssert.assertAll();
     }

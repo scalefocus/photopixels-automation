@@ -6,6 +6,7 @@
             <class name="com.photopixels.api.tus.PostCreateUploadTests"/>
             <class name="com.photopixels.api.tus.GetResumableUploadsTests"/>
             <class name="com.photopixels.api.tus.PatchSendDataTests"/>
+            <class name="com.photopixels.api.tus.DeleteSendDataTests"/>
         </classes>
     </test>
 

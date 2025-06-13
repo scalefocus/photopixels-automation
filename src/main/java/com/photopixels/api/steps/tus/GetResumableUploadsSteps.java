@@ -45,4 +45,12 @@ public class GetResumableUploadsSteps {
         response.then().statusCode(HttpStatus.SC_UNAUTHORIZED);
 
     }
+
+    @Step("Check if file ID is present in user uploads")
+    public boolean getResumableUploadsFileIdPresent(String fileId) {
+        ResumableUploadsResponseDto response = getResumableUploads();
+        return response.getUserUploads().stream()
+                .anyMatch(upload -> fileId.equals(upload.getFileId()));
+    }
+
 }

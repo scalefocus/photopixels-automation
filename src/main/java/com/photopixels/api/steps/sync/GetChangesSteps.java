@@ -26,7 +26,6 @@ public class GetChangesSteps {
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
-
         requestSpecification.addCustomHeader("Authorization", token);
     }
 

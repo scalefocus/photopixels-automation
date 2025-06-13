@@ -14,7 +14,7 @@ public class GetLogsSteps {
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
-    public GetLogsSteps() {
+    public GetLogsSteps(String token) {
 
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
@@ -23,6 +23,9 @@ public class GetLogsSteps {
         requestSpecification.setContentType(ContentType.TEXT);
         requestSpecification.setRelaxedHttpsValidation();
 
+        if (token != null) {
+            requestSpecification.addCustomHeader("Authorization", token);
+        }
     }
 
     @Step("Get server logs")
@@ -33,5 +36,13 @@ public class GetLogsSteps {
         response.then().statusCode(HttpStatus.SC_OK);
 
         return response.getBody().asString();
+    }
+
+    @Step("Get server logs when error is expected")
+    public void getLogsWithError(int statusCode) {
+        Response response = requestOperationsHelper
+        .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
+
+        response.then().statusCode(statusCode);
     }
 }
