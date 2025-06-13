@@ -29,7 +29,7 @@ jobs:
           repository: "scalefocus/photopixels-backend-net"
 
       - name: Build docker image
-        working-directory: "./photopixels-backend-net"
+        working-directory: "photopixels-backend-net"
         run: |
           docker build \
            --no-cache \
