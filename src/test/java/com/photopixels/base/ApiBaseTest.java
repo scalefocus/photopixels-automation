@@ -13,6 +13,7 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import org.apache.commons.codec.binary.Base64;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
+import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static io.restassured.RestAssured.baseURI;
 
 public class ApiBaseTest extends BaseTest{
@@ -123,4 +126,11 @@ public class ApiBaseTest extends BaseTest{
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
     }
 
+    @DataProvider(name = "files")
+    public Object[][] provideFiles() {
+        return new Object[][]{
+                {TRAINING_FILE},  // upload an image
+                {SAMPLE_VIDEO_FILE}    // upload a video
+        };
+    }
 }

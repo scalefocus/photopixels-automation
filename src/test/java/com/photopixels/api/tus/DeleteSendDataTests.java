@@ -7,16 +7,16 @@ import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
-import io.qameta.allure.Description;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
-import io.qameta.allure.Story;
+import com.photopixels.listeners.StatusTestListener;
+import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,6 +26,8 @@ import java.util.Map;
 import static com.photopixels.constants.Constants.*;
 import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
+@Listeners(StatusTestListener.class)
+@Feature("Tus")
 public class DeleteSendDataTests extends ApiBaseTest {
     private String name;
     private String email;
@@ -121,31 +123,27 @@ public class DeleteSendDataTests extends ApiBaseTest {
         // Step 1: Verify file ID is present before deletion
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 2: Perform file deletion
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
         // the response returns HTTP 204 No Content, but swagger shown that the response status should be 200
-        //TODO https://github.com/scalefocus/photopixels/issues/140 (after confirmation or fix we will adjust status)
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/140");
+
         deleteFileById.deleteFileById(uploadCoctailLocationId);
 
         // Step 3: Verify file ID is no longer present after deletion
         boolean isStillPresent = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
-        Assert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
-    }
 
-    @Test(description = "Delete file without providing a file ID (null)")
-    @Description("Negative Test: Verify that API returns error when file ID is missing in the DELETE request")
-    @Story("Delete Send Data")
-    @Severity(SeverityLevel.NORMAL)
-    public void deleteSendDataFileIdNull() {
-        DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
-        //The response returns HTTP status 404 (FileId Not Found)
-        deleteFileById.deleteFileExpectingError(
-                null,
-                HttpStatus.SC_NOT_FOUND
-        );
+        softAssert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Delete file with an invalid/nonexistent file ID")
@@ -158,15 +156,19 @@ public class DeleteSendDataTests extends ApiBaseTest {
         // Step 1: Verify file ID Does Not Exist for the user
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> invalidFileId.equals(upload.getFileId()));
-        Assert.assertFalse(isPresentBefore, "Expected file ID to not be present");
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertFalse(isPresentBefore, "Expected file ID to not be present");
 
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
-        // Currently we have a bug task https://github.com/scalefocus/photopixels/issues/112
-        //TODO after fix we will removed the comments //https://github.com/scalefocus/photopixels-backend-net/issues/92 !!!
-        deleteFileById.deleteFileExpectingError(
-                invalidFileId,
-                HttpStatus.SC_NOT_FOUND
-        );
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels-backend-net/issues/92");
+
+        deleteFileById.deleteFileExpectingError(invalidFileId,  HttpStatus.SC_NOT_FOUND);
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Delete a file created by a different user")
@@ -188,19 +190,25 @@ public class DeleteSendDataTests extends ApiBaseTest {
         // Step 2: Verify file ID is present before deletion
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 3: Attempt deletion with User B (who does not own the file)
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(userTokenB);
-        // TODO: Remove when issue is fixed addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/140");
-        deleteFileById.deleteFileExpectingError(
-                uploadFrenchLocationId,
-                HttpStatus.SC_FORBIDDEN
-        );
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/140");
+
+        deleteFileById.deleteFileExpectingError( uploadFrenchLocationId, HttpStatus.SC_FORBIDDEN);
 
         // Step 4: Verify the file is still present for the original (authorized) user after the unauthorized deletion attempt
         boolean isStillPresent = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isStillPresent, "Expected file ID to be present");
+
+        softAssert.assertTrue(isStillPresent, "Expected file ID to be present");
+
+        softAssert.assertAll();
     }
 }

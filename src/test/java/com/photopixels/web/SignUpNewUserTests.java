@@ -18,17 +18,14 @@ import static com.photopixels.constants.Constants.PASSWORD;
 @Listeners(StatusTestListener.class)
 @Feature("Web")
 public class SignUpNewUserTests extends WebBaseTest {
+
     private String randomName;
     private String randomEmail;
-    private WaitOperationHelper waitHelper;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         randomName = "User_" + RandomString.make(5);
-
         randomEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
-
-        waitHelper = new WaitOperationHelper(driver);
     }
 
     @Test(description = "Successful creation of a user on Sign Up and login")
@@ -43,7 +40,7 @@ public class SignUpNewUserTests extends WebBaseTest {
         loginPage = signUpUserPage.signUpNewUser(randomName, randomEmail, PASSWORD);
 
         /* This wait is necessary because when the page loads too fast the elements don't populate */
-        waitHelper.waitMs();
+        loginPage.waitMs();
 
         OverviewPage overviewPage = loginPage.login(randomEmail, PASSWORD);
 
@@ -55,9 +52,8 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with empty name on Sign up")
     @Description("Unsuccessful creation of a user with empty name on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.MINOR)
     public void createUserEmptyNameFieldSignUpTest() {
-
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
@@ -70,9 +66,8 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with empty email on Sign up")
     @Description("Unsuccessful creation of a user with empty email on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.MINOR)
     public void createUserEmptyEmailFieldSignUpTest() {
-
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
@@ -85,9 +80,8 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with empty password on Sign up")
     @Description("Unsuccessful creation of a user with empty password on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.MINOR)
     public void createUserEmptyPasswordFieldSignUpTest() {
-
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
@@ -100,9 +94,8 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with empty fields on Sign up")
     @Description("Unsuccessful creation of a user with empty fields on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.MINOR)
     public void createUserEmptyFieldsSignUpTest() {
-
         LoginPage loginPage = loadPhotoPixelsApp();
 
         SignUpUserPage signUpUserPage = loginPage.openSignUpUserPage();
@@ -115,7 +108,7 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with invalid email format on Sign up")
     @Description("Unsuccessful creation of a user with invalid email format on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.NORMAL)
     public void createUserInvalidEmailSignUpTest() {
         String invalidEmail = "IN2valid@COM";
 
@@ -131,7 +124,7 @@ public class SignUpNewUserTests extends WebBaseTest {
     @Test(description = "Unsuccessful creation of a user with invalid password format on Sign up")
     @Description("Unsuccessful creation of a user with invalid password format on Sign up")
     @Story("Create New User on Sign Up")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.NORMAL)
     public void createUserInvalidPasswordSignUpTest() {
         String invalidPassword = "abc";
 
