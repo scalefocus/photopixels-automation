@@ -43,8 +43,6 @@
             Assert.assertEquals(overviewPage.getUploadSuccessMessage(), FILE_UPLOADED,
                     "The message is not correct.");
 
-
-
             overviewPage.selectMedia(0);
 
             overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
@@ -54,6 +52,33 @@
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_DELETED,
                     "The message is not correct.");
+
+            overviewPage.logOut();
+        }
+
+        @Test(description = "Successful upload, selection and moving to trash for selected media")
+        @Description("Successful upload and deletion of media")
+        @Story("Delete Media")
+        @Severity(SeverityLevel.NORMAL)
+        public void emptyTrash() {
+
+            LoginPage loginPage = loadPhotoPixelsApp();
+            overviewPage = loginPage.login(username, password);
+            overviewPage.uploadMedia(FRENCH_FRIES_FILE);
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
+            overviewPage.selectMedia(0);
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
+            overviewPage.deleteMedia();
+
+            overviewPage.goToTrashTab();
+
+
 
             overviewPage.logOut();
         }
