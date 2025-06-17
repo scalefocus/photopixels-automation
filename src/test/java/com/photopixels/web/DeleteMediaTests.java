@@ -80,7 +80,7 @@
             Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
                     "The header is not correct.");
 
-            trashPage.selectMedia(1);
+            trashPage.selectMedia(0);
 
             trashPage.deleteMediaPermanently();
 

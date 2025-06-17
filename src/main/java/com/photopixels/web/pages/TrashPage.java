@@ -69,7 +69,7 @@ public class TrashPage extends NavigationPage {
         deletePermanentlyConfirmationButton.click();
     }
 
-    @Step("Delete media")
+    @Step("Empty trash with a button")
     public void emptyTrash() {
         waitForElementToBeVisible(emptyTrashButton);
         emptyTrashButton.click();
