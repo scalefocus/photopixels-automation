@@ -27,8 +27,14 @@ public class TrashPage extends NavigationPage {
     @FindBy(css = "[data-testid='DeleteForeverIcon']")
     private WebElement deleteMediaButton;
 
+    @FindBy(xpath = "//button[contains(@class, 'MuiButton-text') and text()='Empty Trash']")
+    private WebElement emptyTrashButton;
+
     @FindBy(xpath = "//button[normalize-space()='Delete Permanently']")
-    private WebElement deletePermanentlyButton;
+    private WebElement deletePermanentlyConfirmationButton;
+
+    @FindBy(xpath = "//button[contains(@class, 'MuiButton-containedError') and text()='Empty Trash']")
+    private WebElement emptyTrashConfirmationButton;
 
 
     public TrashPage(WebDriver driver) {
@@ -59,7 +65,20 @@ public class TrashPage extends NavigationPage {
     public void deleteMediaPermanently() {
         waitForElementToBeVisible(deleteMediaButton);
         deleteMediaButton.click();
-        waitForElementToBeVisible(deletePermanentlyButton);
-        deletePermanentlyButton.click();
+        waitForElementToBeVisible(deletePermanentlyConfirmationButton);
+        deletePermanentlyConfirmationButton.click();
+    }
+
+    @Step("Delete media")
+    public void emptyTrash() {
+        waitForElementToBeVisible(emptyTrashButton);
+        emptyTrashButton.click();
+        waitForElementToBeVisible(emptyTrashConfirmationButton);
+        emptyTrashConfirmationButton.click();
+    }
+
+    @Step("Get delete media permanently message")
+    public String getDeleteMediaMessage() {
+        return getStatusMessage();
     }
 }

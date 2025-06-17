@@ -24,6 +24,9 @@ public class Constants {
     // Create User Web
     public static final String CREATE_NEW_USER = "Create A New User";
 
+    //Trash Page Web
+    public static final String TRASH_PAGE = "Trash";
+
     //Pop-up Messages
     public static final String USER_CREATED = "User Created.";
     public static final String USER_DELETED = "Account Deleted.";
@@ -31,6 +34,7 @@ public class Constants {
     public static final String PASSWORD_CHANGED = "Password changed successfully.";
     public static final String FILE_UPLOADED = "1 image uploaded successfully";
     public static final String FILE_DELETED = "Object(s) trashed successfully.";
+    public static final String FILE_PERMANENTLY_DELETED ="Object(s) delete permanently successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";
