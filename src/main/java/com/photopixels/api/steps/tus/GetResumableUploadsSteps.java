@@ -15,12 +15,12 @@ public class GetResumableUploadsSteps {
     private final CustomRequestSpecification requestSpecification;
 
     public GetResumableUploadsSteps(String token) {
-
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
         requestSpecification.addBasePath(GET_RESUMABLE_UPLOADS);
         requestSpecification.setRelaxedHttpsValidation();
+
         if (token != null) {
             requestSpecification.addCustomHeader("Authorization", token);
         }
@@ -38,19 +38,10 @@ public class GetResumableUploadsSteps {
 
     @Step("Get resumable uploads without token")
     public void getResumableUploadsError() {
-
         Response response = new RequestOperationsHelper()
                 .sendGetRequest(requestSpecification.getFilterableRequestSpecification());
 
         response.then().statusCode(HttpStatus.SC_UNAUTHORIZED);
-
-    }
-
-    @Step("Check if file ID is present in user uploads")
-    public boolean getResumableUploadsFileIdPresent(String fileId) {
-        ResumableUploadsResponseDto response = getResumableUploads();
-        return response.getUserUploads().stream()
-                .anyMatch(upload -> fileId.equals(upload.getFileId()));
     }
 
 }

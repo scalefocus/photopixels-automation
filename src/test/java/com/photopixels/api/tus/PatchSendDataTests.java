@@ -6,15 +6,14 @@ import com.photopixels.api.steps.tus.PostCreateUploadSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
 import com.photopixels.helpers.SplitBinaryImage;
-import io.qameta.allure.Description;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
-import io.qameta.allure.Story;
+import com.photopixels.listeners.StatusTestListener;
+import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -27,6 +26,8 @@ import static com.photopixels.constants.Constants.*;
 import static com.photopixels.constants.ErrorMessageConstants.*;
 import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
+@Listeners(StatusTestListener.class)
+@Feature("Tus")
 public class PatchSendDataTests extends ApiBaseTest {
 
     private String name;

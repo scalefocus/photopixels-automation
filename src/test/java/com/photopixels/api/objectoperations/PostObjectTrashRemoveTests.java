@@ -1,6 +1,7 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
+import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.*;
@@ -56,10 +57,21 @@ public class PostObjectTrashRemoveTests extends ApiBaseTest {
         PostObjectTrashRemoveSteps removeSteps = new PostObjectTrashRemoveSteps(token);
         ObjectVersioningResponseDto response = removeSteps.removeTrashedObject(objectId);
 
+        // Check that the object is restored
+        GetObjectDataSteps getObjectDataSteps = new GetObjectDataSteps(token);
+        GetObjectDataResponseDto getObjectDataResponseDto = getObjectDataSteps.getObjectData(objectId);
+
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertNotNull(response, "Response is null");
         softAssert.assertTrue(response.getRevision() > 0, "Revision should be greater than 0");
+
+        softAssert.assertNotNull(getObjectDataResponseDto, "Object data is not returned");
+        softAssert.assertEquals(getObjectDataResponseDto.getId(), objectId, "Object data id is not correct");
+        softAssert.assertNotNull(getObjectDataResponseDto.getThumbnail(), "Object data thumbnail is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getContentType(), "Object data content type is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getDateCreated(), "Date created should not be null");
+
 
         softAssert.assertAll();
     }

@@ -10,10 +10,12 @@ import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
@@ -23,12 +25,17 @@ public class DeleteObjectTests extends ApiBaseTest {
 
     private String token;
     private String objectId;
-    private String fileName = TRAINING_FILE;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
+    }
 
+    @Test(dataProvider = "files", description = "Delete object")
+    @Description("Successful deletion of an object")
+    @Story("Delete Object")
+    @Severity(SeverityLevel.CRITICAL)
+    public void deleteObjectTest(String fileName) {
         String objectHash = getObjectHash(fileName);
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
@@ -36,13 +43,7 @@ public class DeleteObjectTests extends ApiBaseTest {
                 .uploadObject(fileName, objectHash);
 
         objectId = uploadObjectResponseDto.getId();
-    }
 
-    @Test(description = "Delete object")
-    @Description("Successful deletion of an object")
-    @Story("Delete Object")
-    @Severity(SeverityLevel.CRITICAL)
-    public void deleteObjectTest() {
         DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
         ObjectVersioningResponseDto objectVersioningResponseDto = deleteObjectSteps.deleteObject(objectId);
 
@@ -70,4 +71,5 @@ public class DeleteObjectTests extends ApiBaseTest {
 
         softAssert.assertAll();
     }
+
 }

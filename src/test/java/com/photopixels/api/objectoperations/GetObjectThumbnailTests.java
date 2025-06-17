@@ -15,6 +15,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
@@ -23,33 +26,34 @@ import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 public class GetObjectThumbnailTests extends ApiBaseTest {
 
     private String token;
-    private String objectId;
-    private String fileName = FRENCH_FRIES_FILE;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
 
-        String objectHash = getObjectHash(fileName);
-
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(fileName, objectHash);
-
-        objectId = uploadObjectResponseDto.getId();
+        objectIds = new ArrayList<>();
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
+        deleteObjects(objectIds, token);
     }
 
-    @Test(description = "Get object thumbnail")
+    @Test(dataProvider = "files", description = "Get object thumbnail")
     @Description("Successful get of an object thumbnail")
     @Story("Get Object Thumbnail")
     @Severity(SeverityLevel.CRITICAL)
-    public void getObjectThumbnailTest() {
+    public void getObjectThumbnailTest(String filePath) {
+        String objectHash = getObjectHash(filePath);
+
+        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
+                .uploadObject(filePath, objectHash);
+
+        String objectId = uploadObjectResponseDto.getId();
+        objectIds.add(objectId);
+
         GetObjectThumbnailSteps getObjectThumbnailSteps = new GetObjectThumbnailSteps(token);
         String object = getObjectThumbnailSteps.getObjectThumbnail(objectId);
 

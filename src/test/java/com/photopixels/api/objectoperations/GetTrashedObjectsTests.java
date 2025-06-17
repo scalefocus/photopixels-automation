@@ -4,7 +4,6 @@ import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetTrashedObjectsResponseDto;
 import com.photopixels.api.dtos.objectoperations.TrashedObjectPropertyDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.GetTrashedObjectsSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
@@ -18,9 +17,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.photopixels.constants.Constants.TRAINING_FILE;
+import static com.photopixels.constants.Constants.*;
 import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
 
 @Listeners(StatusTestListener.class)
@@ -32,15 +32,27 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     private final int pageSize = 30;
     private final String fileName = TRAINING_FILE;
 
+    private List<String> files;
+    private List<String> objectIds;
+
     @BeforeClass(alwaysRun = true)
     public void setup() {
-        token = getUserToken();
+        token = getAdminToken();
+
+        files = new ArrayList<>();
+        files.add(COCTAIL_FILE);
+        files.add(UNNAMED_FILE);
+
+        objectIds = new ArrayList<>();
 
         String objectHash = getObjectHash(fileName);
+
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
         UploadObjectResponseDto uploadResponse = postUploadObjectSteps.uploadObject(fileName, objectHash);
 
         objectId = uploadResponse.getId();
+
+        objectIds.add(objectId);
 
         DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
         deleteTrashObjectSteps.deleteTrashObject(objectId);
@@ -48,8 +60,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
+        deleteObjects(objectIds, token);
     }
 
     @Test(description = "Upload, trash and verify object appears in trash")
@@ -87,23 +98,39 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     @Story("Get Trashed Objects")
     @Severity(SeverityLevel.NORMAL)
     public void getTrashedObjectsWithMiddleLastIdTest() {
-        GetTrashedObjectsSteps steps = new GetTrashedObjectsSteps(token);
-        GetTrashedObjectsResponseDto fullResponse = steps.getTrashedObjects(null, pageSize);
 
-        List<TrashedObjectPropertyDto> allObjects = fullResponse.getProperties();
+        for (String file : files) {
+            String objectHash = getObjectHash(file);
+
+            // Need to reinitialize the variable to clear the multipart for the next upload
+            PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+            UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
+                    .uploadObject(file, objectHash);
+
+            String newerObjectId = uploadObjectResponseDto.getId();
+
+            objectIds.add(newerObjectId);
+
+            DeleteTrashObjectSteps deleteTrashObjectSteps = new DeleteTrashObjectSteps(token);
+            deleteTrashObjectSteps.deleteTrashObject(newerObjectId);
+        }
+
+        String lastObjectId = objectIds.get(1);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertTrue(allObjects.size() >= 2, "At least 2 trashed objects are required");
+        GetTrashedObjectsSteps steps = new GetTrashedObjectsSteps(token);
 
-        String middleId = allObjects.get(allObjects.size() - 2).getId();
-        GetTrashedObjectsResponseDto nextPage = steps.getTrashedObjectsAllowingNoContent(middleId, pageSize);
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/142");
+
+        GetTrashedObjectsResponseDto nextPage = steps.getTrashedObjects(lastObjectId, 1);
 
         if (nextPage != null) {
             List<TrashedObjectPropertyDto> nextItems = nextPage.getProperties();
 
             softAssert.assertFalse(nextItems.isEmpty(), "Next page should not be empty");
-            softAssert.assertFalse(nextItems.stream().anyMatch(p -> middleId.equals(p.getId())), "Next page should not contain the lastId used");
+            softAssert.assertFalse(nextItems.stream().anyMatch(p -> objectId.equals(p.getId())), "Next page should not contain the lastId used");
         }
 
         softAssert.assertAll();
@@ -187,7 +214,7 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         String invalidPageSize = "avc";
 
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
-        ErrorResponseDto response = getTrashedObjectsSteps.getTrashedObjectsWithInvalidPageSize(invalidPageSize);
+        ErrorResponseDto response = getTrashedObjectsSteps.getTrashedObjectsWithError(null, invalidPageSize);
 
         SoftAssert softAssert = new SoftAssert();
 

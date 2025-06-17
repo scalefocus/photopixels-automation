@@ -16,6 +16,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
@@ -24,34 +28,35 @@ import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 public class GetObjectDataTests extends ApiBaseTest {
 
     private String token;
-    private String objectId;
-    private String objectHash;
-    private String fileName = TRAINING_FILE;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
 
-        objectHash = getObjectHash(fileName);
-
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(fileName, objectHash);
-
-        objectId = uploadObjectResponseDto.getId();
+        objectIds = new ArrayList<>();
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
-        deleteObjectSteps.deleteObject(objectId);
+        deleteObjects(objectIds, token);
     }
 
-    @Test(description = "Get object data")
+    @Test(dataProvider = "files", description = "Get object data")
     @Description("Successful get of an object data")
     @Story("Get Object Data")
     @Severity(SeverityLevel.CRITICAL)
-    public void getObjectDataTest() {
+    public void getObjectDataTest(String filePath) {
+        String objectHash = getObjectHash(filePath);
+
+        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
+                .uploadObject(filePath, objectHash);
+
+        String objectId = uploadObjectResponseDto.getId();
+
+        objectIds.add(objectId);
+
         GetObjectDataSteps getObjectDataSteps = new GetObjectDataSteps(token);
         GetObjectDataResponseDto getObjectDataResponseDto = getObjectDataSteps.getObjectData(objectId);
 

@@ -27,8 +27,6 @@ public class PostUploadObjectTests extends ApiBaseTest {
     private String token;
     private String objectHash;
     private String filePath = UNNAMED_FILE;
-    private String uploadPhotoPath = TRAINING_FILE;
-    private String uploadVideo = SAMPLE_VIDEO_FILE;
 
     private Map<String, String> registeredUsersList = new HashMap<>();
 
@@ -53,16 +51,16 @@ public class PostUploadObjectTests extends ApiBaseTest {
         deleteRegisteredUsers(registeredUsersList);
     }
 
-    @Test(description = "Upload photo object")
+    @Test(dataProvider = "files", description = "Upload photo object")
     @Description("Successful upload of photo object")
     @Story("Upload Object")
     @Severity(SeverityLevel.CRITICAL)
-    public void uploadObjectTest() {
-        String photoObjectHash = getObjectHash(uploadPhotoPath);
+    public void uploadObjectTest(String filePath) {
+        String photoObjectHash = getObjectHash(filePath);
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
         UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(uploadPhotoPath, photoObjectHash);
+                .uploadObject(filePath, photoObjectHash);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -132,24 +130,18 @@ public class PostUploadObjectTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-    @DataProvider(name = "invalidHashFiles")
-    public Object[][] provideInvalidHashFiles() {
-        return new Object[][]{
-                {TRAINING_FILE},  // upload an image
-                {SAMPLE_VIDEO_FILE}    // upload a video
-        };
-    }
-    @Test(dataProvider = "invalidHashFiles", description = "Upload object with invalid object hash (image/video)")
+    @Test(description = "Upload object with invalid object hash")
     @Description("Upload image or video with invalid object hash - should return 400 Bad Request")
     @Story("Upload Object")
     @Severity(SeverityLevel.MINOR)
-    public void uploadObjectInvalidObjectHashTest(String filePath) {
+    public void uploadObjectInvalidObjectHashTest() {
 
         String invalidObjectHash = "invalidHash";
         String expectedErrorMessage = ErrorMessagesEnum.OBJECT_HASH_NOT_MATCH.getErrorMessage();
 
         PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        ErrorResponseDto errorResponseDto = postUploadObjectSteps.uploadObjectError(filePath,invalidObjectHash,HttpStatus.SC_BAD_REQUEST);
+        ErrorResponseDto errorResponseDto = postUploadObjectSteps
+                .uploadObjectError(filePath, invalidObjectHash, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -163,24 +155,4 @@ public class PostUploadObjectTests extends ApiBaseTest {
         softAssert.assertAll();
     }
 
-    @Test(description = "Upload video object")
-    @Description("Successful upload of a video object")
-    @Story("Upload Object")
-    @Severity(SeverityLevel.CRITICAL)
-    public void uploadVideoObjectTest() {
-        String videoObjectHash = getObjectHash(uploadVideo);
-
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(uploadVideo, videoObjectHash);
-
-        SoftAssert softAssert = new SoftAssert();
-
-        softAssert.assertNotNull(uploadObjectResponseDto.getId(), "Video object ID is missing");
-        softAssert.assertTrue(uploadObjectResponseDto.getRevision() > 0, "Video revision is missing");
-        softAssert.assertNotNull(uploadObjectResponseDto.getQuota(), "Quota is missing");
-        softAssert.assertNotNull(uploadObjectResponseDto.getUsedQuota(), "Used quota is missing");
-
-        softAssert.assertAll();
-    }
 }
