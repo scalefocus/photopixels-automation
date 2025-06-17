@@ -4,12 +4,14 @@ services:
     deploy:
       labels:
         automation.environment:
-    ports: 
+    ports:
       - '5001:80'
+    networks:
+      - sf-photos-net
     environment:
       SERVER_URL: 'http://localhost:8888'
     restart: always
-    depends_on: 
+    depends_on:
       - backend
 
   backend:
@@ -18,19 +20,20 @@ services:
       labels:
         automation.environment:
 
-    ports: 
+    ports:
       - '8888:8080'
     networks:
+      - sf-photos-net
       - sf-photos-db
     environment:
       ConnectionStrings__PhotosMetadata: 'Host=db;Port=5432;Database=photosdb;Username=postgres;Password=test123'
-      Admin__Email: 'test@mail.com'
-      Admin__Password: 'Test@123'
+      Admin__Email: 'testadmin@test.com'
+      Admin__Password: 'Test12345!'
       EmailConfiguration__Host: ''
       EmailConfiguration__Port: ''
       EmailConfiguration__Username: ''
     restart: always
-    depends_on: 
+    depends_on:
       - db
 
   db:
@@ -48,3 +51,4 @@ services:
 
 networks:
   sf-photos-db:
+  sf-photos-net:

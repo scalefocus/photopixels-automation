@@ -5,9 +5,9 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-sleep 2
-
 docker compose -f $1 up -d
+
+sleep 2
 
 # Check if all services had started
 service_count=$(docker compose -f "$1" ps --services | wc -l)

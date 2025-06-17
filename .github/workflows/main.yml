@@ -12,22 +12,18 @@ env:
 jobs:
   build-fe:
     runs-on: self-hosted
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: "scalefocus/photopixels-web"
       - name: Build docker image
         run: |
-          docker build -t $FRONTEND_TAG -f ./Dockerfile .
+          docker build --no-cache -t $FRONTEND_TAG -f ./Dockerfile .
 
   build-be:
     runs-on: self-hosted
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: "scalefocus/photopixels-backend-net"
           submodules: "recursive"
@@ -42,18 +38,16 @@ jobs:
            -f ./src/SF.PhotoPixels.API/Dockerfile .
   build-automation:
     runs-on: self-hosted
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build docker image
-        # run: docker build -f ./Dockerfile -t $AUTOMATION_TAG .
-        run: echo "Build simulation"
+        run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
 
   automation:
     runs-on: self-hosted
-    needs: [build-fe, build-be, build-automation]
+    needs: [ build-fe, build-be, build-automation ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,8 +57,13 @@ jobs:
           chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
           ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
 
-      - name: Run tests
-        run: sleep 5
+      - name: Run Api tests
+        run: |
+          docker run -i --rm \
+          -e BASE_URI="http://backend:8080/" \
+          -e SUITE_NAME="api" \
+          --network utils_sf-photos-net \
+          $AUTOMATION_TAG
 
       - name: Cleanup environment
         if: always()
