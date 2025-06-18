@@ -1,0 +1,17 @@
+target/
+allure-results/
+allure-report/
+allure-history/
+.allure/
+
+### IntelliJ IDEA ###
+.idea/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache

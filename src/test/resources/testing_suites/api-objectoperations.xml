@@ -1,0 +1,21 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Object Operations API Tests">
+
+    <test name="Object Operations Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.api.objectoperations.PostUploadObjectTests"/>
+            <class name="com.photopixels.api.objectoperations.DeleteObjectTests"/>
+            <class name="com.photopixels.api.objectoperations.GetObjectTests"/>
+            <class name="com.photopixels.api.objectoperations.GetObjectThumbnailTests"/>
+            <class name="com.photopixels.api.objectoperations.PutUpdateObjectTests"/>
+            <class name="com.photopixels.api.objectoperations.GetObjectDataTests"/>
+            <class name="com.photopixels.api.objectoperations.PostGetObjectsDataTests"/>
+            <class name="com.photopixels.api.objectoperations.GetObjectsTests"/>
+            <class name="com.photopixels.api.objectoperations.DeleteTrashObjectTest"/>
+            <class name="com.photopixels.api.objectoperations.GetTrashedObjectsTests"/>
+            <class name="com.photopixels.api.objectoperations.PostObjectTrashRemoveTests"/>
+            <class name="com.photopixels.api.objectoperations.PostTrashDeletePermanentTests"/>
+        </classes>
+    </test>
+
+</suite>

@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Status API Tests">
+
+    <test name="Status Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.api.status.GetStatusTests"/>
+            <class name="com.photopixels.api.status.GetLogsTests"/>
+        </classes>
+    </test>
+
+</suite>

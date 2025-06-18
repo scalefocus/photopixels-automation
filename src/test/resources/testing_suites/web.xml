@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite verbose="1" name="Photo Pixels Web Tests">
+
+    <test name="Web Tests" thread-count="1">
+        <classes>
+            <class name="com.photopixels.web.LoginTests"/>
+            <class name="com.photopixels.web.CreateNewUserTests"/>
+            <class name="com.photopixels.web.EditUserTests"/>
+            <class name="com.photopixels.web.SignUpNewUserTests"/>
+            <class name="com.photopixels.web.DeleteMediaTests"/>
+        </classes>
+    </test>
+
+</suite>
