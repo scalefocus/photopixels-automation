@@ -1,11 +1,10 @@
 package com.photopixels.api.objectoperations;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
+import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
-import com.photopixels.api.steps.objectoperations.PostTrashDeletePermanentSteps;
-import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
+import com.photopixels.api.steps.objectoperations.*;
 import com.photopixels.api.steps.users.DeleteEmptyTrashSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
@@ -54,6 +53,7 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void deletePermanentFromTrashSuccessfullyTest(List<String> files) {
         List<String> objectIds = new ArrayList<>();
+        int pageSize = 10;
 
         for (String fileName : files) {
             String objectHash = getObjectHash(fileName);
@@ -79,6 +79,16 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
 
         softAssert.assertNotNull(response, "Response is null");
         softAssert.assertTrue(response.getRevision() > 0, "Revision should be greater than 0");
+
+        // Checking if objects are removed from trash
+        GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
+        getTrashedObjectsSteps.getTrashedObjectsExpectingNoContent(null, pageSize);
+
+        // Check that objects are not restored
+        PostGetObjectsDataSteps postGetObjectsDataSteps = new PostGetObjectsDataSteps(token);
+        GetObjectDataResponseDto[] getObjectsDataResponseDto = postGetObjectsDataSteps.getObjectsData(objectIds);
+
+        softAssert.assertEquals(getObjectsDataResponseDto.length, 0, "Deleted objects are available");
 
         softAssert.assertAll();
     }
