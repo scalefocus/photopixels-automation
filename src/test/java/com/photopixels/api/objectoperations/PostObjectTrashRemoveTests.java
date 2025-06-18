@@ -6,7 +6,6 @@ import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.*;
 import com.photopixels.base.ApiBaseTest;
-import com.photopixels.constants.ErrorMessageConstants;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -17,7 +16,6 @@ import org.testng.asserts.SoftAssert;
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
-
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")

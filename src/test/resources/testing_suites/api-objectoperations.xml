@@ -14,6 +14,7 @@
             <class name="com.photopixels.api.objectoperations.DeleteTrashObjectTest"/>
             <class name="com.photopixels.api.objectoperations.GetTrashedObjectsTests"/>
             <class name="com.photopixels.api.objectoperations.PostObjectTrashRemoveTests"/>
+            <class name="com.photopixels.api.objectoperations.PostTrashDeletePermanentTests"/>
         </classes>
     </test>
 
