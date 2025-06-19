@@ -16,7 +16,7 @@ jobs:
   build-be:
     runs-on: self-hosted
     steps:
-      - uses: ./github/templates/build-be.yml
+      - uses: ./github/templates/build-be
         with:
           branch: ${{ inputs.branch || 'main' }}
           tag: $DOCKER_TAG
@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: "scalefocus/photopixels-automation"
           fetch-depth: 0
       - name: Build docker image
         run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
