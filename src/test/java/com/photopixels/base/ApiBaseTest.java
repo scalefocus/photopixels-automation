@@ -4,9 +4,11 @@ import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.admin.DeleteUserAdminSteps;
 import com.photopixels.api.steps.admin.GetUsersSteps;
+import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
+import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -24,21 +26,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
-import static com.photopixels.constants.Constants.TRAINING_FILE;
+import static com.photopixels.constants.Constants.*;
 import static io.restassured.RestAssured.baseURI;
 
 public class ApiBaseTest extends BaseTest{
 
     @BeforeSuite(alwaysRun = true)
     public void initSuiteApi() {
-        baseURI = System.getProperty("baseUri");
-
-        if (baseURI == null || baseURI.isEmpty()) {
-            baseURI = configProperties.getProperty("baseUri");
-        }
+        baseURI = baseUri;
 
         String logEnabled = System.getProperty("isLogEnabled");
+
         if (logEnabled == null) {
             logEnabled = configProperties.getProperty("isLogEnabled");
         }
@@ -48,6 +46,20 @@ public class ApiBaseTest extends BaseTest{
                     new ResponseLoggingFilter(LogDetail.ALL));
         } else {
             RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        }
+
+        prepareUsers();
+    }
+
+    // TODO: Move that to be available for web and mobile suites
+    protected void prepareUsers() {
+        try {
+            PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
+            postRegisterUserSteps.registerUser(inputData.getUserFullName(),
+                    inputData.getUsername(), inputData.getPassword());
+        } catch (AssertionError e) {
+            // User already registered
+            // TODO: Add proper check for duplicate user error
         }
     }
 
