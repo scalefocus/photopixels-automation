@@ -28,6 +28,10 @@ jobs:
         with:
           repository: "scalefocus/photopixels-automation"
           fetch-depth: 0
+      - name: whoami
+        run: whoami
+      - name: machine info
+        run: cat /etc/hostname
       - name: Build docker image
         run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
 
