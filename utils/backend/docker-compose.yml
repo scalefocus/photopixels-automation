@@ -1,0 +1,39 @@
+services:
+  backend:
+    image: scalefocusad/photopixels-backend-net:automation
+    deploy:
+      labels:
+        automation.environment:
+
+    ports:
+      - '8888:8080'
+    networks:
+      - sf-photos-net
+      - sf-photos-db
+    environment:
+      ConnectionStrings__PhotosMetadata: 'Host=db;Port=5432;Database=photosdb;Username=postgres;Password=test123'
+      Admin__Email: 'testadmin@test.com'
+      Admin__Password: 'Test12345!'
+      EmailConfiguration__Host: ''
+      EmailConfiguration__Port: ''
+      EmailConfiguration__Username: ''
+    restart: always
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14.3
+    deploy:
+      labels:
+        automation.environment:
+
+    networks:
+      - sf-photos-db
+    environment:
+      POSTGRES_DB: 'photosdb'
+      POSTGRES_PASSWORD: 'test123'
+    restart: always
+
+networks:
+  sf-photos-db:
+  sf-photos-net:

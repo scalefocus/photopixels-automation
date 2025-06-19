@@ -1,0 +1,55 @@
+﻿name: Backend Tests
+on:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        description: 'Branch to checkout'
+        required: true
+        default: 'main'
+env:
+  DOCKER_TAG: automation-backend
+  COMPOSE_FILE: ./utils/backend/docker-compose.yml
+  AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:$DOCKER_TAG
+
+jobs:
+  build-be:
+    runs-on: self-hosted
+    steps:
+      - uses: ./github/templates/build-be.yml
+        with:
+          branch: ${{ inputs.branch || 'main' }}
+          tag: $DOCKER_TAG
+
+  build-automation:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build docker image
+        run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
+
+  automation:
+    runs-on: self-hosted
+    needs: [ build-be, build-automation ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Start environment
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
+          ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
+
+      - name: Run Api tests
+        run: |
+          docker run -i --rm \
+          -e BASE_URI="http://backend:8080/" \
+          -e SUITE_NAME="api" \
+          --network utils_sf-photos-net \
+          $AUTOMATION_TAG
+
+      - name: Cleanup environment
+        if: always()
+        run: docker compose -f $COMPOSE_FILE down -v

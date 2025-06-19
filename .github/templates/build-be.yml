@@ -1,0 +1,33 @@
+﻿name: "Build BE"
+description: 'Checkout and build the backend docker image'
+
+env:
+  BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
+
+inputs:
+  branch:
+    description: 'Branch to checkout'
+    required: false
+    default: 'main'
+  tag:
+    description: 'Tag for the docker test image'
+    required: false
+    default: 'automation'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: "scalefocus/photopixels-backend-net"
+        submodules: "recursive"
+        ref: ${{ inputs.branch }}
+
+    - name: Build docker image
+      run: |
+        docker build \
+         --no-cache \
+         --build-arg VERSION="1.0.0" \
+         --build-arg VERSION_SUFFIX="" \
+         -t $BACKEND_TAG \
+         -f ./src/SF.PhotoPixels.API/Dockerfile .

@@ -1,0 +1,24 @@
+﻿name: "Build FE"
+description: 'Checkout and build the frontend docker image'
+
+env:
+  FRONTEND_TAG: scalefocusad/photopixels-web:automation
+
+inputs:
+  branch:
+    description: 'Branch to checkout'
+    required: false
+    default: 'main'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: "scalefocus/photopixels-web"
+        submodules: "recursive"
+        ref: ${{ inputs.branch }}
+
+    - name: Build docker image
+      run: |
+        docker build --no-cache -t $FRONTEND_TAG -f ./Dockerfile .

@@ -5,13 +5,15 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-docker compose -f $1 up -d
+available_service_count=$(docker compose config --services | wc -l)
+
+docker compose -f "$1" up -d
 
 sleep 2
 
 # Check if all services had started
 service_count=$(docker compose -f "$1" ps --services | wc -l)
-if [ "$service_count" -ne 3 ]; then
+if [ "$service_count" -eq "$available_service_count" ]; then
     echo "All services didn't start"
     exit 1
 fi
@@ -43,6 +45,6 @@ while ((i >= 0)); do
     fi
 done
 
-docker compose -f $1 logs
+docker compose -f "$1" logs
 echo "Services did not become healthy in time."
 exit 1
