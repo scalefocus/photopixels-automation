@@ -19,12 +19,19 @@ public class BaseTest {
 
 	protected static InputDataHelper inputData;
 	protected static Properties configProperties;
+	protected static String baseUri;
 
 	@BeforeSuite(alwaysRun = true)
 	public void initSuiteBase() {
 		configProperties = new PropertiesUtils().loadProps(CONFIG_PROPS);
 
 		inputData = new InputDataHelper();
+
+		baseUri = System.getProperty("baseUri");
+
+		if (baseUri == null || baseUri.isEmpty()) {
+			baseUri = configProperties.getProperty("baseUri");
+		}
 	}
 
 	@AfterSuite(alwaysRun = true)
@@ -76,10 +83,7 @@ public class BaseTest {
 
 			Properties prop = new Properties();
 
-			String environment = configProperties.getProperty("webUrl").isEmpty() ? configProperties.getProperty("baseUri")
-					: configProperties.getProperty("webUrl");
-
-			prop.setProperty("environment", environment);
+			prop.setProperty("environment", baseUri);
 
 			prop.store(out, "Setting environment data");
 
