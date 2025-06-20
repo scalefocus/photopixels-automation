@@ -13,10 +13,12 @@ sleep 2
 
 # Check if all services had started
 service_count=$(docker compose -f "$1" ps --services | wc -l)
-if [ "$service_count" -eq "$available_service_count" ]; then
-    echo "All services didn't start"
+if [ "$service_count" -ne "$available_service_count" ]; then
+    echo "Not all services started"
     exit 1
 fi
+
+echo "All services started successfully"
 
 i=10         # number of retries
 sleep_time=1 # initial sleep time in seconds
