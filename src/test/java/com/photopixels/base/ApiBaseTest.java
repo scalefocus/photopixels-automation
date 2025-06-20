@@ -9,6 +9,7 @@ import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
+import com.photopixels.enums.UserRolesEnum;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import static com.photopixels.constants.Constants.*;
 import static io.restassured.RestAssured.baseURI;
+import static io.restassured.RestAssured.get;
 
 public class ApiBaseTest extends BaseTest{
 
@@ -53,13 +55,16 @@ public class ApiBaseTest extends BaseTest{
 
     // TODO: Move that to be available for web and mobile suites
     protected void prepareUsers() {
-        try {
-            PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
-            postRegisterUserSteps.registerUser(inputData.getUserFullName(),
-                    inputData.getUsername(), inputData.getPassword());
-        } catch (AssertionError e) {
-            // User already registered
-            // TODO: Add proper check for duplicate user error
+        String token = getAdminToken();
+
+        GetUsersSteps getUsersSteps = new GetUsersSteps(token);
+        GetUserResponseDto[] getUserResponseDto = getUsersSteps.getUsers();
+
+        if (Arrays.stream(getUserResponseDto).noneMatch(
+                u -> u.getEmail().equals(inputData.getUsername()))) {
+            PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
+            postRegisterUserAdminSteps.registerUserAdmin(inputData.getUserFullName(),
+                    inputData.getUsername(), inputData.getPassword(), UserRolesEnum.USER);
         }
     }
 
