@@ -1,5 +1,6 @@
 package com.photopixels.api.dtos.objectoperations;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
-public class DeletePermanentRequestDto {
+public class ObjectIdsRequestDto {
 
     private List<String> objectIds;
 

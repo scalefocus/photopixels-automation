@@ -13,43 +13,43 @@ import org.apache.http.HttpStatus;
 
 import java.util.List;
 
-import static com.photopixels.constants.BasePathsConstants.POST_TRASH_DELETE_PERMANENT;
+import static com.photopixels.constants.BasePathsConstants.POST_REMOVE_OBJECTS_FROM_TRASH;
 
-public class PostTrashDeletePermanentSteps {
+public class PostRemoveObjectsFromTrashSteps {
 
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
-    public PostTrashDeletePermanentSteps(String token) {
+    public PostRemoveObjectsFromTrashSteps(String token) {
         requestOperationsHelper = new RequestOperationsHelper();
         requestSpecification = new CustomRequestSpecification();
 
-        requestSpecification.addBasePath(POST_TRASH_DELETE_PERMANENT);
+        requestSpecification.addBasePath(POST_REMOVE_OBJECTS_FROM_TRASH);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
 
         requestSpecification.addCustomHeader("Authorization", token);
     }
 
-    @Step("Delete permanent object from trash")
-    public ObjectVersioningResponseDto deletePermanentFromTrash(List<String> objectIds) {
-        Response response = deletePermanentFromTrashResponse(objectIds);
+    @Step("Remove objects from trash")
+    public ObjectVersioningResponseDto removeObjectsFromTrash(List<String> objectIds) {
+        Response response = removeObjectsFromTrashResponse(objectIds);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
         return response.as(ObjectVersioningResponseDto.class);
     }
 
-    @Step("Delete permanent from trash with error")
-    public ErrorResponseDto deletePermanentFromTrashError(List<String> objectIds, int statusCode) {
-        Response response = deletePermanentFromTrashResponse(objectIds);
+    @Step("Remove objects from trash with error")
+    public ErrorResponseDto removeObjectsFromTrashError(List<String> objectIds, int statusCode) {
+        Response response = removeObjectsFromTrashResponse(objectIds);
 
         response.then().statusCode(statusCode);
 
         return response.as(ErrorResponseDto.class);
     }
 
-    private Response deletePermanentFromTrashResponse(List<String> objectIds) {
+    private Response removeObjectsFromTrashResponse(List<String> objectIds) {
         ObjectIdsFactory objectIdsFactory = new ObjectIdsFactory();
         ObjectIdsRequestDto objectIdsRequestDto = objectIdsFactory
                 .createDeletePermanentRequestDto(objectIds);
