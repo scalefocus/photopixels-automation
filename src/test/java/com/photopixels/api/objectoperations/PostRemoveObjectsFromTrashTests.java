@@ -24,19 +24,21 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class PostTrashDeletePermanentTests extends ApiBaseTest {
+public class PostRemoveObjectsFromTrashTests extends ApiBaseTest {
 
     private String token;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
+        
+        objectIds = new ArrayList<>();
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        DeleteEmptyTrashSteps emptyTrashSteps = new DeleteEmptyTrashSteps(token);
-        emptyTrashSteps.emptyTrash();
+        deleteObjects(objectIds, token);
     }
 
     @DataProvider(name = "filesForDeletion")
@@ -47,12 +49,11 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
         };
     }
 
-    @Test(dataProvider = "filesForDeletion", description = "Successfully delete permanent from trash")
-    @Description("Verify successful permanent deletion of trashed objects")
-    @Story("Delete Permanent")
+    @Test(dataProvider = "filesForDeletion", description = "Successfully remove objects from trash")
+    @Description("Verify successful removal  of trashed objects")
+    @Story("Remove Objects From Trash")
     @Severity(SeverityLevel.CRITICAL)
-    public void deletePermanentFromTrashSuccessfullyTest(List<String> files) {
-        List<String> objectIds = new ArrayList<>();
+    public void removeObjectsFromTrashSuccessfullyTest(List<String> files) {
         int pageSize = 10;
 
         for (String fileName : files) {
@@ -72,8 +73,8 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
         }
 
         // Delete permanent from trash
-        PostTrashDeletePermanentSteps postTrashDeletePermanentSteps = new PostTrashDeletePermanentSteps(token);
-        ObjectVersioningResponseDto response = postTrashDeletePermanentSteps.deletePermanentFromTrash(objectIds);
+        PostRemoveObjectsFromTrashSteps postRemoveObjectsFromTrashSteps = new PostRemoveObjectsFromTrashSteps(token);
+        ObjectVersioningResponseDto response = postRemoveObjectsFromTrashSteps.removeObjectsFromTrash(objectIds);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -88,19 +89,19 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
         PostGetObjectsDataSteps postGetObjectsDataSteps = new PostGetObjectsDataSteps(token);
         GetObjectDataResponseDto[] getObjectsDataResponseDto = postGetObjectsDataSteps.getObjectsData(objectIds);
 
-        softAssert.assertEquals(getObjectsDataResponseDto.length, 0, "Deleted objects are available");
+        softAssert.assertEquals(getObjectsDataResponseDto.length, objectIds.size(), "Deleted objects are available");
 
         softAssert.assertAll();
     }
 
-    @Test(description = "Delete permanent from trash with missing IDs")
+    @Test(description = "Remove objects from trash with missing IDs")
     @Description("Validation of 400 Bad Request when missing object IDs are provided")
-    @Story("Delete Permanent")
+    @Story("Remove Objects From Trash")
     @Severity(SeverityLevel.MINOR)
-    public void deletePermanentFromTrashMissingIdsTest() {
-        PostTrashDeletePermanentSteps postTrashDeletePermanentSteps = new PostTrashDeletePermanentSteps(token);
-        ErrorResponseDto errorResponseDto = postTrashDeletePermanentSteps
-                .deletePermanentFromTrashError(null, HttpStatus.SC_BAD_REQUEST);
+    public void removeObjectsFromTrashMissingIdsTest() {
+        PostRemoveObjectsFromTrashSteps postRemoveObjectsFromTrashSteps = new PostRemoveObjectsFromTrashSteps(token);
+        ErrorResponseDto errorResponseDto = postRemoveObjectsFromTrashSteps
+                .removeObjectsFromTrashError(null, HttpStatus.SC_BAD_REQUEST);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -116,17 +117,17 @@ public class PostTrashDeletePermanentTests extends ApiBaseTest {
     }
 
 
-    @Test(description = "Delete permanent from trash with invalid ID")
-    @Description("Validation of 400 Bad Request when invalid object ID are provided")
-    @Story("Delete Permanent")
+    @Test(description = "Remove objects from trash with invalid IDs")
+    @Description("Validation of 400 Bad Request when invalid object IDs are provided")
+    @Story("Remove Objects From Trash")
     @Severity(SeverityLevel.MINOR)
-    public void deletePermanentFromTrashNotExistingIdsTest() {
+    public void removeObjectsFromTrashNotExistingIdsTest() {
         List<String> notExistingIds = new ArrayList<>();
         notExistingIds.add("NotExisting");
 
-        PostTrashDeletePermanentSteps postTrashDeletePermanentSteps = new PostTrashDeletePermanentSteps(token);
-        ErrorResponseDto errorResponseDto = postTrashDeletePermanentSteps
-                .deletePermanentFromTrashError(notExistingIds, HttpStatus.SC_NOT_FOUND);
+        PostRemoveObjectsFromTrashSteps postRemoveObjectsFromTrashSteps = new PostRemoveObjectsFromTrashSteps(token);
+        ErrorResponseDto errorResponseDto = postRemoveObjectsFromTrashSteps
+                .removeObjectsFromTrashError(notExistingIds, HttpStatus.SC_NOT_FOUND);
 
         SoftAssert softAssert = new SoftAssert();
 
