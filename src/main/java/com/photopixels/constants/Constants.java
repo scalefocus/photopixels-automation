@@ -34,7 +34,7 @@ public class Constants {
     public static final String PASSWORD_CHANGED = "Password changed successfully.";
     public static final String FILE_UPLOADED = "1 image uploaded successfully";
     public static final String FILE_DELETED = "Object(s) trashed successfully.";
-    public static final String FILE_PERMANENTLY_DELETED ="Object(s) delete permanently successfully.";
+    public static final String FILE_PERMANENTLY_DELETED ="Object(s) deleted permanently successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";
