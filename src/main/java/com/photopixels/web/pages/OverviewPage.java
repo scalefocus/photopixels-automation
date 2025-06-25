@@ -23,6 +23,9 @@ public class OverviewPage extends NavigationPage {
     @FindBy(css = "[data-testid='CloudUploadIcon']")
     private WebElement uploadButton;
 
+    @FindBy(css = "span.MuiCircularProgress-root")
+    private WebElement uploadLoader;
+
     @FindBy(xpath = "//input[@type='file']")
     private WebElement fileInput;
 
@@ -56,6 +59,12 @@ public class OverviewPage extends NavigationPage {
         return overviewHeader.getText();
     }
 
+    @Step("Wait for upload to finish")
+    public void waitForUploadToFinish() {
+        waitForLoaderToAppear(uploadLoader);
+        waitForLoaderToDisappear(uploadLoader);
+    }
+
     @Step("Upload media")
     public void uploadMedia(String filePath) {
         waitForElementToBeVisible(uploadButton);
@@ -63,6 +72,8 @@ public class OverviewPage extends NavigationPage {
         File file = new File(filePath);
         String absolutePath = file.getAbsolutePath();
         fileInput.sendKeys(absolutePath);
+
+        waitForUploadToFinish();
     }
 
     @Step("Get upload error message")
