@@ -11,6 +11,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class DriverUtils {
@@ -78,7 +80,7 @@ public class DriverUtils {
 
 		switch (browser) {
 		case CHROME:
-			ChromeOptions chromeOptions = new ChromeOptions();
+			ChromeOptions chromeOptions = getChromeOptions();
 
 			driver = new RemoteWebDriver(url, chromeOptions);
 
@@ -99,7 +101,7 @@ public class DriverUtils {
 		case CHROME:
 			WebDriverManager.chromedriver().setup();
 
-			driver = new ChromeDriver();
+			driver = new ChromeDriver(getChromeOptions());
 			break;
 		case FIREFOX:
 			WebDriverManager.firefoxdriver().setup();
@@ -109,6 +111,18 @@ public class DriverUtils {
 		default:
 			break;
 		}
+	}
+
+	private ChromeOptions getChromeOptions() {
+		Map<String, Object> chromePrefs = new HashMap<>();
+		chromePrefs.put("credentials_enable_service", false);
+		chromePrefs.put("profile.password_manager_enabled", false);
+		chromePrefs.put("profile.password_manager_leak_detection", false);
+
+		ChromeOptions chromeOptions = new ChromeOptions();
+		chromeOptions.setExperimentalOption("prefs", chromePrefs);
+
+		return chromeOptions;
 	}
 
 }

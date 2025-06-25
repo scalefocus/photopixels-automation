@@ -15,8 +15,6 @@
 
         private String username;
         private String password;
-        private OverviewPage overviewPage;
-        private TrashPage trashPage;
 
         @BeforeClass(alwaysRun = true)
         public void setup() throws Exception {
@@ -29,9 +27,8 @@
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
         public void deleteMedia() {
-
             LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(username, password);
+            OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(TRAINING_FILE);
 
             overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
@@ -49,8 +46,6 @@
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_DELETED,
                     "The message is not correct.");
-
-            overviewPage.logOut();
         }
 
         @Test(description = "Successful deleting the selection made in trash page")
@@ -58,9 +53,8 @@
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
         public void emptyTrashWithSelection() {
-
             LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(username, password);
+            OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
 
             overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
@@ -73,9 +67,7 @@
 
             overviewPage.deleteMedia();
 
-            // TODO: Remove when issue is fixed
-            addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/139");
-            overviewPage.goToTrashTab();
+            TrashPage trashPage = overviewPage.goToTrashTab();
 
             Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
                     "The header is not correct.");
@@ -86,8 +78,6 @@
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_PERMANENTLY_DELETED,
                     "The message is not correct.");
-
-            overviewPage.logOut();
         }
 
         @Test(description = "Successful emptying the trash through Empty Trash button")
@@ -95,9 +85,8 @@
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
         public void emptyTrashWithEmptyTrashButton() {
-
             LoginPage loginPage = loadPhotoPixelsApp();
-            overviewPage = loginPage.login(username, password);
+            OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
 
             overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
@@ -110,20 +99,14 @@
 
             overviewPage.deleteMedia();
 
-            // TODO: Remove when issue is fixed
-            addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/139");
-            overviewPage.goToTrashTab();
+            TrashPage trashPage = overviewPage.goToTrashTab();
 
             Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
                     "The header is not correct.");
 
             trashPage.emptyTrash();
 
-            // TODO: Remove when issue is fixed
-            addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/90");
             Assert.assertEquals(trashPage.getDeleteMediaMessage(), FILE_DELETED,
                     "The message is not correct.");
-
-            overviewPage.logOut();
         }
     }
