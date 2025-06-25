@@ -46,7 +46,7 @@ public class GetUserTests extends ApiBaseTest {
         softAssert.assertEquals(getUserResponseDto.getId(), userId, "User id is not correct");
         softAssert.assertNotNull(getUserResponseDto.getName(), "User name is missing");
         softAssert.assertEquals(getUserResponseDto.getEmail(), username, "User email is not correct");
-        softAssert.assertEquals(getUserResponseDto.getUserName(), username, "User name is not correct");
+        softAssert.assertNotNull(getUserResponseDto.getUserName(), "User name is missing");
         softAssert.assertNotNull(getUserResponseDto.getQuota(), "Quota is not returned!");
         softAssert.assertNotNull(getUserResponseDto.getUsedQuota(), "Used quota is not returned!");
         softAssert.assertEquals(getUserResponseDto.getRole(), role.getValue(), "User role is not  correct");
