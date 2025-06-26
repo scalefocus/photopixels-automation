@@ -31,9 +31,6 @@
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(TRAINING_FILE);
 
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
-
             Assert.assertEquals(overviewPage.getUploadSuccessMessage(), FILE_UPLOADED,
                     "The message is not correct.");
 
@@ -43,6 +40,9 @@
             // dynamic wait was executing properly.
 
             overviewPage.deleteMedia();
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_DELETED,
                     "The message is not correct.");
@@ -56,9 +56,6 @@
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             overviewPage.selectMedia(0);
 
@@ -76,6 +73,9 @@
 
             trashPage.deleteMediaPermanently();
 
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_PERMANENTLY_DELETED,
                     "The message is not correct.");
         }
@@ -88,9 +88,6 @@
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             overviewPage.selectMedia(0);
 
@@ -105,6 +102,9 @@
                     "The header is not correct.");
 
             trashPage.emptyTrash();
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
 
             Assert.assertEquals(trashPage.getDeleteMediaMessage(), FILE_DELETED,
                     "The message is not correct.");
