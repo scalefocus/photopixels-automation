@@ -37,15 +37,16 @@ public class DeleteSendDataSteps {
     public void deleteFileById(String fileId) {
         Response response = deleteUploadFileIdResponse(fileId);
 
-        response.then().statusCode(HttpStatus.SC_OK);
+        response.then().statusCode(HttpStatus.SC_NO_CONTENT);
     }
 
     @Step("Delete Upload FileId Error")
-    //TODO once issue https://github.com/scalefocus/photopixels-backend-net/issues/92 is fixed with delete we need to refactor and include the error message in the response
-    public void deleteFileExpectingError(String fileId, int expectedStatusCode) {
+     public String deleteFileExpectingError(String fileId, int expectedStatusCode) {
         Response response = deleteUploadFileIdResponse(fileId);
 
         response.then().statusCode(expectedStatusCode);
+
+        return response.asString();
     }
 
 }

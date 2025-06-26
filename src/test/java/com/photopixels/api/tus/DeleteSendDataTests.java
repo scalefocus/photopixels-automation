@@ -130,15 +130,12 @@ public class DeleteSendDataTests extends ApiBaseTest {
 
         // Step 2: Perform file deletion
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
-        // the response returns HTTP 204 No Content, but swagger shown that the response status should be 200
-
-        // TODO: Remove when issue is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/140");
 
         deleteFileById.deleteFileById(uploadCoctailLocationId);
 
         // Step 3: Verify file ID is no longer present after deletion
-        boolean isStillPresent = responseBefore.getUserUploads().stream()
+        ResumableUploadsResponseDto responseAfter = getResumableUploadsSteps.getResumableUploads();
+        boolean isStillPresent = responseAfter.getUserUploads().stream()
                 .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
 
         softAssert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
@@ -163,10 +160,13 @@ public class DeleteSendDataTests extends ApiBaseTest {
 
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
 
-        // TODO: Remove when issue is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels-backend-net/issues/92");
+        //deleteFileById.deleteFileExpectingError(invalidFileId,  HttpStatus.SC_NOT_FOUND);
+        String responseBody = deleteFileById.deleteFileExpectingError(
+                invalidFileId,
+                HttpStatus.SC_NOT_FOUND
+        );
 
-        deleteFileById.deleteFileExpectingError(invalidFileId,  HttpStatus.SC_NOT_FOUND);
+        softAssert.assertEquals(responseBody, "[\"The object has already been deleted\"]", "Unexpected error message");
 
         softAssert.assertAll();
     }
