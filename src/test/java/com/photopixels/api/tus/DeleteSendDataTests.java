@@ -7,15 +7,14 @@ import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
 import com.photopixels.base.ApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
-import io.qameta.allure.Description;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
-import io.qameta.allure.Story;
+import com.photopixels.listeners.StatusTestListener;
+import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -27,6 +26,8 @@ import java.util.Map;
 import static com.photopixels.constants.Constants.*;
 import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
+@Listeners(StatusTestListener.class)
+@Feature("Tus")
 public class DeleteSendDataTests extends ApiBaseTest {
     private String name;
     private String email;
@@ -123,7 +124,10 @@ public class DeleteSendDataTests extends ApiBaseTest {
         ResumableUploadsResponseDto responseBefore = getResumableUploadsSteps.getResumableUploads();
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 2: Perform file deletion
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
@@ -133,7 +137,10 @@ public class DeleteSendDataTests extends ApiBaseTest {
         ResumableUploadsResponseDto responseAfter = getResumableUploadsSteps.getResumableUploads();
         boolean isStillPresent = responseAfter.getUserUploads().stream()
                 .anyMatch(upload -> uploadCoctailLocationId.equals(upload.getFileId()));
-        Assert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
+
+        softAssert.assertFalse(isStillPresent, "Expected file ID to be not present after deletion");
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Delete file without providing a file ID (null)")
@@ -158,7 +165,8 @@ public class DeleteSendDataTests extends ApiBaseTest {
         // Step 1: Verify file ID Does Not Exist for the user
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> invalidFileId.equals(upload.getFileId()));
-        Assert.assertFalse(isPresentBefore, "Expected file ID to not be present");
+        SoftAssert softAssert = new SoftAssert();
+        softAssert.assertFalse(isPresentBefore, "Expected file ID to not be present");
 
         // Step 2: Try to delete invalid sendDataId
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
@@ -167,7 +175,6 @@ public class DeleteSendDataTests extends ApiBaseTest {
                 HttpStatus.SC_NOT_FOUND
         );
 
-        SoftAssert softAssert = new SoftAssert();
         softAssert.assertEquals(responseBody, "[\"The object has already been deleted\"]", "Unexpected error message");
 
         softAssert.assertAll();
@@ -191,7 +198,10 @@ public class DeleteSendDataTests extends ApiBaseTest {
         // Step 2: Verify file ID is present before deletion
         boolean isPresentBefore = responseBefore.getUserUploads().stream()
                 .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(isPresentBefore, "Expected file ID to be present before deletion");
 
         // Step 3: Attempt deletion with User B (who does not own the file)
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(userTokenB);
@@ -205,6 +215,9 @@ public class DeleteSendDataTests extends ApiBaseTest {
         ResumableUploadsResponseDto responseAfter = getResumableUploadsSteps.getResumableUploads();
         boolean isStillPresent = responseAfter.getUserUploads().stream()
                 .anyMatch(upload -> uploadFrenchLocationId.equals(upload.getFileId()));
-        Assert.assertTrue(isStillPresent, "Expected file ID to be present");
+
+        softAssert.assertTrue(isStillPresent, "Expected file ID to be present");
+
+        softAssert.assertAll();
     }
 }
