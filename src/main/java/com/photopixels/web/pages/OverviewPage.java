@@ -61,8 +61,8 @@ public class OverviewPage extends NavigationPage {
 
     @Step("Wait for upload to finish")
     public void waitForUploadToFinish() {
-        waitForLoaderToAppear(uploadLoader);
-        waitForLoaderToDisappear(uploadLoader);
+        waitForElementToBeVisible(uploadLoader);
+        waitForElementToDisappear(uploadLoader);
     }
 
     @Step("Upload media")

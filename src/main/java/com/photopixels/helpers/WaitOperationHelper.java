@@ -42,11 +42,7 @@ public class WaitOperationHelper {
 		wait.until(ExpectedConditions.visibilityOfAllElements(elements));
 	}
 
-	public void waitForLoaderToAppear(WebElement element) {
-		wait.until(ExpectedConditions.visibilityOf(element));
-	}
-
-	public void waitForLoaderToDisappear(WebElement element) {
+	public void waitForElementToDisappear(WebElement element) {
 		wait.until(ExpectedConditions.invisibilityOf(element));
 	}
 }
