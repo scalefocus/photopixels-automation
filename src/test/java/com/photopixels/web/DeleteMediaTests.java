@@ -38,9 +38,9 @@
 
             overviewPage.selectMedia(0);
 
-            String selectedMediaCount = overviewPage.getSelectedMediaText();
-            Assert.assertTrue(selectedMediaCount.contains(selectedMedia),
-                    "Quota text should contain " + selectedMedia);
+            String selectedMediaCountMessage = overviewPage.getSelectedMediaText();
+            Assert.assertEquals(selectedMediaCountMessage.trim(), selectedMedia,
+                    "Expected selected media count to match exactly.");
 
             overviewPage.deleteMedia();
 
@@ -55,7 +55,7 @@
             Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
                     "The header is not correct.");
 
-            trashPage.selectMedia(0);
+            trashPage.selectMediaByIndex(0);
 
             trashPage.deleteMediaPermanently();
 
@@ -81,7 +81,7 @@
 
             TrashPage trashPage = overviewPage.goToTrashTab();
 
-            trashPage.selectMedia(0);
+            trashPage.selectMediaByIndex(0);
 
             trashPage.deleteMediaPermanently();
 

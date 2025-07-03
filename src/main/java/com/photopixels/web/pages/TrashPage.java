@@ -52,7 +52,7 @@ public class TrashPage extends NavigationPage {
     }
 
     @Step("Select media")
-    public void selectMedia(int index) {
+    public void selectMediaByIndex(int index) {
         waitForAllElementsToBeVisible(selectMediaButton);
         List<WebElement> icons = selectMediaButton;
         if (index >= 0 && index < icons.size()) {
