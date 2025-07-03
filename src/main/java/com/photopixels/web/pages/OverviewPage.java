@@ -38,7 +38,7 @@ public class OverviewPage extends NavigationPage {
     @FindBy(css = "[data-testid='CheckCircleIcon']")
     private List<WebElement> selectedMedia;
 
-    @FindBy(css = "p.MuiTypography-body1.css-13fkwqy")
+    @FindBy(xpath = "//*[@id='root']//header//p")
     private WebElement selectedCountText;
 
     @FindBy(css = "[data-testid='DeleteIcon']")
