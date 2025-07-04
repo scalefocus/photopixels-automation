@@ -38,6 +38,9 @@ public class OverviewPage extends NavigationPage {
     @FindBy(css = "[data-testid='CheckCircleIcon']")
     private List<WebElement> selectedMedia;
 
+    @FindBy(xpath = "//*[@id='root']//header//p")
+    private WebElement selectedCountText;
+
     @FindBy(css = "[data-testid='DeleteIcon']")
     private WebElement deleteMediaButton;
 
@@ -76,13 +79,6 @@ public class OverviewPage extends NavigationPage {
         waitForUploadToFinish();
     }
 
-    @Step("Get upload error message")
-    public String getUploadErrorMessage() {
-        waitForElementToBeVisible(errorMessage);
-
-        return errorMessage.getText();
-    }
-
     @Step("Select media")
     public void selectMedia(int index) {
         List<WebElement> icons = selectMediaButton;
@@ -91,12 +87,6 @@ public class OverviewPage extends NavigationPage {
         } else {
             throw new IllegalArgumentException("Invalid index for CheckCircleIcon: " + index);
         }
-    }
-
-    @Step("Check selected media")
-    public boolean isNthMediaSelected(int index) {
-        List<WebElement> allIcons = selectedMedia;
-        return index < allIcons.size();
     }
 
     @Step("Delete media")
@@ -115,5 +105,11 @@ public class OverviewPage extends NavigationPage {
     @Step("Get delete media message")
     public String getDeleteMediaMessage() {
         return getStatusMessage();
+    }
+
+    @Step("Get selected media info text")
+    public String getSelectedMediaText() {
+        waitForElementToBeVisible(selectedCountText);
+        return selectedCountText.getText().trim();
     }
 }

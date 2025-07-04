@@ -10,6 +10,7 @@ public class Constants {
     public static final String TRAINING_FILE = FILE_LOCATION + "training.jpg";
     public static final String UNNAMED_FILE = FILE_LOCATION + "unnamed.jpg";
     public static final String COCTAIL_FILE = FILE_LOCATION + "coctail.jpg";
+   public static final String LARGER_IMAGE_FILE = FILE_LOCATION + "larger-image-file.jpg";
     public static final String PART1_SUFFIX = "_part1.jpg";
     public static final String PART2_SUFFIX = "_part2.jpg";
     public static final String SAMPLE_VIDEO_FILE = FILE_LOCATION + "sampleVideo.mp4";

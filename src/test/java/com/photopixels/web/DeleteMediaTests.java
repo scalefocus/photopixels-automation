@@ -27,6 +27,8 @@
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
         public void deleteMedia() {
+            String selectedMedia = "1 selected";
+
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(TRAINING_FILE);
@@ -36,8 +38,9 @@
 
             overviewPage.selectMedia(0);
 
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
+            String selectedMediaCountMessage = overviewPage.getSelectedMediaText();
+            Assert.assertEquals(selectedMediaCountMessage.trim(), selectedMedia,
+                    "Expected selected media count to match exactly.");
 
             overviewPage.deleteMedia();
 
@@ -45,6 +48,21 @@
             // dynamic wait was executing properly.
 
             Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_DELETED,
+                    "The message is not correct.");
+
+            TrashPage trashPage = overviewPage.goToTrashTab();
+
+            Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
+                    "The header is not correct.");
+
+            trashPage.selectMediaByIndex(0);
+
+            trashPage.deleteMediaPermanently();
+
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
+            Assert.assertEquals(overviewPage.getDeleteMediaMessage(), FILE_PERMANENTLY_DELETED,
                     "The message is not correct.");
         }
 
@@ -55,21 +73,15 @@
         public void emptyTrashWithSelection() {
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
-            overviewPage.uploadMedia(FRENCH_FRIES_FILE);
+            overviewPage.uploadMedia(LARGER_IMAGE_FILE);
 
             overviewPage.selectMedia(0);
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             overviewPage.deleteMedia();
 
             TrashPage trashPage = overviewPage.goToTrashTab();
 
-            Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
-                    "The header is not correct.");
-
-            trashPage.selectMedia(0);
+            trashPage.selectMediaByIndex(0);
 
             trashPage.deleteMediaPermanently();
 
@@ -90,9 +102,6 @@
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
 
             overviewPage.selectMedia(0);
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             overviewPage.deleteMedia();
 
