@@ -2,7 +2,7 @@ package com.photopixels.api.admin;
 
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.enums.UserRolesEnum;
 import com.photopixels.listeners.StatusTestListener;
@@ -20,13 +20,13 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class PostRegisterUserAdminTests extends ApiBaseTest {
+public class PostRegisterUserAdminTests implements IApiBaseTest {
 
     private String token;
     private String name;
     private String email;
 
-    private List<String> registeredUsersList = new ArrayList<>();
+    private final List<String> registeredUsersList = new ArrayList<>();
 
     @BeforeClass(alwaysRun = true)
     public void setup() {

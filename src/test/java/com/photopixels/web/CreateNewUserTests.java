@@ -1,29 +1,29 @@
     package com.photopixels.web;
 
+    import com.photopixels.base.IApiBaseTest;
     import com.photopixels.base.WebBaseTest;
     import com.photopixels.constants.Constants;
     import com.photopixels.enums.UserRolesEnum;
-    import com.photopixels.helpers.WaitOperationHelper;
     import com.photopixels.listeners.StatusTestListener;
-    import com.photopixels.web.pages.*;
+    import com.photopixels.web.pages.CreateUserPage;
+    import com.photopixels.web.pages.LoginPage;
+    import com.photopixels.web.pages.OverviewPage;
+    import com.photopixels.web.pages.UsersPage;
     import io.qameta.allure.*;
     import net.bytebuddy.utility.RandomString;
-    import org.apache.commons.lang3.RandomStringUtils;
     import org.testng.Assert;
-    import org.testng.annotations.BeforeClass;
-    import org.testng.annotations.BeforeMethod;
-    import org.testng.annotations.Listeners;
-    import org.testng.annotations.Test;
+    import org.testng.annotations.*;
 
+    import java.util.ArrayList;
     import java.util.List;
 
-    import static com.photopixels.constants.Constants.*;
+    import static com.photopixels.constants.Constants.CREATE_NEW_USER;
+    import static com.photopixels.constants.Constants.USER_CREATED;
     import static com.photopixels.enums.ErrorMessagesEnum.*;
-    import static com.photopixels.constants.ErrorMessageConstants.*;
 
     @Listeners(StatusTestListener.class)
     @Feature("Web")
-    public class CreateNewUserTests extends WebBaseTest {
+    public class CreateNewUserTests extends WebBaseTest implements IApiBaseTest {
 
         private String adminEmail;
         private String adminPassword;
@@ -31,10 +31,14 @@
         private String randomEmail;
         private final int expectedNumberOfErrors = 1;
 
+        private List<String> registeredUsers;
+
         @BeforeClass(alwaysRun = true)
         public void setup() {
-            adminEmail = inputData.getUsernameAdmin();
-            adminPassword = inputData.getPasswordAdmin();
+            adminEmail = IApiBaseTest.inputData.getUsernameAdmin();
+            adminPassword = IApiBaseTest.inputData.getPasswordAdmin();
+
+            registeredUsers = new ArrayList<>();
         }
 
         @BeforeMethod
@@ -42,6 +46,11 @@
             String random = RandomString.make(5);
             randomName = "User_" + random;
             randomEmail = "test_" + random + "@test.com";
+        }
+
+        @AfterClass
+        public void deleteUsers() {
+            IApiBaseTest.super.deleteRegisteredUsersAdmin(registeredUsers);
         }
 
         @Test(description = "Successful creation of a user with correct login credential rules")
@@ -60,6 +69,8 @@
 
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
 
+            registeredUsers.add(randomEmail);
+
             Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED,
                     "The message is not correct.");
 
@@ -72,12 +83,6 @@
             Assert.assertTrue(usersPage.hasSearchResultRole(UserRolesEnum.USER.getText()),
                     "User role is not the expected one. Expected 'User', but found: "
                             + usersPage.getRolesFromResults());
-
-            EditUserPage editUserPage = usersPage.clickEditUser();
-            editUserPage.deleteUser();
-
-            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
-                "The message is not correct.");
         }
 
         @Test(description = "Successful creation of admin user with correct login rules")
@@ -93,6 +98,8 @@
             createUserPage.selectAdminUserRole();
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
 
+            registeredUsers.add(randomEmail);
+
             Assert.assertEquals(createUserPage.getUserCreatedMsg(), USER_CREATED,
                     "User is successfully created" );
 
@@ -106,12 +113,6 @@
             Assert.assertTrue(usersPage.hasSearchResultRole(UserRolesEnum.ADMIN.getText()),
                     "User role is not the expected one. Expected 'Admin', but found: "
                             + usersPage.getRolesFromResults());
-
-            EditUserPage editUserPage = usersPage.clickEditUser();
-            editUserPage.deleteUser();
-
-            Assert.assertEquals(editUserPage.getUserDeletedMsg(), USER_DELETED,
-                "The message is not correct.");
     }
 
         @Test(description = "Unsuccessful user creation with empty name")
@@ -246,6 +247,8 @@
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
 
+            registeredUsers.add(randomEmail);
+
             //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
             createUserPage.waitMs();
 
@@ -275,6 +278,8 @@
 
             CreateUserPage createUserPage = overviewPage.goToCreateNewUser();
             createUserPage.createUser(randomName, randomEmail, Constants.PASSWORD);
+
+            registeredUsers.add(randomEmail);
 
             //No other way to handle the revisit of the site, due to the state and the way webdriver interacts with the page.
             createUserPage.waitMs();

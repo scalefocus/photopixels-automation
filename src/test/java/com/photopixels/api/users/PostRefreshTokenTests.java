@@ -4,7 +4,7 @@ import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.api.steps.users.PostRefreshTokenSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -17,7 +17,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostRefreshTokenTests extends ApiBaseTest {
+public class PostRefreshTokenTests implements IApiBaseTest {
 
     @Test(description = "Successful token refresh")
     @Description("Successful refresh of token")

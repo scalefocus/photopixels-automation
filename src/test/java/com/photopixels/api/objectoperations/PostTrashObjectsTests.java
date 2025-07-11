@@ -7,7 +7,7 @@ import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.*;
 import com.photopixels.api.steps.users.DeleteEmptyTrashSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -25,7 +25,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class PostTrashObjectsTests extends ApiBaseTest {
+public class PostTrashObjectsTests implements IApiBaseTest {
 
     private String token;
 

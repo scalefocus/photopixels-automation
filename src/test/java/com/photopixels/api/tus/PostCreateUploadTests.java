@@ -1,7 +1,7 @@
 package com.photopixels.api.tus;
 
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
@@ -15,7 +15,7 @@ import static com.photopixels.constants.Constants.VALID_UPLOAD_METADATA;
 
 @Listeners(StatusTestListener.class)
 @Feature("Tus")
-public class PostCreateUploadTests extends ApiBaseTest {
+public class PostCreateUploadTests implements IApiBaseTest {
 
     private String token;
 

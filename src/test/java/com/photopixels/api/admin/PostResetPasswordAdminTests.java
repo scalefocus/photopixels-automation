@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.admin.PostResetPasswordAdminSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -22,7 +22,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class PostResetPasswordAdminTests extends ApiBaseTest {
+public class PostResetPasswordAdminTests implements IApiBaseTest {
 
     private String token;
     private String email;

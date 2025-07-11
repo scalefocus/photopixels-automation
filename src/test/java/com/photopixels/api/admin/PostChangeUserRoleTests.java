@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.steps.admin.GetUserSteps;
 import com.photopixels.api.steps.admin.PostChangeUserRoleSteps;
 import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.enums.UserRolesEnum;
 import com.photopixels.listeners.StatusTestListener;
@@ -25,7 +25,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class PostChangeUserRoleTests extends ApiBaseTest {
+public class PostChangeUserRoleTests implements IApiBaseTest {
 
     private String token;
     private String userId;

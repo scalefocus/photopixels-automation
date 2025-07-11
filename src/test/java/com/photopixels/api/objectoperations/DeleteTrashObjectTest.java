@@ -3,10 +3,9 @@ package com.photopixels.api.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.ObjectVersioningResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.constants.ErrorMessageConstants;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -19,11 +18,9 @@ import org.testng.asserts.SoftAssert;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.photopixels.constants.Constants.TRAINING_FILE;
-
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class DeleteTrashObjectTest extends ApiBaseTest {
+public class DeleteTrashObjectTest implements IApiBaseTest {
 
     private String token;
     private List<String> objectIds;

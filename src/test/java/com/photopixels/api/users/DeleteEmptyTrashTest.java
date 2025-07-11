@@ -2,26 +2,22 @@ package com.photopixels.api.users;
 
 import com.photopixels.api.dtos.users.EmptyTrashResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetTrashedObjectsResponseDto;
-import com.photopixels.api.dtos.objectoperations.TrashedObjectPropertyDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.*;
 import com.photopixels.api.steps.users.DeleteEmptyTrashSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import java.util.List;
-
 import static com.photopixels.constants.Constants.TRAINING_FILE;
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class DeleteEmptyTrashTest extends ApiBaseTest {
+public class DeleteEmptyTrashTest implements IApiBaseTest {
 
     private String token;
     private String objectId;

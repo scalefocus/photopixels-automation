@@ -2,7 +2,7 @@ package com.photopixels.api.status;
 
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
 import com.photopixels.api.steps.status.GetStatusSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.Listeners;
@@ -11,7 +11,7 @@ import org.testng.asserts.SoftAssert;
 
 @Listeners(StatusTestListener.class)
 @Feature("Status")
-public class GetStatusTests extends ApiBaseTest {
+public class GetStatusTests implements IApiBaseTest {
 
     @Test(description = "Get status")
     @Description("Get status")

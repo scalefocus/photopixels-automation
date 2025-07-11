@@ -12,7 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
-public class MobileBaseTest extends BaseTest {
+public class MobileBaseTest implements IBaseTest {
 
     private MobileDriverUtils mobileDriverUtils;
     private ScreenshotHelper screenshotHelper;

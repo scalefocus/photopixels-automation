@@ -6,36 +6,32 @@ import com.photopixels.helpers.PropertiesUtils;
 import io.qameta.allure.Allure;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
 
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.util.Properties;
 
-public class BaseTest {
+public interface IBaseTest {
 
-	private static final String CONFIG_PROPS = "config.properties";
-	private static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
+	String CONFIG_PROPS = "config.properties";
+	String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
 
-	protected static InputDataHelper inputData;
-	protected static Properties configProperties;
-	protected static String baseUri;
+	InputDataHelper inputData = new InputDataHelper();
+	Properties configProperties = new PropertiesUtils().loadProps(CONFIG_PROPS);
+	String baseUri = getBaseUri();
 
-	@BeforeSuite(alwaysRun = true)
-	public void initSuiteBase() {
-		configProperties = new PropertiesUtils().loadProps(CONFIG_PROPS);
-
-		inputData = new InputDataHelper();
-
-		baseUri = System.getProperty("baseUri");
+	static String getBaseUri() {
+		String baseUri = System.getProperty("baseUri");
 
 		if (baseUri == null || baseUri.isEmpty()) {
 			baseUri = configProperties.getProperty("baseUri");
 		}
+
+		return baseUri;
 	}
 
 	@AfterSuite(alwaysRun = true)
-	public void prepareReport() {
+    default void prepareReport() {
 		String allureResults = System.getProperty("allurePath");
 
 		if (allureResults == null) {
@@ -50,7 +46,7 @@ public class BaseTest {
 		generateCategoriesFile(allureResults);
 	}
 
-	protected void addIssueLinkToAllureReport(String issueLink) {
+	 default void addIssueLinkToAllureReport(String issueLink) {
 		Allure.issue(issueLink, issueLink);
 	}
 

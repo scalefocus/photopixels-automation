@@ -6,7 +6,7 @@ import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
 import com.photopixels.api.steps.objectoperations.PutUpdateObjectSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.hc.core5.http.HttpStatus;
@@ -21,7 +21,7 @@ import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class PutUpdateObjectTests extends ApiBaseTest {
+public class PutUpdateObjectTests implements IApiBaseTest {
 
     private String token;
     private String objectId;

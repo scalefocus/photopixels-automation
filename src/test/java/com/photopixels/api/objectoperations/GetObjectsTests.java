@@ -1,11 +1,13 @@
 package com.photopixels.api.objectoperations;
 
+import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetObjectsResponseDto;
 import com.photopixels.api.dtos.objectoperations.PropertiesResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
+import com.photopixels.api.steps.objectoperations.GetObjectDataSteps;
 import com.photopixels.api.steps.objectoperations.GetObjectsSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
@@ -24,21 +26,24 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class GetObjectsTests extends ApiBaseTest {
+public class GetObjectsTests implements IApiBaseTest {
 
     private String token;
     private String objectId;
     private String fileName = TRAINING_FILE;
-    private String newFileName = COCTAIL_FILE;
     private int pageSize = 10;
-    private LocalDateTime objectDateTime;
-    private List<String> objectIdsForDeletion;
+    private List<String> files;
+    private List<String> objectIds;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         token = getUserToken();
 
-        objectIdsForDeletion = new ArrayList<>();
+        files = new ArrayList<>();
+        files.add(COCTAIL_FILE);
+        files.add(UNNAMED_FILE);
+
+        objectIds = new ArrayList<>();
 
         String objectHash = getObjectHash(fileName);
 
@@ -46,17 +51,14 @@ public class GetObjectsTests extends ApiBaseTest {
         UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
                 .uploadObject(fileName, objectHash);
 
-        // Dates in the response are in UTC zone
-        objectDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-
         objectId = uploadObjectResponseDto.getId();
 
-        objectIdsForDeletion.add(objectId);
+        objectIds.add(objectId);
     }
 
     @AfterClass(alwaysRun = true)
     public void cleanup() {
-        deleteObjects(objectIdsForDeletion, token);
+        deleteObjects(objectIds, token);
     }
 
     @Test(description = "Get objects")
@@ -119,18 +121,29 @@ public class GetObjectsTests extends ApiBaseTest {
     @Story("Get Objects")
     @Severity(SeverityLevel.NORMAL)
     public void getObjectsWithNewerObjectAvailableTest() {
-        String objectHash = getObjectHash(newFileName);
 
-        PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
-        UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
-                .uploadObject(newFileName, objectHash);
+        for (String file : files) {
+            String objectHash = getObjectHash(file);
 
-        String newerObjectId = uploadObjectResponseDto.getId();
+            // Need to reinitialize the variable to clear the multipart for the next upload
+            PostUploadObjectSteps postUploadObjectSteps = new PostUploadObjectSteps(token);
+            UploadObjectResponseDto uploadObjectResponseDto = postUploadObjectSteps
+                    .uploadObject(file, objectHash);
 
-        objectIdsForDeletion.add(newerObjectId);
+            String newerObjectId = uploadObjectResponseDto.getId();
+
+            objectIds.add(newerObjectId);
+        }
+
+        String lastObjectId = objectIds.get(1);
+
+        GetObjectDataSteps getObjectDataSteps = new GetObjectDataSteps(token);
+        GetObjectDataResponseDto getObjectDataResponseDto = getObjectDataSteps.getObjectData(lastObjectId);
+
+        LocalDateTime objectDateTime = LocalDateTime.parse(getObjectDataResponseDto.getDateCreated(), ISO_OFFSET_DATE_TIME);
 
         GetObjectsSteps getObjectsSteps = new GetObjectsSteps(token);
-        GetObjectsResponseDto getObjectsResponseDto = getObjectsSteps.getObjects(objectId, pageSize);
+        GetObjectsResponseDto getObjectsResponseDto = getObjectsSteps.getObjects(lastObjectId, pageSize);
 
         SoftAssert softAssert = new SoftAssert();
 
@@ -151,7 +164,7 @@ public class GetObjectsTests extends ApiBaseTest {
             softAssert.assertTrue(propertyDateTime.isBefore(objectDateTime),
                     "Date created of object is not before the provided last id date");
             softAssert.assertNotNull(property.getId(), "Object property id is not returned");
-            softAssert.assertNotEquals(property.getId(), newerObjectId, "Newer object property id is returned");
+            softAssert.assertNotEquals(property.getId(), lastObjectId, "Newer object property id is returned");
         }
 
         softAssert.assertAll();

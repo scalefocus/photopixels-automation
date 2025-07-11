@@ -10,7 +10,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
-public class WebBaseTest extends BaseTest {
+public class WebBaseTest implements IBaseTest {
 
     private DriverUtils driverUtils;
     private ScreenshotHelper screenshotHelper;

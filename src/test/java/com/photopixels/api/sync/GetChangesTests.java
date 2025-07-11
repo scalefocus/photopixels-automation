@@ -3,7 +3,7 @@ package com.photopixels.api.sync;
 import com.photopixels.api.dtos.sync.GetChangesResponseDto;
 import com.photopixels.api.steps.sync.GetChangesSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -20,7 +20,7 @@ import static com.photopixels.constants.Constants.PASSWORD;
 
 @Listeners(StatusTestListener.class)
 @Feature("Sync")
-public class GetChangesTests extends ApiBaseTest {
+public class GetChangesTests implements IApiBaseTest {
 
     private String token;
     private Map<String, String> registeredUsersList = new HashMap<>();

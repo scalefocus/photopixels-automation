@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.steps.admin.GetUserSteps;
 import com.photopixels.api.steps.admin.PostAdjustStorageQuotaSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -23,7 +23,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class PostAdjustStorageQuotaTests extends ApiBaseTest {
+public class PostAdjustStorageQuotaTests implements IApiBaseTest {
 
     private String token;
     private String userId;

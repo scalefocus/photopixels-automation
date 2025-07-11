@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.users.PostForgotUserPasswordSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
 import com.photopixels.api.steps.users.PostResetUserPasswordSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.helpers.DriverUtils;
 import com.photopixels.listeners.StatusTestListener;
@@ -24,7 +24,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostResetUserPasswordTests extends ApiBaseTest {
+public class PostResetUserPasswordTests implements IApiBaseTest {
 
     private String email;
     private String code;

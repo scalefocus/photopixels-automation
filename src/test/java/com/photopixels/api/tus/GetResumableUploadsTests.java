@@ -4,7 +4,7 @@ import com.photopixels.api.dtos.tus.ResumableUploadDto;
 import com.photopixels.api.dtos.tus.ResumableUploadMetadataDto;
 import com.photopixels.api.dtos.tus.ResumableUploadsResponseDto;
 import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.BeforeClass;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Listeners(StatusTestListener.class)
 @Feature("Tus")
-public class GetResumableUploadsTests extends ApiBaseTest {
+public class GetResumableUploadsTests implements IApiBaseTest {
 
     private String token;
 
