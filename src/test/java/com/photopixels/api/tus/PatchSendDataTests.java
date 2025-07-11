@@ -3,7 +3,7 @@ package com.photopixels.api.tus;
 import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.tus.PatchSendDataSteps;
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
 import com.photopixels.helpers.SplitBinaryImage;
 import com.photopixels.listeners.StatusTestListener;
@@ -28,7 +28,7 @@ import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
 @Listeners(StatusTestListener.class)
 @Feature("Tus")
-public class PatchSendDataTests extends ApiBaseTest {
+public class PatchSendDataTests implements IApiBaseTest {
 
     private String name;
     private String email;

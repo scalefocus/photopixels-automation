@@ -2,7 +2,7 @@ package com.photopixels.api.admin;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.steps.admin.GetUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.UserRolesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class GetUserTests extends ApiBaseTest {
+public class GetUserTests implements IApiBaseTest {
 
     private String token;
 

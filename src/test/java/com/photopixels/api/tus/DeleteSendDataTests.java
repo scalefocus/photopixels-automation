@@ -5,7 +5,7 @@ import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.tus.DeleteSendDataSteps;
 import com.photopixels.api.steps.tus.GetResumableUploadsSteps;
 import com.photopixels.api.steps.tus.PostCreateUploadSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.helpers.FileInfoExtractor;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -28,7 +28,7 @@ import static com.photopixels.enums.UserRolesEnum.ADMIN;
 
 @Listeners(StatusTestListener.class)
 @Feature("Tus")
-public class DeleteSendDataTests extends ApiBaseTest {
+public class DeleteSendDataTests implements IApiBaseTest {
     private String name;
     private String email;
     private String password;

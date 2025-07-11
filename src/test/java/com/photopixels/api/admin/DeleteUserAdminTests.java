@@ -3,7 +3,7 @@ package com.photopixels.api.admin;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.steps.admin.DeleteUserAdminSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -20,7 +20,7 @@ import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class DeleteUserAdminTests extends ApiBaseTest {
+public class DeleteUserAdminTests implements IApiBaseTest {
 
     private String token;
 

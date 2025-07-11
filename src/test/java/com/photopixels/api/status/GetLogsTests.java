@@ -1,7 +1,7 @@
 package com.photopixels.api.status;
 
 import com.photopixels.api.steps.status.GetLogsSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.http.HttpStatus;
@@ -14,7 +14,7 @@ import java.time.ZoneId;
 
 @Listeners(StatusTestListener.class)
 @Feature("Status")
-public class GetLogsTests extends ApiBaseTest {
+public class GetLogsTests implements IApiBaseTest {
 
     @Test(description = "Get logs admin user")
     @Description("Get logs with admin user")

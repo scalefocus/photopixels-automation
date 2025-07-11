@@ -3,10 +3,9 @@ package com.photopixels.api.objectoperations;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
 import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
-import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.objectoperations.GetObjectDataSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.apache.http.HttpStatus;
@@ -19,13 +18,11 @@ import org.testng.asserts.SoftAssert;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
-import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static com.photopixels.constants.ErrorMessageConstants.NOT_FOUND_ERROR;
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class GetObjectDataTests extends ApiBaseTest {
+public class GetObjectDataTests implements IApiBaseTest {
 
     private String token;
     private List<String> objectIds;

@@ -5,7 +5,7 @@ import com.photopixels.api.dtos.users.GetUserInfoResponseDto;
 import com.photopixels.api.steps.users.GetUserInfoSteps;
 import com.photopixels.api.steps.users.PostChangeUserPasswordSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -24,7 +24,7 @@ import static com.photopixels.enums.ErrorMessagesEnum.NEW_PASSWORD;
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostChangeUserPasswordTests extends ApiBaseTest {
+public class PostChangeUserPasswordTests implements IApiBaseTest {
 
     private String token;
     private Map<String, String> registeredUsersList = new HashMap<>();

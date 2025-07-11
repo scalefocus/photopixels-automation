@@ -1,31 +1,46 @@
 package com.photopixels.web;
 
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.base.WebBaseTest;
-import com.photopixels.helpers.WaitOperationHelper;
 import com.photopixels.listeners.StatusTestListener;
-import com.photopixels.web.pages.*;
+import com.photopixels.web.pages.LoginPage;
+import com.photopixels.web.pages.OverviewPage;
+import com.photopixels.web.pages.SignUpUserPage;
 import io.qameta.allure.*;
 import net.bytebuddy.utility.RandomString;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.photopixels.constants.Constants.OVERVIEW_HEADER;
 import static com.photopixels.constants.Constants.PASSWORD;
 
 @Listeners(StatusTestListener.class)
 @Feature("Web")
-public class SignUpNewUserTests extends WebBaseTest {
+public class SignUpNewUserTests extends WebBaseTest implements IApiBaseTest {
 
     private String randomName;
     private String randomEmail;
+    private List<String> registeredUsers;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         randomName = "User_" + RandomString.make(5);
         randomEmail = "test" + RandomStringUtils.randomNumeric(9) + "@test.com";
+
+        registeredUsers = new ArrayList<>();
+        registeredUsers.add(randomEmail);
+    }
+
+    @AfterClass
+    public void deleteUsers() {
+        IApiBaseTest.super.deleteRegisteredUsersAdmin(registeredUsers);
     }
 
     @Test(description = "Successful creation of a user on Sign Up and login")
