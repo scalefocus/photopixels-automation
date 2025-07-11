@@ -24,7 +24,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostResetUserPasswordTests implements IApiBaseTest {//implements WebBase {
+public class PostResetUserPasswordTests implements IApiBaseTest {
 
     private String email;
     private String code;
@@ -45,7 +45,7 @@ public class PostResetUserPasswordTests implements IApiBaseTest {//implements We
 
         PostForgotUserPasswordSteps postForgotUserPasswordSteps = new PostForgotUserPasswordSteps();
         postForgotUserPasswordSteps.forgotUserPassword(email);
-    
+
         String code = getCodeForReset();
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
