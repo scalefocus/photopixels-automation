@@ -8,7 +8,6 @@ import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.users.DeleteUserSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
-import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import com.photopixels.enums.UserRolesEnum;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
@@ -31,10 +30,10 @@ import static com.photopixels.constants.Constants.*;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.get;
 
-public class ApiBaseTest extends BaseTest{
+public interface IApiBaseTest extends IBaseTest {
 
     @BeforeSuite(alwaysRun = true)
-    public void initSuiteApi() {
+    default void initSuiteApi() {
         baseURI = baseUri;
 
         String logEnabled = System.getProperty("isLogEnabled");
@@ -54,7 +53,7 @@ public class ApiBaseTest extends BaseTest{
     }
 
     // TODO: Move that to be available for web and mobile suites
-    protected void prepareUsers() {
+    default void prepareUsers() {
         String token = getAdminToken();
 
         GetUsersSteps getUsersSteps = new GetUsersSteps(token);
@@ -68,22 +67,22 @@ public class ApiBaseTest extends BaseTest{
         }
     }
 
-    protected String getUserToken() {
+     default String getUserToken() {
         return getToken(inputData.getUsername(), inputData.getPassword());
     }
 
-    protected String getAdminToken() {
+    default String getAdminToken() {
         return getToken(inputData.getUsernameAdmin(), inputData.getPasswordAdmin());
     }
 
-    protected String getToken(String username, String password) {
+    default String getToken(String username, String password) {
         PostLoginSteps postLoginSteps = new PostLoginSteps();
         LoginResponseDto loginResponseDto = postLoginSteps.login(username, password);
 
         return loginResponseDto.getTokenType() + " " + loginResponseDto.getAccessToken();
     }
 
-    protected String getUserId(String username) {
+    default String getUserId(String username) {
         GetUsersSteps getUsersSteps = new GetUsersSteps(getAdminToken());
         GetUserResponseDto[] getUserResponseDtos = getUsersSteps.getUsers();
 
@@ -91,7 +90,7 @@ public class ApiBaseTest extends BaseTest{
                 .filter(user -> user.getEmail().equals(username)).findFirst().get().getId();
     }
 
-    protected void deleteRegisteredUsers(Map<String, String> registeredUsers) {
+    default void deleteRegisteredUsers(Map<String, String> registeredUsers) {
         if (!registeredUsers.isEmpty()) {
             for (Map.Entry<String, String> entry : registeredUsers.entrySet()) {
                 String token = getToken(entry.getKey(), entry.getValue());
@@ -102,7 +101,7 @@ public class ApiBaseTest extends BaseTest{
         }
     }
 
-    protected void deleteRegisteredUsersAdmin(List<String> registeredUsers) {
+    default void deleteRegisteredUsersAdmin(List<String> registeredUsers) {
         if (!registeredUsers.isEmpty()) {
             String token = getAdminToken();
 
@@ -115,7 +114,7 @@ public class ApiBaseTest extends BaseTest{
         }
     }
 
-    protected void deleteObjects(List<String> objectIds, String token) {
+    default void deleteObjects(List<String> objectIds, String token) {
         DeleteObjectSteps deleteObjectSteps = new DeleteObjectSteps(token);
 
         for (String objectId : objectIds) {
@@ -123,7 +122,7 @@ public class ApiBaseTest extends BaseTest{
         }
     }
 
-    protected String getObjectHash(String fileName) {
+    default String getObjectHash(String fileName) {
         String res = "";
 
         try {
@@ -138,13 +137,13 @@ public class ApiBaseTest extends BaseTest{
         return res;
     }
 
-    protected String removeExtension(String filename) {
+    default String removeExtension(String filename) {
         int dotIndex = filename.lastIndexOf('.');
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
     }
 
     @DataProvider(name = "files")
-    public Object[][] provideFiles() {
+    default Object[][] provideFiles() {
         return new Object[][]{
                 {TRAINING_FILE},  // upload an image
                 {SAMPLE_VIDEO_FILE}    // upload a video

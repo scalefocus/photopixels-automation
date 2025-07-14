@@ -2,7 +2,7 @@ package com.photopixels.api.admin;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
 import com.photopixels.api.steps.admin.GetUsersSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.BeforeClass;
@@ -12,7 +12,7 @@ import org.testng.asserts.SoftAssert;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class GetUsersTests extends ApiBaseTest {
+public class GetUsersTests implements IApiBaseTest {
 
     private String token;
 

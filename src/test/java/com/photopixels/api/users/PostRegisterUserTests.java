@@ -3,7 +3,7 @@ package com.photopixels.api.users;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
 import com.photopixels.api.steps.users.PostRegisterUserSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -20,7 +20,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Users")
-public class PostRegisterUserTests extends ApiBaseTest {
+public class PostRegisterUserTests implements IApiBaseTest {
 
     private String name;
     private String email;

@@ -3,7 +3,7 @@ package com.photopixels.api.admin;
 import com.photopixels.api.dtos.status.GetStatusResponseDto;
 import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
 import com.photopixels.api.steps.status.GetStatusSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
@@ -14,7 +14,7 @@ import org.testng.asserts.SoftAssert;
 
 @Listeners(StatusTestListener.class)
 @Feature("Admin")
-public class PostDisableRegistrationTests extends ApiBaseTest {
+public class PostDisableRegistrationTests implements IApiBaseTest {
 
     private String token;
 

@@ -7,7 +7,7 @@ import com.photopixels.api.dtos.objectoperations.UploadObjectResponseDto;
 import com.photopixels.api.steps.objectoperations.DeleteTrashObjectSteps;
 import com.photopixels.api.steps.objectoperations.GetTrashedObjectsSteps;
 import com.photopixels.api.steps.objectoperations.PostUploadObjectSteps;
-import com.photopixels.base.ApiBaseTest;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
 import com.photopixels.listeners.StatusTestListener;
 import io.qameta.allure.*;
@@ -25,7 +25,7 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 
 @Listeners(StatusTestListener.class)
 @Feature("Object operations")
-public class GetTrashedObjectsTests extends ApiBaseTest {
+public class GetTrashedObjectsTests implements IApiBaseTest {
 
     private String token;
     private String objectId;
@@ -184,6 +184,8 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
         // Step 2: Use the last object's ID as lastId
         String lastId = properties.get(properties.size() - 1).getId();
 
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/142");
         // Step 3: Expect 204 No Content
         // We use the last returned object's ID as lastId, so there should be no newer trashed objects.
         // The API correctly returns 204 No Content when no more results are available.
@@ -199,6 +201,9 @@ public class GetTrashedObjectsTests extends ApiBaseTest {
     @Severity(SeverityLevel.MINOR)
     public void getTrashedObjectsWithNonExistingLastIdTest() {
         String nonExistingId = "nonExisting_123";
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/142");
 
         GetTrashedObjectsSteps getTrashedObjectsSteps = new GetTrashedObjectsSteps(token);
         getTrashedObjectsSteps.getTrashedObjectsExpectingNoContent(nonExistingId, pageSize);
