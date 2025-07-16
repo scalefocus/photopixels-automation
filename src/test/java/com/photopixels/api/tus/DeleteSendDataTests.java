@@ -158,9 +158,10 @@ public class DeleteSendDataTests implements IApiBaseTest {
 
         softAssert.assertFalse(isPresentBefore, "Expected file ID to not be present");
 
-        DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/170");
 
-        //deleteFileById.deleteFileExpectingError(invalidFileId,  HttpStatus.SC_NOT_FOUND);
+        DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(token);
         String responseBody = deleteFileById.deleteFileExpectingError(
                 invalidFileId,
                 HttpStatus.SC_NOT_FOUND
@@ -197,9 +198,6 @@ public class DeleteSendDataTests implements IApiBaseTest {
 
         // Step 3: Attempt deletion with User B (who does not own the file)
         DeleteSendDataSteps deleteFileById = new DeleteSendDataSteps(userTokenB);
-
-        // TODO: Remove when issue is fixed
-        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/140");
 
         deleteFileById.deleteFileExpectingError( uploadFrenchLocationId, HttpStatus.SC_FORBIDDEN);
 

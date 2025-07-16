@@ -41,14 +41,14 @@
             registeredUsers = new ArrayList<>();
         }
 
-        @BeforeMethod
+        @BeforeMethod(alwaysRun = true)
         public void generateRandoms() {
             String random = RandomString.make(5);
             randomName = "User_" + random;
             randomEmail = "test_" + random + "@test.com";
         }
 
-        @AfterClass
+        @AfterClass(alwaysRun = true)
         public void deleteUsers() {
             IApiBaseTest.super.deleteRegisteredUsersAdmin(registeredUsers);
         }

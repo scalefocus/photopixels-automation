@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.photopixels.constants.Constants.*;
+import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
+import static com.photopixels.constants.Constants.TRAINING_FILE;
 import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.get;
 
 public interface IApiBaseTest extends IBaseTest {
 
@@ -61,9 +61,7 @@ public interface IApiBaseTest extends IBaseTest {
 
         if (Arrays.stream(getUserResponseDto).noneMatch(
                 u -> u.getEmail().equals(inputData.getUsername()))) {
-            PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
-            postRegisterUserAdminSteps.registerUserAdmin(inputData.getUserFullName(),
-                    inputData.getUsername(), inputData.getPassword(), UserRolesEnum.USER);
+            registerUser(inputData.getUserFullName(), inputData.getUsername(), inputData.getPassword(), UserRolesEnum.USER);
         }
     }
 
@@ -140,6 +138,13 @@ public interface IApiBaseTest extends IBaseTest {
     default String removeExtension(String filename) {
         int dotIndex = filename.lastIndexOf('.');
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
+    }
+
+    default void registerUser(String username, String email, String password, UserRolesEnum role) {
+        String token = getAdminToken();
+
+        PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
+        postRegisterUserAdminSteps.registerUserAdmin(username, email, password, role);
     }
 
     @DataProvider(name = "files")

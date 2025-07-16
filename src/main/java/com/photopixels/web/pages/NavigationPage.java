@@ -7,6 +7,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
+
 public class NavigationPage extends WaitOperationHelper {
 
     private WebDriver driver;
@@ -90,5 +92,12 @@ public class NavigationPage extends WaitOperationHelper {
         waitForElementToBeVisible(statusMessage);
 
         return statusMessage.getText().trim();
+    }
+
+    @Step("Get all status messages separated")
+    public List<String> getAllMessagesSeparated() {
+        waitForElementToBeVisible(statusMessage);
+
+        return List.of(statusMessage.getText().split("\n"));
     }
 }
