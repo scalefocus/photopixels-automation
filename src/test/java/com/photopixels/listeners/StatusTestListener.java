@@ -35,6 +35,11 @@ public class StatusTestListener implements ITestListener, StepLifecycleListener,
 		List<StepResult> steps = result.getSteps();
 		StepResult stepResult = steps.get(steps.size() - 1);
 
+		// Attach screenshot for web test
+		if (driver != null) {
+			Allure.addAttachment(stepResult.getName(),
+					new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
+		}
 
 		if ((result.getStatus() == Status.FAILED || result.getStatus() == Status.BROKEN)) {
 
@@ -53,11 +58,6 @@ public class StatusTestListener implements ITestListener, StepLifecycleListener,
 			}
 		}
 
-		// Attach screenshot for web test
-		if (driver != null) {
-			Allure.addAttachment(stepResult.getName(),
-					new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
-		}
 	}
 
 	@Override

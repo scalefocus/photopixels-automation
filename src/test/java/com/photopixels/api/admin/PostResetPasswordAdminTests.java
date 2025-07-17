@@ -106,6 +106,9 @@ public class PostResetPasswordAdminTests implements IApiBaseTest {
     public void resetPasswordAdminInvalidEmailTest() {
         String email = "InvalidEmail";
 
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/171");
+
         PostResetPasswordAdminSteps postResetPasswordAdminSteps = new PostResetPasswordAdminSteps(token);
         ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(PASSWORD, email);
 
@@ -136,6 +139,10 @@ public class PostResetPasswordAdminTests implements IApiBaseTest {
     @Story("Reset Password by Admin")
     @Severity(SeverityLevel.NORMAL)
     public void resetPasswordAdminInvalidPasswordTest(String password, ErrorMessagesEnum errorMessage) {
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/171");
+        
         PostResetPasswordAdminSteps postResetPasswordAdminSteps = new PostResetPasswordAdminSteps(token);
         ErrorResponseDto errorResponseDto = postResetPasswordAdminSteps.resetPasswordAdminError(password, email);
 

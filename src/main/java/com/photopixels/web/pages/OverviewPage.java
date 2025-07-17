@@ -1,16 +1,12 @@
 package com.photopixels.web.pages;
 
 import io.qameta.allure.Step;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
-import java.time.Duration;
 import java.util.List;
 
 public class OverviewPage extends NavigationPage {
@@ -81,9 +77,8 @@ public class OverviewPage extends NavigationPage {
 
     @Step("Select media")
     public void selectMedia(int index) {
-        List<WebElement> icons = selectMediaButton;
-        if (index >= 0 && index < icons.size()) {
-            icons.get(index).click();
+        if (index >= 0 && index < selectMediaButton.size()) {
+            selectMediaButton.get(index).click();
         } else {
             throw new IllegalArgumentException("Invalid index for CheckCircleIcon: " + index);
         }

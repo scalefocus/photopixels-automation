@@ -2,10 +2,14 @@
 
     import com.photopixels.base.WebBaseTest;
     import com.photopixels.listeners.StatusTestListener;
-    import com.photopixels.web.pages.*;
+    import com.photopixels.web.pages.LoginPage;
+    import com.photopixels.web.pages.OverviewPage;
+    import com.photopixels.web.pages.TrashPage;
     import io.qameta.allure.*;
     import org.testng.Assert;
-    import org.testng.annotations.*;
+    import org.testng.annotations.BeforeClass;
+    import org.testng.annotations.Listeners;
+    import org.testng.annotations.Test;
 
     import static com.photopixels.constants.Constants.*;
 
@@ -26,7 +30,7 @@
         @Description("Successful upload and deletion of media")
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
-        public void deleteMedia() {
+        public void deleteMediaTest() {
             String selectedMedia = "1 selected";
 
             LoginPage loginPage = loadPhotoPixelsApp();
@@ -70,7 +74,7 @@
         @Description("Successful deleting the selection made in trash page")
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
-        public void emptyTrashWithSelection() {
+        public void emptyTrashWithSelectionTest() {
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(LARGER_IMAGE_FILE);
@@ -96,7 +100,7 @@
         @Description("Successful emptying the trash through Empty Trash button")
         @Story("Delete Media")
         @Severity(SeverityLevel.NORMAL)
-        public void emptyTrashWithEmptyTrashButton() {
+        public void emptyTrashWithEmptyTrashButtonTest() {
             LoginPage loginPage = loadPhotoPixelsApp();
             OverviewPage overviewPage = loginPage.login(username, password);
             overviewPage.uploadMedia(FRENCH_FRIES_FILE);
