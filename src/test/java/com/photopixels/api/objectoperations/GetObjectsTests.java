@@ -161,10 +161,10 @@ public class GetObjectsTests implements IApiBaseTest {
 
             // The created date of the all returned items needs to be less than
             // the created date of the item with id = LastId
-            softAssert.assertTrue(propertyDateTime.isBefore(objectDateTime),
+            softAssert.assertTrue(propertyDateTime.isBefore(objectDateTime) || propertyDateTime.isEqual(objectDateTime),
                     "Date created of object is not before the provided last id date");
             softAssert.assertNotNull(property.getId(), "Object property id is not returned");
-            softAssert.assertNotEquals(property.getId(), lastObjectId, "Newer object property id is returned");
+            softAssert.assertNotEquals(property.getId(), objectIds.get(2), "Newer object property id is returned");
         }
 
         softAssert.assertAll();

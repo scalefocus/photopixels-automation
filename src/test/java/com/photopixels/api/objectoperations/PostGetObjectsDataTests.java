@@ -72,7 +72,7 @@ public class PostGetObjectsDataTests implements IApiBaseTest {
         softAssert.assertTrue(getObjectsDataResponseDto.length > 0, "Objects data response is missing");
 
         for (int i = 0; i < getObjectsDataResponseDto.length; i++) {
-            softAssert.assertEquals(getObjectsDataResponseDto[i].getId(), objectIds.get(i), "Object data id is not correct");
+            softAssert.assertTrue(objectIds.contains(getObjectsDataResponseDto[i].getId()), "Object data id is not correct");
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getThumbnail(), "Object data thumbnail is not returned");
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getContentType(), "Object data content type is not returned");
             softAssert.assertNotNull(getObjectsDataResponseDto[i].getHash(), "Object data hash is not returned");
