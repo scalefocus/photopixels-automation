@@ -43,6 +43,9 @@ public class OverviewPage extends NavigationPage {
     @FindBy(xpath = "//button[normalize-space()='Move to Trash']")
     private WebElement moveToTrashButton;
 
+    @FindBy(css = "[aria-label='Add to Favorites']")
+    private WebElement addToFavoritesIcon;
+
 
     public OverviewPage(WebDriver driver) {
         super(driver);
@@ -92,13 +95,27 @@ public class OverviewPage extends NavigationPage {
         moveToTrashButton.click();
     }
 
+    @Step("Add to Favorites")
+    public void addToFavoritesMedia() {
+        waitForElementToBeVisible(addToFavoritesIcon);
+        addToFavoritesIcon.click();
+    }
+
     @Step("Get upload success message")
     public String getUploadSuccessMessage() {
+
         return getStatusMessage();
     }
 
     @Step("Get delete media message")
     public String getDeleteMediaMessage() {
+
+        return getStatusMessage();
+    }
+
+    @Step("Get media added to Favorites message")
+    public String getMediaAddedToFavoritesMessage() {
+
         return getStatusMessage();
     }
 

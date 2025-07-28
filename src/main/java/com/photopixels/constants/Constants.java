@@ -28,6 +28,9 @@ public class Constants {
     //Trash Page Web
     public static final String TRASH_PAGE = "Trash";
 
+    //Favorites Page Web
+    public static final String FAVORITES_PAGE = "Favorites";
+
     //Pop-up Messages
     public static final String USER_CREATED = "User Created.";
     public static final String USER_DELETED = "Account Deleted.";
@@ -35,7 +38,8 @@ public class Constants {
     public static final String PASSWORD_CHANGED = "Password changed successfully.";
     public static final String FILE_UPLOADED = "1 image uploaded successfully";
     public static final String FILE_DELETED = "Object(s) trashed successfully.";
-    public static final String FILE_PERMANENTLY_DELETED ="Object(s) deleted permanently successfully.";
+    public static final String FILE_PERMANENTLY_DELETED = "Object(s) deleted permanently successfully.";
+    public static final String MEDIA_ADDED_TO_FAVORITES = "Object(s) added to Favorites successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";
