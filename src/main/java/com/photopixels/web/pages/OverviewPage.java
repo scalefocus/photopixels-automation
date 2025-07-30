@@ -9,7 +9,7 @@ import org.openqa.selenium.support.PageFactory;
 import java.io.File;
 import java.util.List;
 
-public class OverviewPage extends NavigationPage {
+public class OverviewPage extends MediaContentPage {
 
     private WebDriver driver;
 
@@ -24,24 +24,6 @@ public class OverviewPage extends NavigationPage {
 
     @FindBy(xpath = "//input[@type='file']")
     private WebElement fileInput;
-
-    @FindBy(css = ".error-message")
-    private WebElement errorMessage;
-
-    @FindBy(css = "[data-testid='CheckCircleOutlineIcon']")
-    private List<WebElement> selectMediaButton;
-
-    @FindBy(css = "[data-testid='CheckCircleIcon']")
-    private List<WebElement> selectedMedia;
-
-    @FindBy(xpath = "//*[@id='root']//header//p")
-    private WebElement selectedCountText;
-
-    @FindBy(css = "[data-testid='DeleteIcon']")
-    private WebElement deleteMediaButton;
-
-    @FindBy(xpath = "//button[normalize-space()='Move to Trash']")
-    private WebElement moveToTrashButton;
 
     @FindBy(css = "[aria-label='Add to Favorites']")
     private WebElement addToFavoritesIcon;
@@ -78,23 +60,6 @@ public class OverviewPage extends NavigationPage {
         waitForUploadToFinish();
     }
 
-    @Step("Select media")
-    public void selectMedia(int index) {
-        if (index >= 0 && index < selectMediaButton.size()) {
-            selectMediaButton.get(index).click();
-        } else {
-            throw new IllegalArgumentException("Invalid index for CheckCircleIcon: " + index);
-        }
-    }
-
-    @Step("Delete media")
-    public void deleteMedia() {
-        waitForElementToBeVisible(deleteMediaButton);
-        deleteMediaButton.click();
-        waitForElementToBeVisible(moveToTrashButton);
-        moveToTrashButton.click();
-    }
-
     @Step("Add to Favorites")
     public void addToFavoritesMedia() {
         waitForElementToBeVisible(addToFavoritesIcon);
@@ -114,14 +79,8 @@ public class OverviewPage extends NavigationPage {
     }
 
     @Step("Get media added to Favorites message")
-    public String getMediaAddedToFavoritesMessage() {
+    public String getFavoriteMediaMessage() {
 
         return getStatusMessage();
-    }
-
-    @Step("Get selected media info text")
-    public String getSelectedMediaText() {
-        waitForElementToBeVisible(selectedCountText);
-        return selectedCountText.getText().trim();
     }
 }

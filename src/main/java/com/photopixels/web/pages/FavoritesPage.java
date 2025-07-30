@@ -8,12 +8,9 @@ import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
 
-public class FavoritesPage extends NavigationPage {
+public class FavoritesPage extends MediaContentPage {
 
     private WebDriver driver;
-
-    @FindBy(css = ".error-message")
-    private WebElement errorMessage;
 
     @FindBy(xpath = "//h5[text()='Favorites']")
     private WebElement favoritesHeader;
@@ -21,20 +18,11 @@ public class FavoritesPage extends NavigationPage {
     @FindBy(css = "[data-testid='FavoriteIcon']")
     private List<WebElement> favoriteIcon;
 
-    @FindBy(css = "[data-testid='CheckCircleOutlineIcon']")
-    private List<WebElement> selectMediaButton;
+    @FindBy(css = "[data-testid='CancelIcon']")
+    private WebElement removeFromFavorites;
 
-    @FindBy(css = "[data-testid='DeleteForeverIcon']")
-    private WebElement deleteMediaButton;
-
-    @FindBy(xpath = "//button[contains(@class, 'MuiButton-text') and text()='Empty Trash']")
-    private WebElement emptyTrashButton;
-
-    @FindBy(xpath = "//button[normalize-space()='Delete Permanently']")
-    private WebElement deletePermanentlyConfirmationButton;
-
-    @FindBy(xpath = "//button[contains(@class, 'MuiButton-containedError') and text()='Empty Trash']")
-    private WebElement emptyTrashConfirmationButton;
+    @FindBy(xpath = "//button[normalize-space()='Remove from Favorites']")
+    private WebElement removeFromFavoritesConfirmation;
 
 
     public FavoritesPage(WebDriver driver) {
@@ -51,17 +39,6 @@ public class FavoritesPage extends NavigationPage {
         return favoritesHeader.getText();
     }
 
-    @Step("Select media")
-    public void selectMediaByIndex(int index) {
-        waitForAllElementsToBeVisible(selectMediaButton);
-        List<WebElement> icons = selectMediaButton;
-        if (index >= 0 && index < icons.size()) {
-            icons.get(index).click();
-        } else {
-            throw new IllegalArgumentException("Invalid index for CheckCircleIcon: " + index);
-        }
-    }
-
     @Step("Verify all media items have a favorite icon")
     public boolean allMediaHasFavoriteIcon() {
         if (favoriteIcon.isEmpty()) {
@@ -76,25 +53,27 @@ public class FavoritesPage extends NavigationPage {
         return true;
     }
 
-    @Step("Delete media")
-    public void deleteMediaPermanently() {
-        waitForElementToBeVisible(deleteMediaButton);
-        deleteMediaButton.click();
-        waitForElementToBeVisible(deletePermanentlyConfirmationButton);
-        deletePermanentlyConfirmationButton.click();
+    @Step("Remove media from Favorites")
+    public void removeMediaFromFavorites() {
+        waitForElementToBeVisible(removeFromFavorites);
+        removeFromFavorites.click();
+        waitForElementToBeVisible(removeFromFavoritesConfirmation);
+        removeFromFavoritesConfirmation.click();
     }
 
-    @Step("Empty trash with a button")
-    public void emptyTrash() {
-        waitForElementToBeVisible(emptyTrashButton);
-        emptyTrashButton.click();
-        waitForElementToBeVisible(emptyTrashConfirmationButton);
-        emptyTrashConfirmationButton.click();
-    }
+    @Step("Verify no media items are favorited (via aria-hidden check)")
+    public boolean noMediaHasFavoriteIcon() {
+        List<WebElement> icons = favoriteIcon;
 
-    @Step("Get delete media permanently message")
-    public String getDeleteMediaMessage() {
+        for (WebElement icon : icons) {
+            String ariaHidden = icon.getAttribute("aria-hidden");
+            boolean isActuallyVisible = icon.isDisplayed() && ("false".equals(ariaHidden) || ariaHidden == null);
 
-        return getStatusMessage();
+            if (isActuallyVisible) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

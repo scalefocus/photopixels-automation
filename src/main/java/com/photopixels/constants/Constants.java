@@ -40,6 +40,7 @@ public class Constants {
     public static final String FILE_DELETED = "Object(s) trashed successfully.";
     public static final String FILE_PERMANENTLY_DELETED = "Object(s) deleted permanently successfully.";
     public static final String MEDIA_ADDED_TO_FAVORITES = "Object(s) added to Favorites successfully.";
+    public static final String MEDIA_REMOVED_FROM_FAVORITES = "Object(s) removed from favorites successfully.";
     
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";

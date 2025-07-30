@@ -8,30 +8,15 @@ import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
 
-public class TrashPage extends NavigationPage {
+public class TrashPage extends MediaContentPage {
 
     private WebDriver driver;
-
-    @FindBy(css = ".error-message")
-    private WebElement errorMessage;
 
     @FindBy(xpath = "//h5[text()='Trash']")
     private WebElement trashHeader;
 
-    @FindBy(xpath = "//div[@id='root']//div[contains(@class, 'upload-panel')]")
-    private WebElement trashMessagePrompt;
-
-    @FindBy(css = "[data-testid='CheckCircleOutlineIcon']")
-    private List<WebElement> selectMediaButton;
-
-    @FindBy(css = "[data-testid='DeleteForeverIcon']")
-    private WebElement deleteMediaButton;
-
     @FindBy(xpath = "//button[contains(@class, 'MuiButton-text') and text()='Empty Trash']")
     private WebElement emptyTrashButton;
-
-    @FindBy(xpath = "//button[normalize-space()='Delete Permanently']")
-    private WebElement deletePermanentlyConfirmationButton;
 
     @FindBy(xpath = "//button[contains(@class, 'MuiButton-containedError') and text()='Empty Trash']")
     private WebElement emptyTrashConfirmationButton;
@@ -49,25 +34,6 @@ public class TrashPage extends NavigationPage {
         waitForElementToBeVisible(trashHeader);
 
         return trashHeader.getText();
-    }
-
-    @Step("Select media")
-    public void selectMediaByIndex(int index) {
-        waitForAllElementsToBeVisible(selectMediaButton);
-        List<WebElement> icons = selectMediaButton;
-        if (index >= 0 && index < icons.size()) {
-            icons.get(index).click();
-        } else {
-            throw new IllegalArgumentException("Invalid index for CheckCircleIcon: " + index);
-        }
-    }
-
-    @Step("Delete media")
-    public void deleteMediaPermanently() {
-        waitForElementToBeVisible(deleteMediaButton);
-        deleteMediaButton.click();
-        waitForElementToBeVisible(deletePermanentlyConfirmationButton);
-        deletePermanentlyConfirmationButton.click();
     }
 
     @Step("Empty trash with a button")

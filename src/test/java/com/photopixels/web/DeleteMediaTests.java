@@ -59,7 +59,7 @@
             Assert.assertEquals(trashPage.getTrashHeader(), TRASH_PAGE,
                     "The header is not correct.");
 
-            trashPage.selectMediaByIndex(0);
+            trashPage.selectMedia(0);
 
             trashPage.deleteMediaPermanently();
 
@@ -85,7 +85,7 @@
 
             TrashPage trashPage = overviewPage.goToTrashTab();
 
-            trashPage.selectMediaByIndex(0);
+            trashPage.selectMedia(0);
 
             trashPage.deleteMediaPermanently();
 
