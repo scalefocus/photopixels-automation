@@ -71,6 +71,7 @@ public class MediaContentPage extends NavigationPage {
         deletePermanentlyConfirmationButton.click();
     }
 
+    //TODO: consider moving this method in a BasePage, when sufficient one created.
     public void refreshPage() {
         driver.navigate().refresh();
     }

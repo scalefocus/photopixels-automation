@@ -41,9 +41,6 @@ public class FavoritesPage extends MediaContentPage {
 
     @Step("Verify all media items have a favorite icon")
     public boolean allMediaHasFavoriteIcon() {
-        if (favoriteIcon.isEmpty()) {
-        }
-
         for (WebElement icon : favoriteIcon) {
             if (!icon.isDisplayed()) {
                 return false;
@@ -63,9 +60,7 @@ public class FavoritesPage extends MediaContentPage {
 
     @Step("Verify no media items are favorited (via aria-hidden check)")
     public boolean noMediaHasFavoriteIcon() {
-        List<WebElement> icons = favoriteIcon;
-
-        for (WebElement icon : icons) {
+        for (WebElement icon : favoriteIcon) {
             String ariaHidden = icon.getAttribute("aria-hidden");
             boolean isActuallyVisible = icon.isDisplayed() && ("false".equals(ariaHidden) || ariaHidden == null);
 
