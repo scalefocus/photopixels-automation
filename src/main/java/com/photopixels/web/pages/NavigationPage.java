@@ -34,6 +34,9 @@ public class NavigationPage extends WaitOperationHelper {
     @FindBy(xpath = "//a[@href='/trash']")
     private WebElement trashMenu;
 
+    @FindBy(xpath = "//a[@href='/favorites']")
+    private WebElement favoritesMenu;
+
     @FindBy(xpath = "//nav/div[@role='button']")
     private WebElement logoutButton;
 
@@ -53,6 +56,14 @@ public class NavigationPage extends WaitOperationHelper {
         waitForElementToBeVisible(userName);
 
         return userName.getText();
+    }
+
+    @Step("Go to Overview tab")
+    public OverviewPage goToOverview() {
+        waitForElementToBeVisible(overviewMenu);
+        overviewMenu.click();
+
+        return new OverviewPage(driver);
     }
 
     @Step("Go to Create New User tab")
@@ -77,6 +88,14 @@ public class NavigationPage extends WaitOperationHelper {
         trashMenu.click();
 
         return new TrashPage(driver);
+    }
+
+    @Step("Go to Trash tab")
+    public FavoritesPage goToFavoritesTab() {
+        waitForElementToBeVisible(favoritesMenu);
+        favoritesMenu.click();
+
+        return new FavoritesPage(driver);
     }
 
     @Step("Log out of main application")
