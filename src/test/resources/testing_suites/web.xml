@@ -8,6 +8,7 @@
             <class name="com.photopixels.web.EditUserTests"/>
             <class name="com.photopixels.web.SignUpNewUserTests"/>
             <class name="com.photopixels.web.DeleteMediaTests"/>
+            <class name="com.photopixels.web.AlbumsTests"/>
         </classes>
     </test>
 
