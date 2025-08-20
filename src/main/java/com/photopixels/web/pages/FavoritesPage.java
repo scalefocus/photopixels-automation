@@ -15,10 +15,10 @@ public class FavoritesPage extends MediaContentPage {
     @FindBy(xpath = "//h5[text()='Favorites']")
     private WebElement favoritesHeader;
 
-    @FindBy(css = "[data-testid='FavoriteIcon']")
+    @FindBy(css = ".MuiGrid-container img[alt=\"thumbnail\"] + div.MuiBox-root button svg[data-testid='FavoriteIcon']")
     private List<WebElement> favoriteIcon;
 
-    @FindBy(css = "[data-testid='CancelIcon']")
+    @FindBy(css = "[data-testid='HeartBrokenIcon']")
     private WebElement removeFromFavorites;
 
     @FindBy(xpath = "//button[normalize-space()='Remove from Favorites']")
