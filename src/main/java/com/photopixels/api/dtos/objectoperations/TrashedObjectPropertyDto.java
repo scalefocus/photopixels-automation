@@ -13,5 +13,7 @@ public class TrashedObjectPropertyDto {
     private String id;
     private String dateCreated;
     private String dateTrashed;
+    private String mediaType;
+    private Boolean isFavorite;
 
 }
