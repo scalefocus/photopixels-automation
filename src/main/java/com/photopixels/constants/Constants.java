@@ -36,7 +36,7 @@ public class Constants {
     public static final String USER_DELETED = "Account Deleted.";
     public static final String QUOTA_CHANGED = "Quota changed successfully.";
     public static final String PASSWORD_CHANGED = "Password changed successfully.";
-    public static final String FILE_UPLOADED = "1 image uploaded successfully";
+    public static final String FILE_UPLOADED = "1 media uploaded successfully";
     public static final String FILE_DELETED = "Object(s) trashed successfully.";
     public static final String FILE_PERMANENTLY_DELETED = "Object(s) deleted permanently successfully.";
     public static final String MEDIA_ADDED_TO_FAVORITES = "Object(s) added to Favorites successfully.";
