@@ -31,10 +31,10 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
         RegistrationPage registrationPage = loginPage.clickRegistrationButton();
         loginPage = registrationPage.registerNewUser(randomValidName, randomValidEmail, password);
 
-        Assert.assertTrue(loginPage.isToastNotificationDisplayed(REGISTRATION_SUCCESSFUL));
+        Assert.assertTrue(loginPage.isToastNotificationDisplayed(REGISTRATION_SUCCESSFUL), "Successful registration toast notification is missing");
         //Assert that user is on login page and username is prefilled with proper newly created user data
         //NOTE: Email is used for Username
-        Assert.assertEquals(loginPage.getUsernameFieldValue(), randomValidEmail);
+        Assert.assertEquals(loginPage.getUsernameFieldValue(), randomValidEmail, "Username prefilled value is not correct");
     }
 
 }
