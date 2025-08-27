@@ -11,6 +11,8 @@ import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static com.photopixels.constants.Constants.REGISTRATION_SUCCESSFUL;
+
 
 @Listeners(StatusTestListener.class)
 @Feature("Mobile")
@@ -30,10 +32,10 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
         RegistrationPage registrationPage = loginPage.clickRegistrationButton();
         loginPage = registrationPage.registerNewUser(randomValidName, randomValidEmail, password);
 
+        Assert.assertTrue(loginPage.isToastNotificationDisplayed(REGISTRATION_SUCCESSFUL));
         //Assert that user is on login page and username is prefilled with proper newly created user data
         //NOTE: Email is used for Username
         Assert.assertEquals(loginPage.getUsernameFieldValue(), randomValidEmail);
-        //TODO: Add assert for successful registration toast notification
     }
 
 }
