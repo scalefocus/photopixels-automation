@@ -3,14 +3,14 @@ package com.photopixels.mobile.pages;
 import com.photopixels.helpers.WaitOperationHelper;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.qameta.allure.Step;
-import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
-
-import java.util.List;
 
 import static java.time.Duration.ofSeconds;
 
@@ -36,8 +36,11 @@ public class HomePage extends WaitOperationHelper {
     @AndroidFindBy(xpath = "//android.widget.Button[@resource-id='com.android.permissioncontroller:id/permission_allow_all_button']")
     private WebElement allowAccessAllPhotosButton;
 
-    @AndroidFindBy(xpath = "//android.view.View[1]")
+    @AndroidFindBy(xpath = "(//*[@resource-id='android:id/content']//android.view.View)[1]")
     private WebElement firstPicture;
+
+    @AndroidFindBy(xpath = "//android.widget.TextView[@text='Upload device media' and @resource-id='android:id/title']")
+    private WebElement uploadNotification;
 
     public HomePage(AppiumDriver driver) {
         super(driver);
@@ -58,12 +61,13 @@ public class HomePage extends WaitOperationHelper {
     }
 
     @Step("Navigate to settings page")
-    public void navigateToSettings() {
+    public SettingsPage navigateToSettings() {
         settingsButton.click();
+        return new SettingsPage(driver);
     }
 
-    @Step("Navigate to home page")
-    public void navigateToHome() {
+    @Step("Click Home button")
+    public void clickHomeButton() {
         homeButton.click();
     }
 
@@ -82,22 +86,18 @@ public class HomePage extends WaitOperationHelper {
         allowAccessAllPhotosButton.click();
     }
 
-    public void waitForUploadToFinish(AppiumDriver mobileDriver) throws InterruptedException {
-        //TODO: Find a better wait for waiting
-        // Open notification shade
-        waitForElementToDisappear(syncMediaButton);
-        ((AndroidDriver) mobileDriver).openNotifications();
-
-        boolean uploading = true;
-        while (uploading) {
-            //Search for the Upload Notification from the Photo Pixels App
-            List<WebElement> uploadNotifications = mobileDriver.findElements(By.xpath("//*[contains(@text,'Upload device media')]"));
-
-            if (uploadNotifications.isEmpty()) {
-                uploading = false;
-            } else {
-                Thread.sleep(4000);
-            }
+    public void waitForUploadToFinish() {
+        waitForElementToBeVisible(firstPicture);
+        ((AndroidDriver) driver).openNotifications();
+        waitForElementToBeVisible(uploadNotification);
+        try {
+            waitForElementToDisappear(uploadNotification);
+        } catch (TimeoutException e) {
+            // Sometimes the upload can take more time
+            System.out.println("Uploading takes more than usual...");
+            waitForElementToDisappear(uploadNotification);
         }
+
+        ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
     }
 }

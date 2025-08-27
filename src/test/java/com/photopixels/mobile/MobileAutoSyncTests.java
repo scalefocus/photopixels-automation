@@ -7,22 +7,17 @@ import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.SettingsPage;
 import com.photopixels.web.pages.LoginPage;
 import com.photopixels.web.pages.OverviewPage;
+import com.photopixels.web.pages.TrashPage;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.connection.ConnectionState;
 import io.appium.java_client.android.connection.ConnectionStateBuilder;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
 import static com.photopixels.constants.Constants.MEDIA_ADDED_TO_FAVORITES;
@@ -46,11 +41,6 @@ public class MobileAutoSyncTests extends MobileBaseTest {
     private void checkImageIsUploadOnWeb() {
         WebDriver driver = null;
 
-        // Sleep is needed so the image is uploaded
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-        }
         try {
             driver = new DriverUtils().getDriver();
 
@@ -68,6 +58,13 @@ public class MobileAutoSyncTests extends MobileBaseTest {
             Assert.assertEquals(overviewPage.getFavoriteMediaMessage(), MEDIA_ADDED_TO_FAVORITES,
                     "The message is not correct.");
 
+            // Remove media
+            overviewPage.selectMedia(0);
+            overviewPage.deleteMedia();
+            TrashPage trashPage = overviewPage.goToTrashTab();
+            trashPage.selectMedia(0);
+            trashPage.deleteMediaPermanently();
+
         } finally {
             if (driver != null) {
                 driver.quit();
@@ -77,20 +74,37 @@ public class MobileAutoSyncTests extends MobileBaseTest {
 
     @Test(description = "Auto Sync photos only through Wi-Fi")
     @Description("Auto Sync photos only through Wi-Fi")
-    @Story("Auto Sync Through Mobile Data")
+    @Story("Auto Sync")
     @Severity(SeverityLevel.CRITICAL)
-    public void autoSyncThroughWiFi() throws InterruptedException {
-        ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiEnabled().build());
+    public void autoSyncThroughWiFi() {
+        ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiEnabled().withDataEnabled().build());
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         HomePage homePage = loginPage.login(email, password);
-        homePage.navigateToSettings();
-        SettingsPage settingsPage = new SettingsPage(mobileDriver);
+        SettingsPage settingsPage = homePage.navigateToSettings();
         settingsPage.turnRequireWiFiForSyncOnOff(true);
-        homePage.navigateToHome();
+        homePage.clickHomeButton();
         homePage.clickSyncMediaButton();
         homePage.clickAllowNotificationsButton();
         homePage.clickAllowAllPhotosAccessButton();
-        homePage.waitForUploadToFinish(mobileDriver);
+        homePage.waitForUploadToFinish();
+        checkImageIsUploadOnWeb();
+    }
+
+    @Test(description = "Auto Sync photos only through Mobile Data Only")
+    @Description("Auto Sync photos only through Mobile Data Only")
+    @Story("Auto Sync")
+    @Severity(SeverityLevel.CRITICAL)
+    public void autoSyncThroughMobileData() {
+        ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiDisabled().withDataEnabled().build());
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        HomePage homePage = loginPage.login(email, password);
+        SettingsPage settingsPage = homePage.navigateToSettings();
+        settingsPage.turnRequireWiFiForSyncOnOff(false);
+        homePage.clickHomeButton();
+        homePage.clickSyncMediaButton();
+        homePage.clickAllowNotificationsButton();
+        homePage.clickAllowAllPhotosAccessButton();
+        homePage.waitForUploadToFinish();
         checkImageIsUploadOnWeb();
     }
 
