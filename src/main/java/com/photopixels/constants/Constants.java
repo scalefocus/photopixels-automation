@@ -46,4 +46,7 @@ public class Constants {
     public static final String LOGIN_ERROR_TITLE = "Error Login";
     public static final String LOGIN_ERROR_TEXT = "Error while Login. Please try again.";
 
+    //Register Mobile
+    public static final String REGISTRATION_SUCCESSFUL = "Account has been created successfully.";
+
 }

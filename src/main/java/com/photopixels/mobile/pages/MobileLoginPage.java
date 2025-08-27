@@ -69,4 +69,20 @@ public class MobileLoginPage extends WaitOperationHelper {
     public boolean isLoginButtonDisplayed() {
         return loginButton.isDisplayed();
     }
+
+    @Step("Click Registration button")
+    public RegistrationPage clickRegistrationButton() {
+        registerButton.click();
+        return new RegistrationPage(driver);
+    }
+
+    @Step("Get Username field input value")
+    public String getUsernameFieldValue() {
+        return usernameField.getText();
+    }
+
+    @Step("Get Password field input value")
+    public String getPasswordFieldValue() {
+        return passwordField.getText();
+    }
 }
