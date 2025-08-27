@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import static com.photopixels.constants.Constants.REGISTRATION_SUCCESSFUL;
 
-
 @Listeners(StatusTestListener.class)
 @Feature("Mobile")
 public class MobileRegisterNewUserTests extends MobileBaseTest {
