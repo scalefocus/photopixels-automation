@@ -80,9 +80,4 @@ public class MobileLoginPage extends WaitOperationHelper {
     public String getUsernameFieldValue() {
         return usernameField.getText();
     }
-
-    @Step("Get Password field input value")
-    public String getPasswordFieldValue() {
-        return passwordField.getText();
-    }
 }
