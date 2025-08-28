@@ -76,7 +76,7 @@ public class MobileAutoSyncTests extends MobileBaseTest {
     @Description("Auto Sync photos only through Wi-Fi")
     @Story("Auto Sync")
     @Severity(SeverityLevel.CRITICAL)
-    public void autoSyncThroughWiFi() {
+    public void autoSyncThroughWiFiTest() {
         ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiEnabled().withDataEnabled().build());
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         HomePage homePage = loginPage.login(email, password);
@@ -94,7 +94,7 @@ public class MobileAutoSyncTests extends MobileBaseTest {
     @Description("Auto Sync photos only through Mobile Data Only")
     @Story("Auto Sync")
     @Severity(SeverityLevel.CRITICAL)
-    public void autoSyncThroughMobileData() {
+    public void autoSyncThroughMobileDataTest() {
         ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiDisabled().withDataEnabled().build());
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         HomePage homePage = loginPage.login(email, password);
@@ -107,5 +107,4 @@ public class MobileAutoSyncTests extends MobileBaseTest {
         homePage.waitForUploadToFinish();
         checkImageIsUploadOnWeb();
     }
-
 }

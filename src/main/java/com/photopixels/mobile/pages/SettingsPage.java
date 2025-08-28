@@ -20,7 +20,7 @@ public class SettingsPage {
     private WebElement requireWiFiForSync;
 
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='Sync Google Photos']/following-sibling::android.view.View")
-    private WebElement SyncGooglePhotos;
+    private WebElement syncGooglePhotos;
 
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='Logout']")
     private WebElement logoutButton;
@@ -34,16 +34,9 @@ public class SettingsPage {
 
     @Step("Turn Require WiFi for Sync option to {requirewifi}")
     public void turnRequireWiFiForSyncOnOff(boolean requirewifi) {
-        if(requirewifi){
-            if (!Boolean.parseBoolean(requireWiFiForSync.getDomAttribute("checked"))) {
-                requireWiFiForSync.click();
-            }
-        }
-        else {
-            if (Boolean.parseBoolean(requireWiFiForSync.getDomAttribute("checked"))) {
-                requireWiFiForSync.click();
-            }
+        boolean currentState = Boolean.parseBoolean(requireWiFiForSync.getDomAttribute("checked"));
+        if (currentState != requirewifi) {
+            requireWiFiForSync.click();
         }
     }
-
 }

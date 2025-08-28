@@ -12,6 +12,8 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
+
 import static java.time.Duration.ofSeconds;
 
 public class HomePage extends WaitOperationHelper {
@@ -36,8 +38,8 @@ public class HomePage extends WaitOperationHelper {
     @AndroidFindBy(xpath = "//android.widget.Button[@resource-id='com.android.permissioncontroller:id/permission_allow_all_button']")
     private WebElement allowAccessAllPhotosButton;
 
-    @AndroidFindBy(xpath = "(//*[@resource-id='android:id/content']//android.view.View)[1]")
-    private WebElement firstPicture;
+    @AndroidFindBy(xpath = "//K0.w0/android.view.View/android.view.View/android.view.View/android.view.View[1]//android.view.View")
+    private List<WebElement> photos;
 
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='Upload device media' and @resource-id='android:id/title']")
     private WebElement uploadNotification;
@@ -71,7 +73,7 @@ public class HomePage extends WaitOperationHelper {
         homeButton.click();
     }
 
-    @Step("Click Sync media button and allow permissions for notifications and photo access")
+    @Step("Click Sync media button")
     public void clickSyncMediaButton() {
         syncMediaButton.click();
     }
@@ -87,7 +89,7 @@ public class HomePage extends WaitOperationHelper {
     }
 
     public void waitForUploadToFinish() {
-        waitForElementToBeVisible(firstPicture);
+        waitForElementToBeVisible(photos.get(0));
         ((AndroidDriver) driver).openNotifications();
         waitForElementToBeVisible(uploadNotification);
         try {

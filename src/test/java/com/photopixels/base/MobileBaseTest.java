@@ -75,5 +75,4 @@ public class MobileBaseTest implements IBaseTest {
             ((AndroidDriver) mobileDriver).pushFile("/storage/emulated/0/Download/" + fileName, new File(localFilePath));
         }
     }
-
 }
