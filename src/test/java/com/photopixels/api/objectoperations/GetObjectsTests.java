@@ -78,6 +78,7 @@ public class GetObjectsTests implements IApiBaseTest {
             softAssert.assertFalse(property.getId().isEmpty(), "Object id is not returned");
             softAssert.assertFalse(property.getDateCreated().isEmpty(), "Object date created is not returned");
             softAssert.assertFalse(property.getMediaType().isEmpty(), "Object media type is not returned");
+            softAssert.assertFalse(property.isFavorite(), "The boolean parameter isFavorite is not false.");
         }
 
         softAssert.assertAll();
