@@ -48,7 +48,9 @@ public class GetObjectsSteps {
     private Response getObjectsResponse(String lastId, Integer pageSize) {
         Map<String, String> queryParams = new HashMap<>();
 
-        queryParams.put("LastId", lastId);
+        if (lastId != null) {
+            queryParams.put("LastId", lastId);
+        }
 
         if (pageSize != null) {
             queryParams.put("PageSize", String.valueOf(pageSize));

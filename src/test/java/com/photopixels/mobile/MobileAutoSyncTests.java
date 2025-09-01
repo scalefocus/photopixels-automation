@@ -1,36 +1,41 @@
 package com.photopixels.mobile;
 
+import com.photopixels.api.dtos.objectoperations.GetObjectDataResponseDto;
+import com.photopixels.api.dtos.objectoperations.GetObjectsResponseDto;
+import com.photopixels.api.steps.objectoperations.GetObjectDataSteps;
+import com.photopixels.api.steps.objectoperations.GetObjectsSteps;
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.base.MobileBaseTest;
-import com.photopixels.helpers.DriverUtils;
 import com.photopixels.mobile.pages.HomePage;
 import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.SettingsPage;
-import com.photopixels.web.pages.LoginPage;
-import com.photopixels.web.pages.OverviewPage;
-import com.photopixels.web.pages.TrashPage;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.connection.ConnectionStateBuilder;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import org.openqa.selenium.WebDriver;
-import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+import java.util.Collections;
 
 import static com.photopixels.constants.Constants.FRENCH_FRIES_FILE;
-import static com.photopixels.constants.Constants.MEDIA_ADDED_TO_FAVORITES;
 
-public class MobileAutoSyncTests extends MobileBaseTest {
+public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest {
 
     private String email;
     private String password;
+    private String token;
+    private String objectId;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
         email = inputData.getUsername();
         password = inputData.getPassword();
+        token = getUserToken();
         try {
             pushImageToGallery(FRENCH_FRIES_FILE, "french-fries.jpg");
         } catch (Exception e) {
@@ -38,38 +43,9 @@ public class MobileAutoSyncTests extends MobileBaseTest {
         }
     }
 
-    private void checkImageIsUploadOnWeb() {
-        WebDriver driver = null;
-
-        try {
-            driver = new DriverUtils().getDriver();
-
-            driver.get(configProperties.getProperty("webUrl"));
-
-            LoginPage loginPage = new LoginPage(driver);
-            OverviewPage overviewPage = loginPage.login(email, password);
-            overviewPage.selectMedia(0);
-
-            overviewPage.addToFavoritesMedia();
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
-
-            Assert.assertEquals(overviewPage.getFavoriteMediaMessage(), MEDIA_ADDED_TO_FAVORITES,
-                    "The message is not correct.");
-
-            // Remove media
-            overviewPage.selectMedia(0);
-            overviewPage.deleteMedia();
-            TrashPage trashPage = overviewPage.goToTrashTab();
-            trashPage.selectMedia(0);
-            trashPage.deleteMediaPermanently();
-
-        } finally {
-            if (driver != null) {
-                driver.quit();
-            }
-        }
+    @AfterMethod(alwaysRun = true)
+    public void cleanup() {
+        deleteObjects(Collections.singletonList(objectId), token);
     }
 
     @Test(description = "Auto Sync photos only through Wi-Fi")
@@ -87,7 +63,29 @@ public class MobileAutoSyncTests extends MobileBaseTest {
         homePage.clickAllowNotificationsButton();
         homePage.clickAllowAllPhotosAccessButton();
         homePage.waitForUploadToFinish();
-        checkImageIsUploadOnWeb();
+
+        String objectHash = getObjectHash(FRENCH_FRIES_FILE);
+
+        GetObjectsSteps getObjectsSteps = new GetObjectsSteps(token);
+        GetObjectsResponseDto getObjectsResponseDto = getObjectsSteps.getObjects(null, 1);
+        objectId = getObjectsResponseDto.getProperties().get(0).getId();
+
+        GetObjectDataSteps getObjectDataSteps = new GetObjectDataSteps(token);
+        GetObjectDataResponseDto getObjectDataResponseDto = getObjectDataSteps.getObjectData(objectId);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertNotNull(getObjectDataResponseDto, "Object data is not returned");
+        softAssert.assertEquals(getObjectDataResponseDto.getId(), objectId, "Object data id is not correct");
+        softAssert.assertNotNull(getObjectDataResponseDto.getThumbnail(), "Object data thumbnail is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getContentType(), "Object data content type is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getDateCreated(), "Date created should not be null");
+        softAssert.assertEquals(getObjectDataResponseDto.getOriginalHash(), objectHash,
+                "Original hash does not match expected object hash");
+        softAssert.assertEquals(getObjectDataResponseDto.getHash(), objectHash.substring(0, objectHash.length() - 1),
+                "Object data hash is not correct");
+
+        softAssert.assertAll();
     }
 
     @Test(description = "Auto Sync photos only through Mobile Data Only")
@@ -105,6 +103,28 @@ public class MobileAutoSyncTests extends MobileBaseTest {
         homePage.clickAllowNotificationsButton();
         homePage.clickAllowAllPhotosAccessButton();
         homePage.waitForUploadToFinish();
-        checkImageIsUploadOnWeb();
+
+        String objectHash = getObjectHash(FRENCH_FRIES_FILE);
+
+        GetObjectsSteps getObjectsSteps = new GetObjectsSteps(token);
+        GetObjectsResponseDto getObjectsResponseDto = getObjectsSteps.getObjects(null, 1);
+        objectId = getObjectsResponseDto.getProperties().get(0).getId();
+
+        GetObjectDataSteps getObjectDataSteps = new GetObjectDataSteps(token);
+        GetObjectDataResponseDto getObjectDataResponseDto = getObjectDataSteps.getObjectData(objectId);
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertNotNull(getObjectDataResponseDto, "Object data is not returned");
+        softAssert.assertEquals(getObjectDataResponseDto.getId(), objectId, "Object data id is not correct");
+        softAssert.assertNotNull(getObjectDataResponseDto.getThumbnail(), "Object data thumbnail is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getContentType(), "Object data content type is not returned");
+        softAssert.assertNotNull(getObjectDataResponseDto.getDateCreated(), "Date created should not be null");
+        softAssert.assertEquals(getObjectDataResponseDto.getOriginalHash(), objectHash,
+                "Original hash does not match expected object hash");
+        softAssert.assertEquals(getObjectDataResponseDto.getHash(), objectHash.substring(0, objectHash.length() - 1),
+                "Object data hash is not correct");
+
+        softAssert.assertAll();
     }
 }
