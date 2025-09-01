@@ -26,6 +26,9 @@ public class MobileLoginPage extends WaitOperationHelper {
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='REGISTER']/following-sibling::android.widget.Button")
     private WebElement registerButton;
 
+    @AndroidFindBy(xpath = "//android.widget.Toast[1]")
+    private WebElement activeToastNotification;
+
     public MobileLoginPage(AppiumDriver driver) {
         super(driver);
         this.driver = driver;
@@ -79,5 +82,14 @@ public class MobileLoginPage extends WaitOperationHelper {
     @Step("Get Username field input value")
     public String getUsernameFieldValue() {
         return usernameField.getText();
+    }
+
+    @Step("Check if a toast notification string appeared on screen")
+    public boolean isToastNotificationDisplayed(String expectedToast) {
+        try {
+            return expectedToast.equals(activeToastNotification.getText());
+        } catch (org.openqa.selenium.StaleElementReferenceException e) {
+            return false;
+        }
     }
 }
