@@ -29,6 +29,9 @@ public class RegistrationPage extends WaitOperationHelper {
     @AndroidFindBy(xpath = "//android.widget.TextView[@text='REGISTER']")
     private WebElement registerButton;
 
+    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Name\"]/following-sibling::android.widget.TextView")
+    private WebElement nameFieldErrorMessage;
+
     public RegistrationPage(AppiumDriver driver) {
         super(driver);
         this.driver = driver;
@@ -74,4 +77,14 @@ public class RegistrationPage extends WaitOperationHelper {
             confirmPasswordField.sendKeys(confirmPassword);
         }
     }
+
+    public boolean isNameFieldErrorMessageVisible() {
+        try {
+            waitForElementToBeVisible(driver, nameFieldErrorMessage, 2);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

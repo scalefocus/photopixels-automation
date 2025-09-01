@@ -22,6 +22,14 @@ public class WaitOperationHelper {
 		wait.pollingEvery(Duration.ofMillis(HALF_SECOND_IN_MS)).ignoring(NoSuchElementException.class);
 	}
 
+	// Helper method for creating a FluentWait with a custom timeout
+	private FluentWait<WebDriver> customWait(WebDriver driver, int timeoutSeconds) {
+		return new FluentWait<>(driver)
+				.withTimeout(Duration.ofSeconds(timeoutSeconds))
+				.pollingEvery(Duration.ofMillis(HALF_SECOND_IN_MS))
+				.ignoring(NoSuchElementException.class);
+	}
+
 	public void waitMs() {
 		try {
 			Thread.sleep(ONE_SECOND_IN_MS);
@@ -33,6 +41,12 @@ public class WaitOperationHelper {
 	public void waitForElementToBeVisible(WebElement element) {
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
+
+	// Waits until the given element becomes visible within the specified timeout (in seconds)
+	public void waitForElementToBeVisible(WebDriver driver, WebElement element, int timeoutSeconds) {
+		customWait(driver, timeoutSeconds).until(ExpectedConditions.visibilityOf(element));
+	}
+
 
 	public void waitForElementToBeClickable(WebElement element) {
 		wait.until(ExpectedConditions.elementToBeClickable(element));

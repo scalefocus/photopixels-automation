@@ -37,4 +37,25 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
         Assert.assertEquals(loginPage.getUsernameFieldValue(), randomValidEmail, "Username prefilled value is not correct");
     }
 
+
+    @Test(description = "User can register with valid alphanumeric name")
+    @Description("Successful registration of a new user with name which includes letters and digits")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerNewUserWithAlphanumericNameMobileTest() {
+        String random = RandomStringUtils.randomAlphanumeric(6);
+        String randomValidAlphanumericName = "TestUser" + random;
+        String randomValidEmail = "testUserBox" + random + "@test.com";
+        String password = Constants.PASSWORD;
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/183");
+
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        RegistrationPage registrationPage = loginPage.clickRegistrationButton();
+        registrationPage.registerNewUser(randomValidAlphanumericName, randomValidEmail, password);
+
+        Assert.assertFalse(registrationPage.isNameFieldErrorMessageVisible(), "Name field validation fails");
+    }
+
 }
