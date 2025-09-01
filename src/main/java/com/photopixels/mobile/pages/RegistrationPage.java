@@ -78,6 +78,7 @@ public class RegistrationPage extends WaitOperationHelper {
         }
     }
 
+    @Step("Check if 'Name' field error message appears")
     public boolean isNameFieldErrorMessageVisible() {
         try {
             waitForElementToBeVisible(driver, nameFieldErrorMessage, 2);
