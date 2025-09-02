@@ -1,7 +1,5 @@
 package com.photopixels.enums;
 
-import lombok.Getter;
-
 public enum MobileNetworkOptionsEnum {
 
     WIFI_ON,
