@@ -11,8 +11,6 @@ import java.util.List;
 @Data
 @Builder
 public class GetObjectsResponseDto {
-
     private String lastId;
     private List<PropertiesResponseDto> properties;
-
 }
