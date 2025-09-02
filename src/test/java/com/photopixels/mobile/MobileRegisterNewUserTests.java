@@ -1,27 +1,42 @@
 package com.photopixels.mobile;
 
+import com.photopixels.base.IApiBaseTest;
 import com.photopixels.base.MobileBaseTest;
-import com.photopixels.constants.Constants;
 import com.photopixels.listeners.StatusTestListener;
 import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.RegistrationPage;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.photopixels.constants.Constants.PASSWORD;
 import static com.photopixels.constants.Constants.REGISTRATION_SUCCESSFUL;
 
 @Listeners(StatusTestListener.class)
 @Feature("Mobile")
-public class MobileRegisterNewUserTests extends MobileBaseTest {
+public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBaseTest {
 
     String random = RandomStringUtils.randomAlphabetic(6);
-    String randomValidName = "TestUser" + random;
-    String randomValidEmail = "testUserBox" + random + "@test.com";
-    String password = Constants.PASSWORD;
+    private String randomValidName;
+    private String randomValidEmail;
+    private List<String> registeredUsers;
+
+    @BeforeClass(alwaysRun = true)
+    public void setup() {
+    randomValidName = "TestUser" + random;
+    randomValidEmail = "testUserBox" + random + "@test.com";
+    registeredUsers = new ArrayList<>();
+    registeredUsers.add(randomValidEmail);
+    }
+
+    @AfterClass
+    public void deleteUsers() {
+        IApiBaseTest.super.deleteRegisteredUsersAdmin(registeredUsers);
+    }
 
     @Test(description = "Successful new user registration")
     @Description("Successful registration of a new user in mobile app")
@@ -30,7 +45,7 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
     public void registerNewUserMobileTest() {
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         RegistrationPage registrationPage = loginPage.clickRegistrationButton();
-        loginPage = registrationPage.registerNewUser(randomValidName, randomValidEmail, password, password);
+        loginPage = registrationPage.registerNewUser(randomValidName, randomValidEmail, PASSWORD, PASSWORD);
 
         Assert.assertTrue(loginPage.isToastNotificationDisplayed(REGISTRATION_SUCCESSFUL), "Successful registration toast notification is missing");
         //Assert that user is on login page and username is prefilled with proper newly created user data
@@ -44,17 +59,16 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
     @Story("Register User")
     @Severity(SeverityLevel.NORMAL)
     public void registerNewUserWithAlphanumericNameMobileTest() {
-        String random = RandomStringUtils.randomAlphanumeric(6);
-        String randomValidAlphanumericName = "TestUser" + random;
-        String randomValidEmail = "testUserBox" + random + "@test.com";
-        String password = Constants.PASSWORD;
+        String randomValidAlphanumericName = randomValidName + "1";
+        randomValidEmail =  "testUserBox" + randomValidAlphanumericName + "@test.com";
+        registeredUsers.add(randomValidEmail);
 
         // TODO: Remove when issue is fixed
         addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/183");
 
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         RegistrationPage registrationPage = loginPage.clickRegistrationButton();
-        registrationPage.registerNewUser(randomValidAlphanumericName, randomValidEmail, password, password);
+        registrationPage.registerNewUser(randomValidAlphanumericName, randomValidEmail, PASSWORD, PASSWORD);
 
         Assert.assertFalse(registrationPage.isNameFieldErrorMessageVisible(), "Name field validation fails");
     }
@@ -62,10 +76,10 @@ public class MobileRegisterNewUserTests extends MobileBaseTest {
     @DataProvider(name = "singleEmptyField")
     public Object[][] getSingleEmptyField() {
         return new Object [][]  {
-                { "", randomValidEmail, password, password},
-                {randomValidName, "", password, password},
-                {randomValidName, randomValidEmail, "", password},
-                {randomValidName, randomValidEmail, password, ""}
+                { "", randomValidEmail, PASSWORD, PASSWORD},
+                {randomValidName, "", PASSWORD, PASSWORD},
+                {randomValidName, randomValidEmail, "", PASSWORD},
+                {randomValidName, randomValidEmail, PASSWORD, ""}
         };
     }
     @Test(description = "Register button is disabled when a required field is empty", dataProvider = "singleEmptyField")

@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
@@ -84,8 +85,12 @@ public interface IApiBaseTest extends IBaseTest {
         GetUsersSteps getUsersSteps = new GetUsersSteps(getAdminToken());
         GetUserResponseDto[] getUserResponseDtos = getUsersSteps.getUsers();
 
-        return Arrays.stream(getUserResponseDtos)
-                .filter(user -> user.getEmail().equals(username)).findFirst().get().getId();
+        try {
+            return Arrays.stream(getUserResponseDtos)
+                    .filter(user -> user.getEmail().equals(username)).findFirst().get().getId();
+        } catch (NoSuchElementException e) {
+            return "";
+        }
     }
 
     default void deleteRegisteredUsers(Map<String, String> registeredUsers) {
@@ -105,6 +110,10 @@ public interface IApiBaseTest extends IBaseTest {
 
             for (String username : registeredUsers) {
                 String userId = getUserId(username);
+
+                if (userId.isEmpty()) {
+                    continue;
+                }
 
                 DeleteUserAdminSteps deleteUserAdminSteps = new DeleteUserAdminSteps(token);
                 deleteUserAdminSteps.deleteUserAdmin(userId);
