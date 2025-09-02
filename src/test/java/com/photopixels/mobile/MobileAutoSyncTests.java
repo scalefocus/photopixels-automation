@@ -6,11 +6,10 @@ import com.photopixels.api.steps.objectoperations.GetObjectDataSteps;
 import com.photopixels.api.steps.objectoperations.GetObjectsSteps;
 import com.photopixels.base.IApiBaseTest;
 import com.photopixels.base.MobileBaseTest;
+import com.photopixels.enums.MobileNetworkOptionsEnum;
 import com.photopixels.mobile.pages.HomePage;
 import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.SettingsPage;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.connection.ConnectionStateBuilder;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
@@ -53,7 +52,7 @@ public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest 
     @Story("Auto Sync")
     @Severity(SeverityLevel.CRITICAL)
     public void autoSyncThroughWiFiTest() {
-        ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiEnabled().withDataEnabled().build());
+        setNetworkConnection(MobileNetworkOptionsEnum.WIFI_AND_DATA_ON);
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         HomePage homePage = loginPage.login(email, password);
         SettingsPage settingsPage = homePage.navigateToSettings();
@@ -93,7 +92,7 @@ public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest 
     @Story("Auto Sync")
     @Severity(SeverityLevel.CRITICAL)
     public void autoSyncThroughMobileDataTest() {
-        ((AndroidDriver) mobileDriver).setConnection(new ConnectionStateBuilder().withWiFiDisabled().withDataEnabled().build());
+        setNetworkConnection(MobileNetworkOptionsEnum.DATA_ON);
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         HomePage homePage = loginPage.login(email, password);
         SettingsPage settingsPage = homePage.navigateToSettings();

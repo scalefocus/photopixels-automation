@@ -1,5 +1,6 @@
 package com.photopixels.base;
 
+import com.photopixels.enums.MobileNetworkOptionsEnum;
 import com.photopixels.enums.PlatformEnum;
 import com.photopixels.helpers.MobileDriverUtils;
 import com.photopixels.helpers.ScreenshotHelper;
@@ -7,6 +8,8 @@ import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.ServerConfigPage;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.connection.ConnectionState;
+import io.appium.java_client.android.connection.ConnectionStateBuilder;
 import lombok.Getter;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
@@ -58,7 +61,7 @@ public class MobileBaseTest implements IBaseTest {
     }
 
     public MobileLoginPage loadPhotoPixelsApp() {
-        String serverAddress = configProperties.getProperty("webUrl");
+        String serverAddress = configProperties.getProperty("mobileUrl");
 
         ServerConfigPage serverConfigPage = new ServerConfigPage(getMobileDriver());
 
@@ -74,5 +77,31 @@ public class MobileBaseTest implements IBaseTest {
         if (mobileDriver.getCapabilities().getPlatformName().name().equalsIgnoreCase(PlatformEnum.ANDROID.toString())) {
             ((AndroidDriver) mobileDriver).pushFile("/storage/emulated/0/Download/" + fileName, new File(localFilePath));
         }
+    }
+
+    public void setNetworkConnection(MobileNetworkOptionsEnum networkOption) {
+        ConnectionState state = switch (networkOption) {
+            case WIFI_ON -> new ConnectionStateBuilder()
+                    .withWiFiEnabled()
+                    .build();
+            case WIFI_OFF -> new ConnectionStateBuilder()
+                    .withWiFiDisabled()
+                    .build();
+            case WIFI_AND_DATA_ON -> new ConnectionStateBuilder()
+                    .withWiFiEnabled()
+                    .withDataEnabled()
+                    .build();
+            case DATA_ON -> new ConnectionStateBuilder()
+                    .withDataEnabled()
+                    .build();
+            case DATA_OFF -> new ConnectionStateBuilder()
+                    .withDataDisabled()
+                    .build();
+            case WIFI_OFF_DATA_ON -> new ConnectionStateBuilder()
+                    .withWiFiDisabled()
+                    .withDataEnabled()
+                    .build();
+        };
+        ((AndroidDriver) mobileDriver).setConnection(state);
     }
 }
