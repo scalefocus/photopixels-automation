@@ -22,6 +22,8 @@ public class GetEmailListSteps {
     private static final String FUNC_GET_EMAIL_LIST = "get_email_list";
     private static final String FUNC_FETCH_EMAIL = "fetch_email";
     private static final Pattern SIX_DIGIT_CODE = Pattern.compile("\\b\\d{6}\\b");
+    private static final int MAX_RETRIES = 5;
+    private static final int DELAY_MILLIS = 4000;
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
 
@@ -33,8 +35,8 @@ public class GetEmailListSteps {
         requestSpecification.setRelaxedHttpsValidation();
     }
 
-    public long getMailIdFromSender(String expectedSender, String sidToken, int maxRetries, int delayMillis) {
-        for (int i = 0; i < maxRetries; i++) {
+    public long getMailIdFromSender(String expectedSender, String sidToken) {
+        for (int i = 0; i < MAX_RETRIES; i++) {
             GetEmailListResponseDto response = getEmailList(sidToken);
 
             if (response.getList() != null) {
@@ -47,13 +49,13 @@ public class GetEmailListSteps {
                 }
             }
             try {
-                Thread.sleep(delayMillis);
+                Thread.sleep(DELAY_MILLIS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Interrupted while waiting for email", e);
             }
         }
-        throw new RuntimeException("Email from " + expectedSender + " not found after " + maxRetries + " retries");
+        throw new RuntimeException("Email from " + expectedSender + " not found after " + MAX_RETRIES + " retries");
     }
 
     public String getResetCodeFromMail(String sidToken, long mailId) {
