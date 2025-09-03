@@ -85,12 +85,11 @@ public interface IApiBaseTest extends IBaseTest {
         GetUsersSteps getUsersSteps = new GetUsersSteps(getAdminToken());
         GetUserResponseDto[] getUserResponseDtos = getUsersSteps.getUsers();
 
-        try {
-            return Arrays.stream(getUserResponseDtos)
-                    .filter(user -> user.getEmail().equals(username)).findFirst().get().getId();
-        } catch (NoSuchElementException e) {
-            return "";
-        }
+        return Arrays.stream(getUserResponseDtos)
+                .filter(user -> user.getEmail().equals(username))
+                .map(GetUserResponseDto::getId)
+                .findFirst()
+                .orElse("");
     }
 
     default void deleteRegisteredUsers(Map<String, String> registeredUsers) {

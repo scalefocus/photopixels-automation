@@ -53,7 +53,6 @@ public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBa
         Assert.assertEquals(loginPage.getUsernameFieldValue(), randomValidEmail, "Username prefilled value is not correct");
     }
 
-
     @Test(description = "User can register with valid alphanumeric name")
     @Description("Successful registration of a new user with name which includes letters and digits")
     @Story("Register User")
@@ -82,6 +81,7 @@ public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBa
                 {randomValidName, randomValidEmail, PASSWORD, ""}
         };
     }
+
     @Test(description = "Register button is disabled when a required field is empty", dataProvider = "singleEmptyField")
     @Description("User cannot use Register button if a required field is not filled in")
     @Story("Register User")
@@ -103,20 +103,20 @@ public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBa
                 {"Password!"} // missing digit
         };
     }
+
     @Test(description = "Registration not allowed with invalid password", dataProvider = "invalidPassword")
     @Description("User cannot register a new user with invalid password - it should be at least 8 characters, one lowercase, one uppercase, and one non alphanumeric character")
     @Story("Register User")
     @Severity(SeverityLevel.NORMAL)
-    public void registerWithInvalidPasswordNotAllowedMobileTest(String password) {
+    public void registerWithInvalidPasswordNotAllowedMobileTest(String invalidPassword) {
 
         // TODO: Remove when issue is fixed
         addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/191");
 
         MobileLoginPage loginPage = loadPhotoPixelsApp();
         RegistrationPage registrationPage = loginPage.clickRegistrationButton();
-        registrationPage.registerNewUser(randomValidName, randomValidEmail, password, password);
+        registrationPage.registerNewUser(randomValidName, randomValidEmail, invalidPassword, invalidPassword);
 
-        Assert.assertTrue(registrationPage.isPasswordFieldErrorMessageVisible(), "Password field validation fails, app accepts invalid password: " + password);
+        Assert.assertTrue(registrationPage.isPasswordFieldErrorMessageVisible(), "Password field validation fails, app accepts invalid password: " + invalidPassword);
     }
-
 }
