@@ -5,6 +5,7 @@
         <classes>
             <class name="com.photopixels.mobile.MobileLoginTests"/>
             <class name="com.photopixels.mobile.MobileAutoSyncTests"/>
+            <class name="com.photopixels.mobile.MobileRegisterNewUserTests"/>
         </classes>
     </test>
 
