@@ -95,4 +95,28 @@ public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBa
         Assert.assertFalse(registrationPage.isRegisterButtonEnabled(), "Register button is enabled");
     }
 
+    @DataProvider(name = "invalidPassword")
+    public Object[][] getInvalidPassword() {
+        return new Object [][]  {
+                { "password1!"}, //missing capital letter
+                {"Password1"}, //missing special symbol
+                {"Password!"} // missing digit
+        };
+    }
+    @Test(description = "Registration not allowed with invalid password", dataProvider = "invalidPassword")
+    @Description("User cannot register a new user with invalid password - it should be at least 8 characters, one lowercase, one uppercase, and one non alphanumeric character")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerWithInvalidPasswordNotAllowedMobileTest(String password) {
+
+        // TODO: Remove when issue is fixed
+        addIssueLinkToAllureReport("https://github.com/scalefocus/photopixels/issues/191");
+
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        RegistrationPage registrationPage = loginPage.clickRegistrationButton();
+        registrationPage.registerNewUser(randomValidName, randomValidEmail, password, password);
+
+        Assert.assertTrue(registrationPage.isPasswordFieldErrorMessageVisible(), "Password field validation fails, app accepts invalid password: " + password);
+    }
+
 }
