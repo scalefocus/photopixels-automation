@@ -18,6 +18,9 @@ import java.util.regex.Pattern;
 public class GetEmailListSteps {
 
     private static final String EMAIL_URI = "https://api.guerrillamail.com/ajax.php";
+    private static final String FUNC_GET_EMAIL_ADDRESS = "get_email_address";
+    private static final String FUNC_GET_EMAIL_LIST = "get_email_list";
+    private static final String FUNC_FETCH_EMAIL = "fetch_email";
     private static final Pattern SIX_DIGIT_CODE = Pattern.compile("\\b\\d{6}\\b");
     private final RequestOperationsHelper requestOperationsHelper;
     private final CustomRequestSpecification requestSpecification;
@@ -62,7 +65,7 @@ public class GetEmailListSteps {
     }
 
     public GetEmailAddressResponseDto getEmailAddress() {
-        Response response = getEmailAddressResponse();
+        Response response = getEmail(FUNC_GET_EMAIL_ADDRESS, null, null, null);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
@@ -70,7 +73,7 @@ public class GetEmailListSteps {
     }
 
     public GetEmailListResponseDto getEmailList(String sidToken) {
-        Response response = getEmailListResponse(sidToken);
+        Response response = getEmail(FUNC_GET_EMAIL_LIST, sidToken, 0, null);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
@@ -78,36 +81,25 @@ public class GetEmailListSteps {
     }
 
     public FetchEmailResponseDto fetchEmail(String sidToken, long mailId) {
-        Response response = getEmailDetailsResponse(sidToken, mailId);
+        Response response = getEmail(FUNC_FETCH_EMAIL, sidToken, null, mailId);
 
         response.then().statusCode(HttpStatus.SC_OK);
 
         return response.as(FetchEmailResponseDto.class);
     }
 
-    private Response getEmailAddressResponse() {
+    private Response getEmail(String function, String sidToken, Integer offset, Long mailId) {
         Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("f", "get_email_address");
-        requestSpecification.addQueryParams(queryParams);
-
-        return requestOperationsHelper.sendGetRequest(requestSpecification.getFilterableRequestSpecification());
-    }
-
-    private Response getEmailListResponse(String sidToken) {
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("f", "get_email_list");
-        queryParams.put("offset", String.valueOf(0));
-        queryParams.put("sid_token", sidToken);
-        requestSpecification.addQueryParams(queryParams);
-
-        return requestOperationsHelper.sendGetRequest(requestSpecification.getFilterableRequestSpecification());
-    }
-
-    private Response getEmailDetailsResponse(String sidToken, long mailId) {
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("f", "fetch_email");
-        queryParams.put("sid_token", sidToken);
-        queryParams.put("email_id", String.valueOf(mailId));
+        queryParams.put("f", function);
+        if (sidToken != null) {
+            queryParams.put("sid_token", sidToken);
+        }
+        if (mailId != null) {
+            queryParams.put("email_id", String.valueOf(mailId));
+        }
+        if (offset != null) {
+            queryParams.put("offset", String.valueOf(offset));
+        }
         requestSpecification.addQueryParams(queryParams);
 
         return requestOperationsHelper.sendGetRequest(requestSpecification.getFilterableRequestSpecification());
