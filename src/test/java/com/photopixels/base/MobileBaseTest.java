@@ -61,7 +61,7 @@ public class MobileBaseTest implements IBaseTest {
     }
 
     public MobileLoginPage loadPhotoPixelsApp() {
-        String serverAddress = configProperties.getProperty("mobileUrl");
+        String serverAddress = configProperties.getProperty("baseUri");
 
         ServerConfigPage serverConfigPage = new ServerConfigPage(getMobileDriver());
 
