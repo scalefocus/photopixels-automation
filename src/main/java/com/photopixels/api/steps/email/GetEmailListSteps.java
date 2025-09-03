@@ -31,7 +31,6 @@ public class GetEmailListSteps {
         requestSpecification.addBaseUri(EMAIL_URI);
         requestSpecification.setContentType(ContentType.JSON);
         requestSpecification.setRelaxedHttpsValidation();
-
     }
 
     public long getMailIdFromSender(String expectedSender, String sidToken, int maxRetries, int delayMillis) {
