@@ -4,6 +4,7 @@
     <test name="Mobile Tests" thread-count="1">
         <classes>
             <class name="com.photopixels.mobile.MobileLoginTests"/>
+            <class name="com.photopixels.mobile.MobileAutoSyncTests"/>
         </classes>
     </test>
 
