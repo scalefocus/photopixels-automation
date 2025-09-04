@@ -116,26 +116,24 @@ jobs:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
 
-      - name: Extract summary and failed rows (Allure or fallback)
+      - name: Extract summary and failed table (Allure or fallback)
         id: summary
         shell: bash
         run: |
           python3 - << 'PY'
-          import os, json, xml.etree.ElementTree as ET, html
+          import os, json, xml.etree.ElementTree as ET, html, re
           report_dir = os.environ['REPORT_DIR']
           art_dir = os.environ['ART_DIR']
           summary_path = os.path.join(report_dir,'widgets','summary.json')
 
           passed=failed=broken=skipped=total=0
-          failed_rows = []
+          rows = []
 
-          def esc(s): 
-              return html.escape(s or '')
-
+          def esc(s): return html.escape(s or '')
           def add_row(cls, name, msg):
               msg = (msg or '').strip()
-              first_line = msg.splitlines()[0][:300]
-              failed_rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc(first_line)}</td></tr>")
+              first = msg.splitlines()[0][:300]
+              rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc(first)}</td></tr>")
 
           if os.path.exists(summary_path):
               try:
@@ -166,8 +164,7 @@ jobs:
                           for tc in root.findall('.//testcase'):
                               name = tc.attrib.get('name','')
                               cls = tc.attrib.get('classname','')
-                              f = tc.find('failure')
-                              e = tc.find('error')
+                              f = tc.find('failure'); e = tc.find('error')
                               if f is not None:
                                   add_row(cls, name, f.attrib.get('message') or (f.text or ''))
                               elif e is not None:
@@ -175,15 +172,29 @@ jobs:
                       except Exception:
                           pass
 
-          if (failed + broken) == 0 and failed_rows:
-              failed = len(failed_rows)
+          if (failed + broken) == 0 and rows:
+              failed = len(rows)
           if total == 0 and (passed or failed or broken or skipped):
               total = passed + failed + broken + skipped
           if passed == 0 and total > 0:
               passed = max(total - failed - broken - skipped, 0)
 
           verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
-          failed_table_rows = "".join(failed_rows)
+
+          if rows:
+              table = (
+                  '<table border="1" cellpadding="6" cellspacing="0" '
+                  'style="border-collapse:collapse;width:100%;">'
+                  '<tr><th style="text-align:left;">Test</th>'
+                  '<th style="text-align:left;">Message</th></tr>' +
+                  "".join(rows) +
+                  '</table>'
+              )
+          else:
+              table = '<p>No failed tests.</p>'
+
+          # minimize to single line to avoid mail client HTML merging
+          table_min = re.sub(r"\\s+", " ", table).strip()
 
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
               out.write(f"passed={passed}\\n")
@@ -192,8 +203,8 @@ jobs:
               out.write(f"skipped={skipped}\\n")
               out.write(f"total={total}\\n")
               out.write(f"verdict={verdict}\\n")
-              out.write("failed_table_rows<<EOF\\n")
-              out.write(failed_table_rows + "\\n")
+              out.write("failed_table_html<<EOF\\n")
+              out.write(table_min + "\\n")
               out.write("EOF\\n")
           PY
 
@@ -269,13 +280,7 @@ jobs:
             </table>
 
             <p>Failed tests:</p>
-            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">
-              <tr>
-                <th style="text-align:left;">Test</th>
-                <th style="text-align:left;">Message</th>
-              </tr>
-              ${{ steps.summary.outputs.failed_table_rows }}
-            </table>
+            ${{ steps.summary.outputs.failed_table_html }}
 
             <p>
               <ul>
