@@ -262,8 +262,6 @@ jobs:
             <p>
               <ul>
                 <li>Workflow summary &amp; Allure report: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
-                <li>Artifact (if generated): <i>allure-html-report</i></li>
-                <li>Raw results: <i>be-api-test-artifacts</i></li>
               </ul>
             </p>
 
