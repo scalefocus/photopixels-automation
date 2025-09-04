@@ -52,10 +52,12 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
+
       - name: Start environment
         run: |
           chmod +x "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
           "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "${COMPOSE_FILE}"
+
       - name: Run API tests
         id: run-tests
         run: |
@@ -65,6 +67,7 @@ jobs:
             -e SUITE_NAME="api" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
+
       - name: Collect test artifacts
         if: always()
         run: |
@@ -72,6 +75,7 @@ jobs:
           mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
           docker cp api-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
           docker cp api-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
+
       - name: Upload raw artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,6 +84,7 @@ jobs:
           path: test-artifacts/**
           if-no-files-found: warn
           retention-days: 14
+
       - name: Cleanup
         if: always()
         run: |
@@ -96,80 +101,67 @@ jobs:
         with:
           name: be-api-test-artifacts
           path: ./test-artifacts
-      - name: Ensure jq present
-        run: |
-          set -e
-          if command -v jq >/dev/null 2>&1; then exit 0; fi
-          if command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y && sudo apt-get install -y jq && exit 0; fi
-          if command -v yum >/dev/null 2>&1; then sudo yum install -y epel-release || true; sudo yum install -y jq && exit 0; fi
-          if command -v dnf >/dev/null 2>&1; then sudo dnf install -y jq && exit 0; fi
-          if command -v zypper >/dev/null 2>&1; then sudo zypper refresh && sudo zypper install -y jq && exit 0; fi
-          if command -v apk >/dev/null 2>&1; then sudo apk add --no-cache jq && exit 0; fi
-          curl -fsSL -o /tmp/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-          chmod +x /tmp/jq
-          sudo mv /tmp/jq /usr/local/bin/jq
-      - name: Ensure zip present
-        run: |
-          set -e
-          if command -v zip >/dev/null 2>&1; then exit 0; fi
-          if command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y && sudo apt-get install -y zip && exit 0; fi
-          if command -v yum >/dev/null 2>&1; then sudo yum install -y zip && exit 0; fi
-          if command -v dnf >/dev/null 2>&1; then sudo dnf install -y zip && exit 0; fi
-          if command -v zypper >/dev/null 2>&1; then sudo zypper install -y zip && exit 0; fi
-          if command -v apk >/dev/null 2>&1; then sudo apk add --no-cache zip && exit 0; fi
-          exit 0
+
       - name: Generate Allure report
         id: gen
         continue-on-error: true
-        env:
-          REPORT_DIR: ${{ runner.temp }}/allure-report
-        run: |
-          set -e
-          mkdir -p "$REPORT_DIR"
-          npx --yes allure-commandline generate ./test-artifacts/allure-results --clean -o "$REPORT_DIR" || true
-      - name: Extract summary stats
+        uses: simple-elf/allure-report-action@v1.8
+        with:
+          allure_results: ./test-artifacts/allure-results
+          allure_report: ./allure-report
+
+      - name: Extract summary stats (Python)
         id: summary
-        continue-on-error: true
-        env:
-          REPORT_DIR: ${{ runner.temp }}/allure-report
+        shell: bash
         run: |
-          set -e
-          f="$REPORT_DIR/widgets/summary.json"
-          if [ -f "$f" ]; then
-            passed=$(jq '.statistic.passed' "$f")
-            failed=$(jq '.statistic.failed' "$f")
-            broken=$(jq '.statistic.broken' "$f")
-            skipped=$(jq '.statistic.skipped' "$f")
-            total=$(jq '.statistic.total' "$f")
-          else
-            passed=0; failed=0; broken=0; skipped=0; total=0
-          fi
-          echo "passed=$passed" >> $GITHUB_OUTPUT
-          echo "failed=$failed" >> $GITHUB_OUTPUT
-          echo "broken=$broken" >> $GITHUB_OUTPUT
-          echo "skipped=$skipped" >> $GITHUB_OUTPUT
-          echo "total=$total" >> $GITHUB_OUTPUT
-      - name: Zip Allure report
-        env:
-          REPORT_DIR: ${{ runner.temp }}/allure-report
+          python3 - << 'PY'
+          import json, os
+          summary_path = os.path.join('allure-report','widgets','summary.json')
+          passed=failed=broken=skipped=total=0
+          if os.path.exists(summary_path):
+            with open(summary_path,'r',encoding='utf-8') as f:
+              data=json.load(f)
+              stat=data.get('statistic',{})
+              passed=int(stat.get('passed',0))
+              failed=int(stat.get('failed',0))
+              broken=int(stat.get('broken',0))
+              skipped=int(stat.get('skipped',0))
+              total=int(stat.get('total',0))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+            out.write(f"passed={passed}\n")
+            out.write(f"failed={failed}\n")
+            out.write(f"broken={broken}\n")
+            out.write(f"skipped={skipped}\n")
+            out.write(f"total={total}\n")
+          PY
+
+      - name: Zip Allure report (Python)
         run: |
-          if [ -d "$REPORT_DIR" ]; then
-            cd "$REPORT_DIR"
-            zip -qr "$GITHUB_WORKSPACE/allure-report.zip" .
-          else
-            mkdir -p "$REPORT_DIR" && echo "No report available" > "$REPORT_DIR/README.txt"
-            cd "$REPORT_DIR"
-            zip -qr "$GITHUB_WORKSPACE/allure-report.zip" .
-          fi
+          python3 - << 'PY'
+          import os, zipfile
+          report_dir='allure-report'
+          zip_path='allure-report.zip'
+          if not os.path.isdir(report_dir):
+              os.makedirs(report_dir, exist_ok=True)
+              with open(os.path.join(report_dir,'README.txt'),'w') as f:
+                  f.write('No report available')
+          with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
+              for root,_,files in os.walk(report_dir):
+                  for fn in files:
+                      p=os.path.join(root,fn)
+                      z.write(p, os.path.relpath(p, report_dir))
+          PY
+
       - name: Upload Allure HTML as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-html-report
           path: |
-            ${{ runner.temp }}/allure-report/**
+            allure-report/**
             allure-report.zip
           retention-days: 14
+
       - name: Send email with Allure report
         if: always()
         uses: dawidd6/action-send-mail@v3
