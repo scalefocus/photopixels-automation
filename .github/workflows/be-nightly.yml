@@ -194,27 +194,24 @@ BEGIN { RS="</testcase>"; FS="\n" }
 }
 AWK
 
-          ROWS=""
+          : > /tmp/rows.html
           shopt -s nullglob
           for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
-            out=$(awk -f "$TMP_AWK" "$f" || true)
-            [ -n "$out" ] && ROWS="${ROWS}${out}"
+            awk -f "$TMP_AWK" "$f" >> /tmp/rows.html || true
           done
 
-          if [ -n "$ROWS" ]; then
+          if [ -s /tmp/rows.html ]; then
             {
-              echo "table<<EOF"
-              echo "<h3>Failed tests</h3><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse; width:100%;\"><thead><tr style=\"background:#f5f5f5;\"><th style=\"text-align:left;\">Test &amp; reason</th></tr></thead><tbody>"
-              printf "%s\n" "$ROWS"
-              echo "</tbody></table>"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+              echo '<h3>Failed tests</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;"><thead><tr style="background:#f5f5f5;"><th style="text-align:left;">Test &amp; reason</th></tr></thead><tbody>'
+              cat /tmp/rows.html
+              echo '</tbody></table>'
+            } > /tmp/failed_table.html
           else
-            {
-              echo "table<<EOF"
-              echo "<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo '<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
+          fi
+
+          TABLE_ONE=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
+          echo "table=$TABLE_ONE" >> "$GITHUB_OUTPUT"
 
       - name: Conditionally upload Allure HTML (skip if missing)
         shell: bash
