@@ -105,6 +105,14 @@ jobs:
         with:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
+      - name: Show downloaded artifacts
+        run: |
+          echo "=== ART_DIR tree ==="
+          ls -la "$ART_DIR" || true
+          echo "=== surefire-reports ==="
+          ls -la "$ART_DIR/surefire-reports" || true
+          echo "=== allure-results ==="
+          ls -la "$ART_DIR/allure-results" || true
       - name: Generate Allure report
         id: gen
         continue-on-error: true
@@ -112,47 +120,78 @@ jobs:
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
-      - name: Extract summary stats (Python)
+      - name: Extract summary (Allure or fallback to surefire)
         id: summary
         shell: bash
         run: |
           python3 - << 'PY'
-          import json, os
-          summary_path = os.path.join(os.environ['REPORT_DIR'],'widgets','summary.json')
+          import os, json, xml.etree.ElementTree as ET
+          report_dir = os.environ['REPORT_DIR']
+          art_dir = os.environ['ART_DIR']
+          summary_path = os.path.join(report_dir,'widgets','summary.json')
           passed=failed=broken=skipped=total=0
           if os.path.exists(summary_path):
-            with open(summary_path,'r',encoding='utf-8') as f:
-              data=json.load(f)
-              stat=data.get('statistic',{})
-              passed=int(stat.get('passed',0))
-              failed=int(stat.get('failed',0))
-              broken=int(stat.get('broken',0))
-              skipped=int(stat.get('skipped',0))
-              total=int(stat.get('total',0))
+              with open(summary_path,'r',encoding='utf-8') as f:
+                  data=json.load(f)
+                  stat=data.get('statistic',{})
+                  passed=int(stat.get('passed',0))
+                  failed=int(stat.get('failed',0))
+                  broken=int(stat.get('broken',0))
+                  skipped=int(stat.get('skipped',0))
+                  total=int(stat.get('total',0))
+          else:
+              surefire = os.path.join(art_dir,'surefire-reports')
+              if os.path.isdir(surefire):
+                  for fn in os.listdir(surefire):
+                      if fn.startswith('TEST-') and fn.endswith('.xml'):
+                          try:
+                              tree = ET.parse(os.path.join(surefire,fn))
+                              root = tree.getroot()
+                              tests = int(root.attrib.get('tests', 0))
+                              failures = int(root.attrib.get('failures', 0))
+                              errors = int(root.attrib.get('errors', 0))
+                              skipped_i = int(root.attrib.get('skipped', 0))
+                              total += tests
+                              failed += failures
+                              broken += errors
+                              skipped += skipped_i
+                          except Exception:
+                              pass
+                  passed = max(total - failed - broken - skipped, 0)
           verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-            out.write(f"passed={passed}\n")
-            out.write(f"failed={failed}\n")
-            out.write(f"broken={broken}\n")
-            out.write(f"skipped={skipped}\n")
-            out.write(f"total={total}\n")
-            out.write(f"verdict={verdict}\n")
+              out.write(f"passed={passed}\n")
+              out.write(f"failed={failed}\n")
+              out.write(f"broken={broken}\n")
+              out.write(f"skipped={skipped}\n")
+              out.write(f"total={total}\n")
+              out.write(f"verdict={verdict}\n")
           PY
-      - name: Zip Allure report (Python)
+      - name: Build ZIP (Allure if present, else raw artifacts)
         run: |
           python3 - << 'PY'
-          import os, zipfile
+          import os, zipfile, shutil
           report_dir=os.environ['REPORT_DIR']
-          zip_path=os.path.join(os.getcwd(),'allure-report.zip')
-          if not os.path.isdir(report_dir):
-              os.makedirs(report_dir, exist_ok=True)
-              with open(os.path.join(report_dir,'README.txt'),'w') as f:
-                  f.write('No report available')
+          art_dir=os.environ['ART_DIR']
+          zip_path='allure-report.zip'
+          has_index=os.path.isfile(os.path.join(report_dir,'index.html'))
+          if not has_index:
+              fallback_dir=os.path.join(report_dir,'_fallback')
+              os.makedirs(fallback_dir, exist_ok=True)
+              ar=os.path.join(art_dir,'allure-results')
+              sr=os.path.join(art_dir,'surefire-reports')
+              if os.path.isdir(ar):
+                  shutil.copytree(ar, os.path.join(fallback_dir,'allure-results'), dirs_exist_ok=True)
+              if os.path.isdir(sr):
+                  shutil.copytree(sr, os.path.join(fallback_dir,'surefire-reports'), dirs_exist_ok=True)
+              with open(os.path.join(fallback_dir,'README.txt'),'w',encoding='utf-8') as f:
+                  f.write('Allure HTML was not generated. This zip contains raw allure-results and surefire-reports.')
           with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
-              for root,_,files in os.walk(report_dir):
+              base=report_dir
+              for root,_,files in os.walk(base):
                   for fn in files:
                       p=os.path.join(root,fn)
-                      z.write(p, os.path.relpath(p, report_dir))
+                      z.write(p, os.path.relpath(p, base))
           PY
       - name: Upload Allure HTML as artifact
         if: always()
@@ -171,7 +210,8 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ secrets.SMTP_FROM }}
+          secure: ${{ secrets.SMTP_SECURE }}
+          from: ${{ secrets.SMTP_FROM != '' && secrets.SMTP_FROM || secrets.SMTP_USERNAME }}
           to: ${{ secrets.SMTP_TO }}
           subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
           html_body: |
@@ -200,6 +240,6 @@ jobs:
                 <li>Artifacts: <i>be-api-test-artifacts</i> and <i>allure-html-report</i></li>
               </ul>
             </p>
-            <p>The attached file contains the HTML Allure report (unzip and open <code>index.html</code>).</p>
+            <p>The attached file contains the report. If Allure HTML could not be generated, the zip contains raw <code>allure-results</code> and <code>surefire-reports</code>.</p>
             <p>Best regards,<br/>CI</p>
           attachments: allure-report.zip
