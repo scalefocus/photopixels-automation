@@ -14,10 +14,16 @@ jobs:
   build-be:
     runs-on: self-hosted
     steps:
+      - name: Pre-clean workspace (safe ownership + wipe)
+        run: |
+          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
+          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
           repository: scalefocus/photopixels-backend-net
           submodules: recursive
+          clean: false
+          fetch-depth: 0
       - name: Build docker image (BE)
         run: |
           docker build \
@@ -30,8 +36,13 @@ jobs:
   build-automation:
     runs-on: self-hosted
     steps:
+      - name: Pre-clean workspace (safe ownership + wipe)
+        run: |
+          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
+          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
+          clean: false
           fetch-depth: 0
       - name: Build docker image (automation tests)
         run: |
@@ -41,8 +52,13 @@ jobs:
     runs-on: self-hosted
     needs: [build-be, build-automation]
     steps:
+      - name: Pre-clean workspace (safe ownership + wipe)
+        run: |
+          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
+          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
+          clean: false
           fetch-depth: 0
       - name: Start environment
         run: |
@@ -83,8 +99,13 @@ jobs:
     needs: [automation]
     if: always()
     steps:
+      - name: Pre-clean workspace (safe ownership + wipe)
+        run: |
+          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
+          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
+          clean: false
           fetch-depth: 0
       - name: Download test artifacts
         uses: actions/download-artifact@v4
@@ -106,16 +127,19 @@ jobs:
       - name: Generate Allure report
         id: gen
         continue-on-error: true
-        uses: simple-elf/allure-report-action@v1.8
-        with:
-          allure_results: ./test-artifacts/allure-results
-          allure_report: ./allure-report
+        env:
+          REPORT_DIR: ${{ runner.temp }}/allure-report
+        run: |
+          mkdir -p "$REPORT_DIR"
+          npx --yes allure-commandline generate ./test-artifacts/allure-results --clean -o "$REPORT_DIR" || true
       - name: Extract summary stats
         id: summary
         continue-on-error: true
+        env:
+          REPORT_DIR: ${{ runner.temp }}/allure-report
         run: |
           set -e
-          f="./allure-report/widgets/summary.json"
+          f="$REPORT_DIR/widgets/summary.json"
           if [ -f "$f" ]; then
             passed=$(jq '.statistic.passed' "$f")
             failed=$(jq '.statistic.failed' "$f")
@@ -131,17 +155,16 @@ jobs:
           echo "skipped=$skipped" >> $GITHUB_OUTPUT
           echo "total=$total" >> $GITHUB_OUTPUT
       - name: Zip Allure report
-        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/allure-report
         run: |
-          if [ -d "./allure-report" ]; then
-            cd ./allure-report
-            zip -qr ../allure-report.zip .
-            cd -
+          if [ -d "$REPORT_DIR" ]; then
+            cd "$REPORT_DIR"
+            zip -qr "$GITHUB_WORKSPACE/allure-report.zip" .
           else
-            mkdir -p ./allure-report && echo "No report available" > ./allure-report/README.txt
-            cd ./allure-report
-            zip -qr ../allure-report.zip .
-            cd -
+            mkdir -p "$REPORT_DIR" && echo "No report available" > "$REPORT_DIR/README.txt"
+            cd "$REPORT_DIR"
+            zip -qr "$GITHUB_WORKSPACE/allure-report.zip" .
           fi
       - name: Upload Allure HTML as artifact
         if: always()
@@ -149,7 +172,7 @@ jobs:
         with:
           name: allure-html-report
           path: |
-            allure-report/**
+            ${{ runner.temp }}/allure-report/**
             allure-report.zip
           retention-days: 14
       - name: Send email with Allure report
@@ -165,7 +188,7 @@ jobs:
           subject: "Photopixels BE nightly API tests — ${{ needs.automation.result || 'success' }}"
           html_body: |
             <p>Hello team,</p>
-            <p>The nightly BE run of the automation tests finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
+            <p>The nightly run finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
