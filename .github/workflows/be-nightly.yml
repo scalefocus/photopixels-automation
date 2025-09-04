@@ -132,8 +132,8 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          from: "QA Automations <qa-automations@your-domain.tld>"
-          to: "qa-team@your-domain.tld,devops@your-domain.tld"
+          from: "Photopixels Test <photopixel.test@scalefocus.com>"
+          to: "martin.georgiev@scalefocus.com"
           subject: "Photopixels BE nightly API tests — ${{ needs.automation.result || 'success' }}"
           html_body: |
             <p>Hello team,</p>
