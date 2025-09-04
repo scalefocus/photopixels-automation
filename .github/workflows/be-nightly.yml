@@ -105,14 +105,6 @@ jobs:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
 
-      - name: Verify inputs
-        shell: bash
-        run: |
-          echo "=== ART_DIR tree ==="; ls -la "$ART_DIR" || true
-          echo "=== surefire-reports ==="; ls -la "$ART_DIR/surefire-reports" || true
-          echo "=== allure-results ==="; ls -la "$ART_DIR/allure-results" || true
-          echo "Allure result json count: $(find "$ART_DIR/allure-results" -type f -name '*-result.json' 2>/dev/null | wc -l)"
-
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
         continue-on-error: true
@@ -128,24 +120,23 @@ jobs:
           [ -f "$REPORT_DIR/index.html" ] && echo "index.html: OK" || echo "index.html: MISSING"
           [ -f "$REPORT_DIR/widgets/summary.json" ] && echo "summary.json: OK" || echo "summary.json: MISSING"
 
-      - name: Extract summary from surefire (fallback if Allure missing)
+      - name: Extract summary (prefer Allure, fallback to Surefire)
         id: summary
         shell: bash
         run: |
           set -e
-          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0
+          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0; PASSED=0
           if [ -f "$REPORT_DIR/widgets/summary.json" ]; then
-            PASS=$(grep -o '"passed":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
-            FAILED=$(grep -o '"failed":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
-            BROKEN=$(grep -o '"broken":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            PASSED=$(grep -o '"passed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            FAILED=$(grep -o '"failed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            BROKEN=$(grep -o '"broken":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
             SKIPPED=$(grep -o '"skipped":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
-            TOTAL=$(grep -o '"total":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
-            PASSED=$PASS
+            TOTAL=$(grep -o '"total":[0-9]\+'    "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
           else
             for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
               [ -f "$f" ] || continue
               line=$(head -1 "$f")
-              t=$(echo "$line" | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
+              t=$(echo "$line"  | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
               fa=$(echo "$line" | sed -n 's/.*failures="\([0-9]\+\)".*/\1/p')
               er=$(echo "$line" | sed -n 's/.*errors="\([0-9]\+\)".*/\1/p')
               sk=$(echo "$line" | sed -n 's/.*skipped="\([0-9]\+\)".*/\1/p')
@@ -157,8 +148,7 @@ jobs:
             PASSED=$((TOTAL - FAILED - BROKEN - SKIPPED))
             [ $PASSED -lt 0 ] && PASSED=0 || true
           fi
-          VERDICT="PASSED"
-          if [ $((FAILED + BROKEN)) -gt 0 ]; then VERDICT="FAILED"; fi
+          VERDICT="PASSED"; [ $((FAILED + BROKEN)) -gt 0 ] && VERDICT="FAILED"
           {
             echo "passed=$PASSED"
             echo "failed=$FAILED"
@@ -168,49 +158,39 @@ jobs:
             echo "verdict=$VERDICT"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Build failed-tests table HTML from Surefire
+      - name: Build failed-tests table HTML from Allure JSON
         id: failedtbl
         shell: bash
         run: |
           set -e
-          TMP_AWK="/tmp/parse_fail.awk"
-          cat > "$TMP_AWK" <<'AWK'
-BEGIN { RS="</testcase>"; FS="\n" }
-{
-  name=""; cls=""; msg=""
-  if (match($0, /<testcase[^>]*name="([^"]+)"[^>]*classname="([^"]*)"/, a)) {
-    name=a[1]; cls=a[2]
-    if ($0 ~ /<failure/ || $0 ~ /<error/) {
-      if (match($0, /<failure[^>]*message="([^"]*)"/, m) || match($0, /<error[^>]*message="([^"]*)"/, m)) { msg=m[1] }
-      if (msg == "") {
-        if (match($0, /<failure[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/failure>/, t) || match($0, /<error[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/error>/, t)) { msg=t[1] }
-      }
-      gsub(/\r/, " ", msg); gsub(/\n+/, " ", msg)
-      gsub(/&/, "\\&amp;", msg); gsub(/</, "\\&lt;", msg); gsub(/>/, "\\&gt;", msg)
-      printf("<tr><td><b>%s.%s</b><br/><div style='white-space:pre-wrap;margin:4px 0;'>%s</div></td></tr>\n", cls, name, msg)
-    }
-  }
-}
-AWK
-
-          : > /tmp/rows.html
+          rows=""
           shopt -s nullglob
-          for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
-            awk -f "$TMP_AWK" "$f" >> /tmp/rows.html || true
+          for f in "$ART_DIR"/allure-results/*-result.json; do
+            [ -f "$f" ] || continue
+            content=$(tr -d '\n' < "$f")
+            status=$(printf '%s' "$content" | sed -n 's/.*"status":"\([^"]*\)".*/\1/p' | head -1)
+            if [ "$status" = "failed" ] || [ "$status" = "broken" ]; then
+              fullname=$(printf '%s' "$content" | sed -n 's/.*"fullName":"\([^"]*\)".*/\1/p' | head -1)
+              if [ -z "$fullname" ]; then
+                fullname=$(printf '%s' "$content" | sed -n 's/.*"name":"\([^"]*\)".*/\1/p' | head -1)
+              fi
+              msg=$(printf '%s' "$content" | sed -n 's/.*"statusDetails":[^{}]*"message":"\([^"]*\)".*/\1/p' | head -1)
+              if [ -z "$msg" ]; then
+                msg=$(printf '%s' "$content" | sed -n 's/.*"statusDetails":[^{}]*"trace":"\([^"]*\)".*/\1/p' | head -1)
+              fi
+              esc_full=$(printf '%s' "$fullname" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+              esc_msg=$(printf '%s' "$msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+              rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
+            fi
           done
-
-          if [ -s /tmp/rows.html ]; then
-            {
-              echo '<h3>Failed tests</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;"><thead><tr style="background:#f5f5f5;"><th style="text-align:left;">Test &amp; reason</th></tr></thead><tbody>'
-              cat /tmp/rows.html
-              echo '</tbody></table>'
-            } > /tmp/failed_table.html
+          if [ -n "$rows" ]; then
+            table="<h3>Failed tests</h3><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse; width:100%;\"><thead><tr style=\"background:#f5f5f5;\"><th style=\"text-align:left;\">Test &amp; reason</th></tr></thead><tbody>
+${rows}</tbody></table>"
           else
-            echo '<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
+            table="<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>"
           fi
-
-          TABLE_ONE=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
-          echo "table=$TABLE_ONE" >> "$GITHUB_OUTPUT"
+          oneline=$(printf '%s' "$table" | tr '\n' ' ' | sed 's/  \+/ /g')
+          echo "table=$oneline" >> "$GITHUB_OUTPUT"
 
       - name: Conditionally upload Allure HTML (skip if missing)
         shell: bash
