@@ -91,33 +91,61 @@ jobs:
         with:
           name: be-api-test-artifacts
           path: ./test-artifacts
+      - name: Ensure jq present
+        run: |
+          set -e
+          if command -v jq >/dev/null 2>&1; then exit 0; fi
+          if command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y && sudo apt-get install -y jq && exit 0; fi
+          if command -v yum >/dev/null 2>&1; then sudo yum install -y epel-release || true; sudo yum install -y jq && exit 0; fi
+          if command -v dnf >/dev/null 2>&1; then sudo dnf install -y jq && exit 0; fi
+          if command -v zypper >/dev/null 2>&1; then sudo zypper refresh && sudo zypper install -y jq && exit 0; fi
+          if command -v apk >/dev/null 2>&1; then sudo apk add --no-cache jq && exit 0; fi
+          curl -fsSL -o /tmp/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+          chmod +x /tmp/jq
+          sudo mv /tmp/jq /usr/local/bin/jq
       - name: Generate Allure report
+        id: gen
+        continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
           allure_results: ./test-artifacts/allure-results
           allure_report: ./allure-report
       - name: Extract summary stats
         id: summary
+        continue-on-error: true
         run: |
-          summary_file="./allure-report/widgets/summary.json"
-          passed=$(jq '.statistic.passed' "$summary_file")
-          failed=$(jq '.statistic.failed' "$summary_file")
-          broken=$(jq '.statistic.broken' "$summary_file")
-          skipped=$(jq '.statistic.skipped' "$summary_file")
-          total=$(jq '.statistic.total' "$summary_file")
+          set -e
+          f="./allure-report/widgets/summary.json"
+          if [ -f "$f" ]; then
+            passed=$(jq '.statistic.passed' "$f")
+            failed=$(jq '.statistic.failed' "$f")
+            broken=$(jq '.statistic.broken' "$f")
+            skipped=$(jq '.statistic.skipped' "$f")
+            total=$(jq '.statistic.total' "$f")
+          else
+            passed=0; failed=0; broken=0; skipped=0; total=0
+          fi
           echo "passed=$passed" >> $GITHUB_OUTPUT
           echo "failed=$failed" >> $GITHUB_OUTPUT
           echo "broken=$broken" >> $GITHUB_OUTPUT
           echo "skipped=$skipped" >> $GITHUB_OUTPUT
           echo "total=$total" >> $GITHUB_OUTPUT
       - name: Zip Allure report
-        run: |
-          cd ./allure-report
-          zip -qr ../allure-report.zip .
-          cd -
-      - name: Upload Allure HTML as artifact
-        uses: actions/upload-artifact@v4
         if: always()
+        run: |
+          if [ -d "./allure-report" ]; then
+            cd ./allure-report
+            zip -qr ../allure-report.zip .
+            cd -
+          else
+            mkdir -p ./allure-report && echo "No report available" > ./allure-report/README.txt
+            cd ./allure-report
+            zip -qr ../allure-report.zip .
+            cd -
+          fi
+      - name: Upload Allure HTML as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: allure-html-report
           path: |
@@ -137,7 +165,7 @@ jobs:
           subject: "Photopixels BE nightly API tests — ${{ needs.automation.result || 'success' }}"
           html_body: |
             <p>Hello team,</p>
-            <p>The nightly run finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
+            <p>The nightly BE run of the automation tests finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -148,11 +176,11 @@ jobs:
                 <th>Skipped</th>
               </tr>
               <tr>
-                <td align="center">${{ steps.summary.outputs.total }}</td>
-                <td align="center" style="color:green;">${{ steps.summary.outputs.passed }}</td>
-                <td align="center" style="color:red;">${{ steps.summary.outputs.failed }}</td>
-                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken }}</td>
-                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped }}</td>
+                <td align="center">${{ steps.summary.outputs.total || '0' }}</td>
+                <td align="center" style="color:green;">${{ steps.summary.outputs.passed || '0' }}</td>
+                <td align="center" style="color:red;">${{ steps.summary.outputs.failed || '0' }}</td>
+                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken || '0' }}</td>
+                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped || '0' }}</td>
               </tr>
             </table>
             <p>
@@ -161,6 +189,6 @@ jobs:
                 <li>Artifacts: <i>be-api-test-artifacts</i> and <i>allure-html-report</i></li>
               </ul>
             </p>
-            <p>The attached file contains the full HTML Allure report (unzip and open <code>index.html</code>).</p>
+            <p>The attached file contains the HTML Allure report (unzip and open <code>index.html</code>).</p>
             <p>Best regards,<br/>CI</p>
           attachments: allure-report.zip
