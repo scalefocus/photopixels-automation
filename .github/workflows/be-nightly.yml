@@ -4,7 +4,7 @@ run-name: "Nightly BE API — ${{ github.ref_name }} #${{ github.run_number }}"
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 15 * * *'
+    - cron: '0 14 * * *'
 
 env:
   AUTOMATION_REPO_PATH: automation
@@ -116,7 +116,7 @@ jobs:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
 
-      - name: Extract summary and failures (Allure or fallback)
+      - name: Extract summary and failed rows (Allure or fallback)
         id: summary
         shell: bash
         run: |
@@ -125,12 +125,17 @@ jobs:
           report_dir = os.environ['REPORT_DIR']
           art_dir = os.environ['ART_DIR']
           summary_path = os.path.join(report_dir,'widgets','summary.json')
-          passed=failed=broken=skipped=total=0
-          failed_items=[]
 
-          def add_item(cls, name, msg):
-              msg = (msg or '').strip().splitlines()[0][:300]
-              failed_items.append(f"<li><code>{html.escape(cls)}#{html.escape(name)}</code> — {html.escape(msg)}</li>")
+          passed=failed=broken=skipped=total=0
+          failed_rows = []
+
+          def esc(s): 
+              return html.escape(s or '')
+
+          def add_row(cls, name, msg):
+              msg = (msg or '').strip()
+              first_line = msg.splitlines()[0][:300]
+              failed_rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc(first_line)}</td></tr>")
 
           if os.path.exists(summary_path):
               try:
@@ -156,28 +161,29 @@ jobs:
                           failures = int(root.attrib.get('failures', 0))
                           errors = int(root.attrib.get('errors', 0))
                           skipped_i = int(root.attrib.get('skipped', 0))
-                          total = max(total, 0) + tests if total==0 else total
+                          if total == 0:
+                              total += tests
                           for tc in root.findall('.//testcase'):
                               name = tc.attrib.get('name','')
                               cls = tc.attrib.get('classname','')
                               f = tc.find('failure')
                               e = tc.find('error')
                               if f is not None:
-                                  add_item(cls, name, f.attrib.get('message') or (f.text or ''))
+                                  add_row(cls, name, f.attrib.get('message') or (f.text or ''))
                               elif e is not None:
-                                  add_item(cls, name, e.attrib.get('message') or (e.text or ''))
+                                  add_row(cls, name, e.attrib.get('message') or (e.text or ''))
                       except Exception:
                           pass
 
-          if failed==0 and broken==0 and failed_items:
-              failed = len(failed_items)
-          if total==0 and (failed_items or passed or skipped):
+          if (failed + broken) == 0 and failed_rows:
+              failed = len(failed_rows)
+          if total == 0 and (passed or failed or broken or skipped):
               total = passed + failed + broken + skipped
-          if passed==0 and total>0:
+          if passed == 0 and total > 0:
               passed = max(total - failed - broken - skipped, 0)
 
           verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
-          failed_html = "<p>No failed tests.</p>" if not failed_items else "<ol>" + "".join(failed_items) + "</ol>"
+          failed_table_rows = "".join(failed_rows)
 
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
               out.write(f"passed={passed}\\n")
@@ -186,8 +192,8 @@ jobs:
               out.write(f"skipped={skipped}\\n")
               out.write(f"total={total}\\n")
               out.write(f"verdict={verdict}\\n")
-              out.write("failed_html<<EOF\\n")
-              out.write(failed_html + "\\n")
+              out.write("failed_table_rows<<EOF\\n")
+              out.write(failed_table_rows + "\\n")
               out.write("EOF\\n")
           PY
 
@@ -243,6 +249,7 @@ jobs:
           html_body: |
             <p>Hello team,</p>
             <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
+
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -260,8 +267,16 @@ jobs:
                 <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped || '0' }}</td>
               </tr>
             </table>
+
             <p>Failed tests:</p>
-            ${{ steps.summary.outputs.failed_html }}
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">
+              <tr>
+                <th style="text-align:left;">Test</th>
+                <th style="text-align:left;">Message</th>
+              </tr>
+              ${{ steps.summary.outputs.failed_table_rows }}
+            </table>
+
             <p>
               <ul>
                 <li>Workflow: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">link</a></li>
