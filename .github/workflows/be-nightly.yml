@@ -3,7 +3,7 @@ name: Photopixels BE nightly API tests
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '30 0 * * *'
+    - cron: '00 14 * * *'
 
 env:
   AUTOMATION_REPO_PATH: automation
@@ -90,26 +90,32 @@ jobs:
     runs-on: self-hosted
     needs: [automation]
     if: always()
+    env:
+      ART_DIR: ${{ runner.temp }}/be-artifacts
+      REPORT_DIR: ${{ runner.temp }}/allure-report
     steps:
+      - name: Prep artifact dir
+        run: |
+          rm -rf "$ART_DIR" && mkdir -p "$ART_DIR"
       - name: Download test artifacts
         uses: actions/download-artifact@v4
         with:
           name: be-api-test-artifacts
-          path: ./test-artifacts
+          path: ${{ env.ART_DIR }}
       - name: Generate Allure report
         id: gen
         continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
-          allure_results: ./test-artifacts/allure-results
-          allure_report: ./allure-report
+          allure_results: ${{ env.ART_DIR }}/allure-results
+          allure_report: ${{ env.REPORT_DIR }}
       - name: Extract summary stats (Python)
         id: summary
         shell: bash
         run: |
           python3 - << 'PY'
           import json, os
-          summary_path = os.path.join('allure-report','widgets','summary.json')
+          summary_path = os.path.join(os.environ['REPORT_DIR'],'widgets','summary.json')
           passed=failed=broken=skipped=total=0
           if os.path.exists(summary_path):
             with open(summary_path,'r',encoding='utf-8') as f:
@@ -133,8 +139,8 @@ jobs:
         run: |
           python3 - << 'PY'
           import os, zipfile
-          report_dir='allure-report'
-          zip_path='allure-report.zip'
+          report_dir=os.environ['REPORT_DIR']
+          zip_path=os.path.join(os.getcwd(),'allure-report.zip')
           if not os.path.isdir(report_dir):
               os.makedirs(report_dir, exist_ok=True)
               with open(os.path.join(report_dir,'README.txt'),'w') as f:
@@ -151,7 +157,7 @@ jobs:
         with:
           name: allure-html-report
           path: |
-            allure-report/**
+            ${{ env.REPORT_DIR }}/**
             allure-report.zip
           retention-days: 14
       - name: Send email with Allure report
@@ -162,8 +168,8 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ secrets.SENDER }}
-          to: ${{ secrets.RECIPIENTS }}
+          from: ${{ secrets.SMTP_FROM }}
+          to: ${{ secrets.SMTP_TO }}
           subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
           html_body: |
             <p>Hello team,</p>
