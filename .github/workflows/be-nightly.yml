@@ -1,0 +1,99 @@
+name: Photopixels BE nightly API tests
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '00 12 * * *'
+
+env:
+  COMPOSE_FILE: ./utils/docker-compose.yml
+  FRONTEND_TAG: scalefocusad/photopixels-web:automation
+  BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
+  AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
+
+jobs:
+  build-fe:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: scalefocus/photopixels-web
+      - name: Build docker image (FE)
+        run: |
+          docker build --no-cache -t "$FRONTEND_TAG" -f ./Dockerfile .
+
+  build-be:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: scalefocus/photopixels-backend-net
+          submodules: recursive
+      - name: Build docker image (BE)
+        run: |
+          docker build \
+            --no-cache \
+            --build-arg VERSION="1.0.0" \
+            --build-arg VERSION_SUFFIX="" \
+            -t "$BACKEND_TAG" \
+            -f ./src/SF.PhotoPixels.API/Dockerfile .
+
+  build-automation:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build docker image (automation tests)
+        run: |
+          docker build --no-cache -f ./Dockerfile -t "$AUTOMATION_TAG" .
+
+  automation:
+    runs-on: self-hosted
+    needs: [build-fe, build-be, build-automation]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Start environment
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
+          "${GITHUB_WORKSPACE}/utils/create-environment.sh" "${COMPOSE_FILE}"
+
+      - name: Run API tests (in container, named for later copy)
+        id: run-tests
+        run: |
+          set -e
+          # Пускаме контейнера без --rm, за да можем да копираме отчетите след това
+          docker run -i --name api-tests \
+            -e BASE_URI="http://backend:8080/" \
+            -e SUITE_NAME="api" \
+            --network utils_sf-photos-net \
+            "$AUTOMATION_TAG"
+
+      - name: Collect test artifacts (surefire + allure-results)
+        if: always()
+        run: |
+          set -e
+          mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
+          # Опитваме да копираме (ако ги има)
+          docker cp api-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
+          docker cp api-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
+          ls -la "${GITHUB_WORKSPACE}/test-artifacts" || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: be-api-test-artifacts
+          path: |
+            test-artifacts/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f api-tests || true
+          docker compose -f "$COMPOSE_FILE" down -v || true
