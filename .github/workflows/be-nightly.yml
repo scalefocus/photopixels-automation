@@ -109,14 +109,14 @@ jobs:
           echo "=== ART_DIR tree ==="; ls -la "$ART_DIR" || true
           echo "=== surefire-reports ==="; ls -la "$ART_DIR/surefire-reports" || true
           echo "=== allure-results ==="; ls -la "$ART_DIR/allure-results" || true
-          python3 - << 'PY'
-          import os, glob
-          base=os.environ['ART_DIR']; res=os.path.join(base,'allure-results')
-          files=glob.glob(os.path.join(res,'*-result.json'))
-          print("Allure *-result.json count:", len(files))
-          for p in sorted(files)[:5]:
-              print("  ", os.path.basename(p))
-          PY
+          python3 - <<'PY'
+import os, glob
+base=os.environ['ART_DIR']; res=os.path.join(base,'allure-results')
+files=glob.glob(os.path.join(res,'*-result.json'))
+print("Allure *-result.json count:", len(files))
+for p in sorted(files)[:5]:
+    print("  ", os.path.basename(p))
+PY
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
@@ -136,61 +136,63 @@ jobs:
         id: summary
         shell: bash
         run: |
-          python3 - << 'PY'
-          import os, json, xml.etree.ElementTree as ET
-          report_dir = os.environ['REPORT_DIR']
-          art_dir = os.environ['ART_DIR']
-          summary_path = os.path.join(report_dir,'widgets','summary.json')
-          passed=failed=broken=skipped=total=0
-          if os.path.exists(summary_path):
-              with open(summary_path,'r',encoding='utf-8') as f:
-                  data=json.load(f)
-                  stat=data.get('statistic',{})
-                  passed=int(stat.get('passed',0))
-                  failed=int(stat.get('failed',0))
-                  broken=int(stat.get('broken',0))
-                  skipped=int(stat.get('skipped',0))
-                  total=int(stat.get('total',0))
-          else:
-              surefire = os.path.join(art_dir,'surefire-reports')
-              if os.path.isdir(surefire):
-                  for fn in os.listdir(surefire):
-                      if fn.startswith('TEST-') and fn.endswith('.xml'):
-                          try:
-                              tree = ET.parse(os.path.join(surefire,fn))
-                              root = tree.getroot()
-                              tests = int(root.attrib.get('tests', 0))
-                              failures = int(root.attrib.get('failures', 0))
-                              errors = int(root.attrib.get('errors', 0))
-                              skipped_i = int(root.attrib.get('skipped', 0))
-                              total += tests
-                              failed += failures
-                              broken += errors
-                              skipped += skipped_i
-                          except Exception:
-                              pass
-                  passed = max(total - failed - broken - skipped, 0)
-          verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
-          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-              out.write(f"passed={passed}\nfailed={failed}\nbroken={broken}\nskipped={skipped}\n")
-              out.write(f"total={total}\nverdict={verdict}\n")
-          PY
+          python3 - <<'PY'
+import os, json, xml.etree.ElementTree as ET
+report_dir = os.environ['REPORT_DIR']
+art_dir = os.environ['ART_DIR']
+summary_path = os.path.join(report_dir,'widgets','summary.json')
+passed=failed=broken=skipped=total=0
+if os.path.exists(summary_path):
+    with open(summary_path,'r',encoding='utf-8') as f:
+        data=json.load(f)
+        stat=data.get('statistic',{})
+        passed=int(stat.get('passed',0))
+        failed=int(stat.get('failed',0))
+        broken=int(stat.get('broken',0))
+        skipped=int(stat.get('skipped',0))
+        total=int(stat.get('total',0))
+else:
+    surefire = os.path.join(art_dir,'surefire-reports')
+    if os.path.isdir(surefire):
+        for fn in os.listdir(surefire):
+            if fn.startswith('TEST-') and fn.endswith('.xml'):
+                try:
+                    tree = ET.parse(os.path.join(surefire,fn))
+                    root = tree.getroot()
+                    tests = int(root.attrib.get('tests', 0))
+                    failures = int(root.attrib.get('failures', 0))
+                    errors = int(root.attrib.get('errors', 0))
+                    skipped_i = int(root.attrib.get('skipped', 0))
+                    total += tests
+                    failed += failures
+                    broken += errors
+                    skipped += skipped_i
+                except Exception:
+                    pass
+        passed = max(total - failed - broken - skipped, 0)
+verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
+with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+    out.write(f"passed={passed}\nfailed={failed}\nbroken={broken}\nskipped={skipped}\n")
+    out.write(f"total={total}\nverdict={verdict}\n")
+PY
 
       - name: Zip Allure report for artifact convenience (only if HTML exists)
+        if: always()
+        shell: bash
         run: |
           if [ -f "$REPORT_DIR/index.html" ]; then
-            python3 - << 'PY'
-            import os, zipfile
-            report_dir=os.environ['REPORT_DIR']
-            zip_path='allure-report.zip'
-            with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
-                for root,_,files in os.walk(report_dir):
-                    for fn in files:
-                        p=os.path.join(root,fn)
-                        z.write(p, os.path.relpath(p, report_dir))
-            PY
+            python3 - <<'PY'
+import os, zipfile
+report_dir=os.environ['REPORT_DIR']
+zip_path='allure-report.zip'
+with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
+    for root,_,files in os.walk(report_dir):
+        for fn in files:
+            p=os.path.join(root,fn)
+            z.write(p, os.path.relpath(p, report_dir))
+PY
           else
-            then echo "No HTML to zip, skipping zip step."
+            echo "No HTML to zip, skipping zip step."
           fi
 
       - name: Conditionally upload Allure HTML (skip if missing)
