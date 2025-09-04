@@ -1,4 +1,5 @@
 name: Photopixels BE nightly API tests
+run-name: "Nightly BE API — ${{ github.ref_name }} #${{ github.run_number }}"
 
 on:
   workflow_dispatch: {}
@@ -90,10 +91,12 @@ jobs:
     runs-on: self-hosted
     needs: [automation]
     if: always()
-    env:
-      ART_DIR: ${{ runner.temp }}/be-artifacts
-      REPORT_DIR: ${{ runner.temp }}/allure-report
     steps:
+      - name: Init temp paths
+        run: |
+          echo "ART_DIR=$RUNNER_TEMP/be-artifacts" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=$RUNNER_TEMP/allure-report" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/be-artifacts" "$RUNNER_TEMP/allure-report"
       - name: Prep artifact dir
         run: |
           rm -rf "$ART_DIR" && mkdir -p "$ART_DIR"
@@ -168,6 +171,8 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
+          secure: ${{ secrets.SMTP_SECURE || 'false' }}
+          tls: true
           from: ${{ secrets.SMTP_FROM }}
           to: ${{ secrets.SMTP_TO }}
           subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
