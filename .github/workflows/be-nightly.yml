@@ -53,10 +53,10 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-      - name: Start environment
+      - name: Start environment (backend + db only)
         run: |
-          chmod +x "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
-          "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "${COMPOSE_FILE}"
+          docker compose -f "${COMPOSE_FILE}" pull backend db || true
+          docker compose -f "${COMPOSE_FILE}" up -d backend db
       - name: Run API tests
         id: run-tests
         continue-on-error: true
@@ -92,73 +92,72 @@ jobs:
     needs: [automation]
     if: always()
     steps:
-      - name: Init temp paths
+      - name: Set workspace-scoped paths (visible in action container)
+        shell: bash
         run: |
-          echo "ART_DIR=$RUNNER_TEMP/be-artifacts" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=$RUNNER_TEMP/allure-report" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/be-artifacts" "$RUNNER_TEMP/allure-report"
-      - name: Prep artifact dir
-        run: |
-          rm -rf "$ART_DIR" && mkdir -p "$ART_DIR"
-      - name: Download test artifacts
+          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
+          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
+
+      - name: Download test artifacts (into workspace)
         uses: actions/download-artifact@v4
         with:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
-      - name: Generate Allure report
+
+      - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
         continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
-      - name: Extract summary stats
+
+      - name: Verify Allure output
+        shell: bash
+        run: |
+          echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
+          [ -f "$REPORT_DIR/index.html" ] && echo "index.html: OK" || echo "index.html: MISSING"
+          [ -f "$REPORT_DIR/widgets/summary.json" ] && echo "summary.json: OK" || echo "summary.json: MISSING"
+
+      - name: Extract summary (prefer Allure, fallback to Surefire)
         id: summary
         shell: bash
         run: |
-          python3 - << 'PY'
-          import os, json, xml.etree.ElementTree as ET
-          report_dir = os.environ['REPORT_DIR']
-          art_dir = os.environ['ART_DIR']
-          summary_path = os.path.join(report_dir,'widgets','summary.json')
-          passed=failed=broken=skipped=total=0
-          if os.path.exists(summary_path):
-              with open(summary_path,'r',encoding='utf-8') as f:
-                  data=json.load(f)
-                  stat=data.get('statistic',{})
-                  passed=int(stat.get('passed',0))
-                  failed=int(stat.get('failed',0))
-                  broken=int(stat.get('broken',0))
-                  skipped=int(stat.get('skipped',0))
-                  total=int(stat.get('total',0))
-          else:
-              surefire = os.path.join(art_dir,'surefire-reports')
-              if os.path.isdir(surefire):
-                  for fn in os.listdir(surefire):
-                      if fn.startswith('TEST-') and fn.endswith('.xml'):
-                          try:
-                              tree = ET.parse(os.path.join(surefire,fn))
-                              root = tree.getroot()
-                              tests = int(root.attrib.get('tests', 0))
-                              failures = int(root.attrib.get('failures', 0))
-                              errors = int(root.attrib.get('errors', 0))
-                              skipped_i = int(root.attrib.get('skipped', 0))
-                              total += tests
-                              failed += failures
-                              broken += errors
-                              skipped += skipped_i
-                          except Exception:
-                              pass
-                  passed = max(total - failed - broken - skipped, 0)
-          verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
-          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-              out.write(f"passed={passed}\n")
-              out.write(f"failed={failed}\n")
-              out.write(f"broken={broken}\n")
-              out.write(f"skipped={skipped}\n")
-              out.write(f"total={total}\n")
-              out.write(f"verdict={verdict}\n")
-          PY
+          set -e
+          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0; PASSED=0
+          if [ -f "$REPORT_DIR/widgets/summary.json" ]; then
+            PASSED=$(grep -o '"passed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            FAILED=$(grep -o '"failed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            BROKEN=$(grep -o '"broken":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            SKIPPED=$(grep -o '"skipped":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            TOTAL=$(grep -o '"total":[0-9]\+'    "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+          else
+            for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+              [ -f "$f" ] || continue
+              line=$(head -1 "$f")
+              t=$(echo "$line"  | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
+              fa=$(echo "$line" | sed -n 's/.*failures="\([0-9]\+\)".*/\1/p')
+              er=$(echo "$line" | sed -n 's/.*errors="\([0-9]\+\)".*/\1/p')
+              sk=$(echo "$line" | sed -n 's/.*skipped="\([0-9]\+\)".*/\1/p')
+              TOTAL=$((TOTAL + ${t:-0}))
+              FAILED=$((FAILED + ${fa:-0}))
+              BROKEN=$((BROKEN + ${er:-0}))
+              SKIPPED=$((SKIPPED + ${sk:-0}))
+            done
+            PASSED=$((TOTAL - FAILED - BROKEN - SKIPPED))
+            [ $PASSED -lt 0 ] && PASSED=0 || true
+          fi
+          VERDICT="PASSED"; [ $((FAILED + BROKEN)) -gt 0 ] && VERDICT="FAILED"
+          {
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "broken=$BROKEN"
+            echo "skipped=$SKIPPED"
+            echo "total=$TOTAL"
+            echo "verdict=$VERDICT"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build failed-tests table HTML from Surefire XML
         id: failedtbl
         shell: bash
@@ -167,50 +166,46 @@ jobs:
           rows=""
           shopt -s nullglob
           for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+            cls=""
+            name=""
+            msg=""
             while IFS= read -r line; do
-              if [[ $line =~ \<testcase\ name=\"([^\"]+)\".*classname=\"([^\"]+)\" ]]; then
-                name="${BASH_REMATCH[1]}"
-                cls="${BASH_REMATCH[2]}"
-                msg=""
-              fi
-              if [[ $line =~ \<failure ]]; then
-                if [[ $line =~ message=\"([^\"]*)\" ]]; then
-                  msg="${BASH_REMATCH[1]}"
-                fi
-              fi
-              if [[ $line =~ \<error ]]; then
-                if [[ $line =~ message=\"([^\"]*)\" ]]; then
-                  msg="${BASH_REMATCH[1]}"
-                fi
-              fi
-              if [[ $line =~ \</testcase\> ]]; then
-                if [ -n "$msg" ]; then
-                  esc_full=$(printf '%s.%s' "$cls" "$name" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-                  tmp_msg=$(printf '%s' "$msg" | sed -e 's/&#10;/___BR___/g' -e 's/\\n/___BR___/g' -e 's/\r\n/___BR___/g')
-                  esc_msg=$(printf '%s' "$tmp_msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-                  esc_msg=$(printf '%s' "$esc_msg" | sed -e 's/___BR___/<br\/>/g')
-                  rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
-                fi
-              fi
+              case "$line" in
+                *"<testcase "*)
+                  cls=$(printf '%s\n' "$line" | sed -n 's/.*classname="\([^"]*\)".*/\1/p')
+                  name=$(printf '%s\n' "$line" | sed -n 's/.*name="\([^"]*\)".*/\1/p')
+                  msg=""
+                  ;;
+                *"<failure "*|*"<error "*)
+                  msg=$(printf '%s\n' "$line" | sed -n 's/.*message="\([^"]*\)".*/\1/p')
+                  if [ -n "$msg" ]; then
+                    esc_full=$(printf '%s.%s' "$cls" "$name" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+                    tmp_msg=$(printf '%s' "$msg" | sed -e 's/&#10;/___BR___/g' -e 's/\\n/___BR___/g' -e 's/\r\n/___BR___/g')
+                    esc_msg=$(printf '%s' "$tmp_msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+                    esc_msg=$(printf '%s' "$esc_msg" | sed -e 's/\&amp;lt;/\&lt;/g' -e 's/\&amp;gt;/\&gt;/g' -e 's/\&amp;quot;/\&quot;/g' -e 's/\&amp;\#10;/___BR___/g')
+                    esc_msg=$(printf '%s' "$esc_msg" | sed -e 's/___BR___/<br\/>/g')
+                    rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
+                  fi
+                  ;;
+              esac
             done < "$f"
           done
 
           if [ -n "$rows" ]; then
             {
-              echo "table<<EOF"
-              echo "<h3>Failed tests</h3><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse; width:100%;\"><thead><tr style=\"background:#f5f5f5;\"><th style=\"text-align:left;\">Test &amp; reason</th></tr></thead><tbody>"
+              echo '<h3>Failed tests</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#f5f5f5;"><th style="text-align:left;">Test &amp; reason</th></tr></thead><tbody>'
               printf "%s\n" "$rows"
-              echo "</tbody></table>"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+              echo '</tbody></table>'
+            } > /tmp/failed_table.html
           else
-            {
-              echo "table<<EOF"
-              echo "<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo '<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
           fi
-      - name: Send email with Allure report
+
+          oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
+          echo "table=$oneline" >> "$GITHUB_OUTPUT"
+
+      - name: Send email with Allure report (link only, no attachment)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -225,6 +220,7 @@ jobs:
           html_body: |
             <p>Hello team,</p>
             <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
+
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -236,18 +232,23 @@ jobs:
               </tr>
               <tr>
                 <td align="center">${{ steps.summary.outputs.total || '0' }}</td>
-                <td align="center" style="color:green;">${{ steps.summary.outputs.passed || '0' }}</td>
-                <td align="center" style="color:red;">${{ steps.summary.outputs.failed || '0' }}</td>
-                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken || '0' }}</td>
-                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped || '0' }}</td>
+                <td align="center" style="color:green;"><b>${{ steps.summary.outputs.passed || '0' }}</b></td>
+                <td align="center" style="color:red;"><b>${{ steps.summary.outputs.failed || '0' }}</b></td>
+                <td align="center" style="color:#b10;"><b>${{ steps.summary.outputs.broken || '0' }}</b></td>
+                <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
               </tr>
             </table>
-            <br/>
-            ${{ steps.failedtbl.outputs.table }}
+
+            <div style="margin-top:12px;">
+              ${{ steps.failedtbl.outputs.table }}
+            </div>
+
             <p>
               <ul>
-                <li>Workflow: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">link</a></li>
-                <li>Artifacts: <i>be-api-test-artifacts</i> and <i>allure-html-report</i></li>
+                <li>Workflow &amp; Artifacts: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
+                <li>Allure HTML artifact (if generated): <i>allure-html-report</i></li>
+                <li>Raw results (always): <i>be-api-test-artifacts</i></li>
               </ul>
             </p>
+
             <p>Best regards,<br/>CI</p>
