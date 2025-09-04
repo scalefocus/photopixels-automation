@@ -7,21 +7,10 @@ on:
 
 env:
   COMPOSE_FILE: ./utils/docker-compose.yml
-  FRONTEND_TAG: scalefocusad/photopixels-web:automation
   BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
 jobs:
-  build-fe:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: scalefocus/photopixels-web
-      - name: Build docker image (FE)
-        run: |
-          docker build --no-cache -t "$FRONTEND_TAG" -f ./Dockerfile .
-
   build-be:
     runs-on: self-hosted
     steps:
@@ -50,50 +39,128 @@ jobs:
 
   automation:
     runs-on: self-hosted
-    needs: [build-fe, build-be, build-automation]
+    needs: [build-be, build-automation]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Start environment
         run: |
           chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
           "${GITHUB_WORKSPACE}/utils/create-environment.sh" "${COMPOSE_FILE}"
-
-      - name: Run API tests (in container, named for later copy)
+      - name: Run API tests
         id: run-tests
         run: |
           set -e
-          # Пускаме контейнера без --rm, за да можем да копираме отчетите след това
           docker run -i --name api-tests \
             -e BASE_URI="http://backend:8080/" \
             -e SUITE_NAME="api" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
-
-      - name: Collect test artifacts (surefire + allure-results)
+      - name: Collect test artifacts
         if: always()
         run: |
           set -e
           mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
-          # Опитваме да копираме (ако ги има)
           docker cp api-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
           docker cp api-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
-          ls -la "${GITHUB_WORKSPACE}/test-artifacts" || true
-
-      - name: Upload artifacts
+      - name: Upload raw artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: be-api-test-artifacts
-          path: |
-            test-artifacts/**
+          path: test-artifacts/**
           if-no-files-found: warn
           retention-days: 14
-
       - name: Cleanup
         if: always()
         run: |
           docker rm -f api-tests || true
           docker compose -f "$COMPOSE_FILE" down -v || true
+
+  allure-report-email:
+    runs-on: self-hosted
+    needs: [automation]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: be-api-test-artifacts
+          path: ./test-artifacts
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@v1.8
+        with:
+          allure_results: ./test-artifacts/allure-results
+          allure_report: ./allure-report
+      - name: Extract summary stats
+        id: summary
+        run: |
+          summary_file="./allure-report/widgets/summary.json"
+          passed=$(jq '.statistic.passed' "$summary_file")
+          failed=$(jq '.statistic.failed' "$summary_file")
+          broken=$(jq '.statistic.broken' "$summary_file")
+          skipped=$(jq '.statistic.skipped' "$summary_file")
+          total=$(jq '.statistic.total' "$summary_file")
+          echo "passed=$passed" >> $GITHUB_OUTPUT
+          echo "failed=$failed" >> $GITHUB_OUTPUT
+          echo "broken=$broken" >> $GITHUB_OUTPUT
+          echo "skipped=$skipped" >> $GITHUB_OUTPUT
+          echo "total=$total" >> $GITHUB_OUTPUT
+      - name: Zip Allure report
+        run: |
+          cd ./allure-report
+          zip -qr ../allure-report.zip .
+          cd -
+      - name: Upload Allure HTML as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-html-report
+          path: |
+            allure-report/**
+            allure-report.zip
+          retention-days: 14
+      - name: Send email with Allure report
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: "QA Automations <qa-automations@your-domain.tld>"
+          to: "qa-team@your-domain.tld,devops@your-domain.tld"
+          subject: "Photopixels BE nightly API tests — ${{ needs.automation.result || 'success' }}"
+          html_body: |
+            <p>Hello team,</p>
+            <p>The nightly run finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
+            <p>Summary:</p>
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
+              <tr>
+                <th>Total</th>
+                <th>Passed</th>
+                <th>Failed</th>
+                <th>Broken</th>
+                <th>Skipped</th>
+              </tr>
+              <tr>
+                <td align="center">${{ steps.summary.outputs.total }}</td>
+                <td align="center" style="color:green;">${{ steps.summary.outputs.passed }}</td>
+                <td align="center" style="color:red;">${{ steps.summary.outputs.failed }}</td>
+                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken }}</td>
+                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped }}</td>
+              </tr>
+            </table>
+            <p>
+              <ul>
+                <li>Workflow: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">link</a></li>
+                <li>Artifacts: <i>be-api-test-artifacts</i> and <i>allure-html-report</i></li>
+              </ul>
+            </p>
+            <p>The attached file contains the full HTML Allure report (unzip and open <code>index.html</code>).</p>
+            <p>Best regards,<br/>CI</p>
+          attachments: allure-report.zip
