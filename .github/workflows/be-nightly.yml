@@ -4,7 +4,7 @@ run-name: "Nightly BE API — ${{ github.ref_name }} #${{ github.run_number }}"
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 14 * * *'
+    - cron: '0 4 * * *'
 
 env:
   AUTOMATION_REPO_PATH: automation
@@ -219,9 +219,9 @@ jobs:
           subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
           html_body: |
             <p>Hello team,</p>
-            <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
+            <p>The nightly BE run of the automation tests finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
 
-            <p>Summary:</p>
+            <p style="font-size:16px; font-weight:bold; margin-top:12px;">Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
                 <th>Total</th>
@@ -245,10 +245,8 @@ jobs:
 
             <p>
               <ul>
-                <li>Workflow &amp; Artifacts: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
-                <li>Allure HTML artifact (if generated): <i>allure-html-report</i></li>
-                <li>Raw results (always): <i>be-api-test-artifacts</i></li>
+                <li>Workflow summary &amp; Allure report: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
               </ul>
             </p>
 
-            <p>Best regards,<br/>CI</p>
+            <p>Best regards,<br/>GitHub Actions</p>
