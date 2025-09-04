@@ -3,10 +3,12 @@ name: Photopixels BE nightly API tests
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '00 12 * * *'
+    - cron: '30 0 * * *'
 
 env:
-  COMPOSE_FILE: ./utils/docker-compose.yml
+  AUTOMATION_REPO_PATH: automation
+  BACKEND_REPO_PATH: backend
+  COMPOSE_FILE: ${{ github.workspace }}/automation/utils/docker-compose.yml
   BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
@@ -14,17 +16,14 @@ jobs:
   build-be:
     runs-on: self-hosted
     steps:
-      - name: Pre-clean workspace (safe ownership + wipe)
-        run: |
-          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
-          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
           repository: scalefocus/photopixels-backend-net
           submodules: recursive
-          clean: false
           fetch-depth: 0
+          path: ${{ env.BACKEND_REPO_PATH }}
       - name: Build docker image (BE)
+        working-directory: ${{ env.BACKEND_REPO_PATH }}
         run: |
           docker build \
             --no-cache \
@@ -36,15 +35,12 @@ jobs:
   build-automation:
     runs-on: self-hosted
     steps:
-      - name: Pre-clean workspace (safe ownership + wipe)
-        run: |
-          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
-          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
-          clean: false
           fetch-depth: 0
+          path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Build docker image (automation tests)
+        working-directory: ${{ env.AUTOMATION_REPO_PATH }}
         run: |
           docker build --no-cache -f ./Dockerfile -t "$AUTOMATION_TAG" .
 
@@ -52,18 +48,14 @@ jobs:
     runs-on: self-hosted
     needs: [build-be, build-automation]
     steps:
-      - name: Pre-clean workspace (safe ownership + wipe)
-        run: |
-          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
-          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
       - uses: actions/checkout@v4
         with:
-          clean: false
           fetch-depth: 0
+          path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Start environment
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
-          "${GITHUB_WORKSPACE}/utils/create-environment.sh" "${COMPOSE_FILE}"
+          chmod +x "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
+          "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "${COMPOSE_FILE}"
       - name: Run API tests
         id: run-tests
         run: |
@@ -99,14 +91,6 @@ jobs:
     needs: [automation]
     if: always()
     steps:
-      - name: Pre-clean workspace (safe ownership + wipe)
-        run: |
-          sudo chown -R $(id -u):$(id -g) "$GITHUB_WORKSPACE" || true
-          sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || true
-      - uses: actions/checkout@v4
-        with:
-          clean: false
-          fetch-depth: 0
       - name: Download test artifacts
         uses: actions/download-artifact@v4
         with:
@@ -124,12 +108,23 @@ jobs:
           curl -fsSL -o /tmp/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x /tmp/jq
           sudo mv /tmp/jq /usr/local/bin/jq
+      - name: Ensure zip present
+        run: |
+          set -e
+          if command -v zip >/dev/null 2>&1; then exit 0; fi
+          if command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y && sudo apt-get install -y zip && exit 0; fi
+          if command -v yum >/dev/null 2>&1; then sudo yum install -y zip && exit 0; fi
+          if command -v dnf >/dev/null 2>&1; then sudo dnf install -y zip && exit 0; fi
+          if command -v zypper >/dev/null 2>&1; then sudo zypper install -y zip && exit 0; fi
+          if command -v apk >/dev/null 2>&1; then sudo apk add --no-cache zip && exit 0; fi
+          exit 0
       - name: Generate Allure report
         id: gen
         continue-on-error: true
         env:
           REPORT_DIR: ${{ runner.temp }}/allure-report
         run: |
+          set -e
           mkdir -p "$REPORT_DIR"
           npx --yes allure-commandline generate ./test-artifacts/allure-results --clean -o "$REPORT_DIR" || true
       - name: Extract summary stats
