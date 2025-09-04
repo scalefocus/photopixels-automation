@@ -167,33 +167,19 @@ jobs:
               out.write(f"total={total}\n")
               out.write(f"verdict={verdict}\n")
           PY
-      - name: Build ZIP (Allure if present, else raw artifacts)
+      - name: Zip Allure report for artifact convenience
         run: |
           python3 - << 'PY'
-          import os, zipfile, shutil
+          import os, zipfile
           report_dir=os.environ['REPORT_DIR']
-          art_dir=os.environ['ART_DIR']
           zip_path='allure-report.zip'
-          has_index=os.path.isfile(os.path.join(report_dir,'index.html'))
-          if not has_index:
-              fallback_dir=os.path.join(report_dir,'_fallback')
-              os.makedirs(fallback_dir, exist_ok=True)
-              ar=os.path.join(art_dir,'allure-results')
-              sr=os.path.join(art_dir,'surefire-reports')
-              if os.path.isdir(ar):
-                  shutil.copytree(ar, os.path.join(fallback_dir,'allure-results'), dirs_exist_ok=True)
-              if os.path.isdir(sr):
-                  shutil.copytree(sr, os.path.join(fallback_dir,'surefire-reports'), dirs_exist_ok=True)
-              with open(os.path.join(fallback_dir,'README.txt'),'w',encoding='utf-8') as f:
-                  f.write('Allure HTML was not generated. This zip contains raw allure-results and surefire-reports.')
           with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
-              base=report_dir
-              for root,_,files in os.walk(base):
+              for root,_,files in os.walk(report_dir):
                   for fn in files:
                       p=os.path.join(root,fn)
-                      z.write(p, os.path.relpath(p, base))
+                      z.write(p, os.path.relpath(p, report_dir))
           PY
-      - name: Upload Allure HTML as artifact
+      - name: Upload Allure HTML and ZIP as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -202,7 +188,7 @@ jobs:
             ${{ env.REPORT_DIR }}/**
             allure-report.zip
           retention-days: 14
-      - name: Send email with Allure report
+      - name: Send email with Allure report (link only, no attachment)
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -217,6 +203,7 @@ jobs:
           html_body: |
             <p>Hello team,</p>
             <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
+
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -228,18 +215,18 @@ jobs:
               </tr>
               <tr>
                 <td align="center">${{ steps.summary.outputs.total || '0' }}</td>
-                <td align="center" style="color:green;">${{ steps.summary.outputs.passed || '0' }}</td>
-                <td align="center" style="color:red;">${{ steps.summary.outputs.failed || '0' }}</td>
-                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken || '0' }}</td>
-                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped || '0' }}</td>
+                <td align="center" style="color:green;"><b>${{ steps.summary.outputs.passed || '0' }}</b></td>
+                <td align="center" style="color:red;"><b>${{ steps.summary.outputs.failed || '0' }}</b></td>
+                <td align="center" style="color:#b10;"><b>${{ steps.summary.outputs.broken || '0' }}</b></td>
+                <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
               </tr>
             </table>
+
             <p>
               <ul>
-                <li>Workflow: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">link</a></li>
-                <li>Artifacts: <i>be-api-test-artifacts</i> and <i>allure-html-report</i></li>
+                <li>Workflow &amp; Artifacts: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
+                <li>Download ZIP: <i>allure-html-report</i> &rarr; <i>allure-report.zip</i> in the artifacts of this run</li>
               </ul>
             </p>
-            <p>The attached file contains the report. If Allure HTML could not be generated, the zip contains raw <code>allure-results</code> and <code>surefire-reports</code>.</p>
+
             <p>Best regards,<br/>CI</p>
-          attachments: allure-report.zip
