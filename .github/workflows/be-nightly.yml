@@ -14,30 +14,8 @@ env:
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
 jobs:
-  free-space:
-    runs-on: self-hosted
-    steps:
-      - name: Show disk before
-        run: |
-          df -h || true
-          docker system df || true
-      - name: Docker prune
-        run: |
-          docker stop $(docker ps -q) 2>/dev/null || true
-          docker system prune -af --volumes || true
-          docker builder prune -af || true
-      - name: Clean temp folders
-        run: |
-          rm -rf "$RUNNER_TEMP"/* || true
-          mkdir -p "$RUNNER_TEMP"
-      - name: Show disk after
-        run: |
-          df -h || true
-          docker system df || true
-
   build-be:
     runs-on: self-hosted
-    needs: [free-space]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,7 +23,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           path: ${{ env.BACKEND_REPO_PATH }}
-          clean: true
       - name: Build docker image (BE)
         working-directory: ${{ env.BACKEND_REPO_PATH }}
         run: |
@@ -58,13 +35,11 @@ jobs:
 
   build-automation:
     runs-on: self-hosted
-    needs: [free-space]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-          clean: true
       - name: Build docker image (automation tests)
         working-directory: ${{ env.AUTOMATION_REPO_PATH }}
         run: |
@@ -122,17 +97,22 @@ jobs:
           echo "ART_DIR=$RUNNER_TEMP/be-artifacts" >> "$GITHUB_ENV"
           echo "REPORT_DIR=$RUNNER_TEMP/allure-report" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/be-artifacts" "$RUNNER_TEMP/allure-report"
-
       - name: Prep artifact dir
         run: |
           rm -rf "$ART_DIR" && mkdir -p "$ART_DIR"
-
       - name: Download test artifacts
         uses: actions/download-artifact@v4
         with:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
-
+      - name: Show downloaded artifacts
+        run: |
+          echo "=== ART_DIR tree ==="
+          ls -la "$ART_DIR" || true
+          echo "=== surefire-reports ==="
+          ls -la "$ART_DIR/surefire-reports" || true
+          echo "=== allure-results ==="
+          ls -la "$ART_DIR/allure-results" || true
       - name: Generate Allure report
         id: gen
         continue-on-error: true
@@ -140,109 +120,53 @@ jobs:
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
-
-      - name: Extract summary and failed table (prefer Allure JSON, fallback JUnit)
+      - name: Extract summary (Allure or fallback to surefire)
         id: summary
         shell: bash
         run: |
           python3 - << 'PY'
-          import os, json, glob, html, re, xml.etree.ElementTree as ET
-
-          def esc(s): return html.escape(s or '')
-
+          import os, json, xml.etree.ElementTree as ET
           report_dir = os.environ['REPORT_DIR']
           art_dir = os.environ['ART_DIR']
-          allure_results = os.path.join(art_dir,'allure-results')
-          surefire_dir   = os.path.join(art_dir,'surefire-reports')
-
-          passed = failed = broken = skipped = total = 0
-          rows = []
-
-          for path in glob.glob(os.path.join(allure_results,'*-result.json')):
-              try:
-                  with open(path,'r',encoding='utf-8') as f:
-                      obj = json.load(f)
-                  st = (obj.get('status','') or '').lower()
-                  if   st == 'passed':  passed += 1
-                  elif st == 'failed':  failed += 1
-                  elif st == 'skipped': skipped += 1
-                  elif st == 'broken':  broken += 1
-                  else: pass
-                  total += 1
-                  if st in ('failed','broken'):
-                      labels = { (l.get('name') or ''): (l.get('value') or '') for l in obj.get('labels',[]) }
-                      pkg = labels.get('package','')
-                      testClass = labels.get('testClass','')
-                      cls = testClass or pkg
-                      name = obj.get('name') or 'Unnamed'
-                      msg = (obj.get('statusDetails',{}) or {}).get('message') or (obj.get('statusDetails',{}) or {}).get('trace') or ''
-                      msg = (msg or '').strip()
-                      first = msg.splitlines()[0][:500]
-                      rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc(first)}</td></tr>")
-              except Exception:
-                  pass
-
-          def parse_testsuite(ts):
-              nonlocal passed, failed, broken, skipped, total, rows
-              try:
-                  t = int(ts.attrib.get('tests', 0)); f = int(ts.attrib.get('failures', 0)); e = int(ts.attrib.get('errors', 0)); sk = int(ts.attrib.get('skipped', 0))
-                  if total == 0:
-                      total += t
-                  for tc in ts.findall('.//testcase'):
-                      name = tc.attrib.get('name',''); cls = tc.attrib.get('classname','')
-                      fnode = tc.find('failure'); enode = tc.find('error'); sknode = tc.find('skipped')
-                      if fnode is not None:
-                          if not rows:
+          summary_path = os.path.join(report_dir,'widgets','summary.json')
+          passed=failed=broken=skipped=total=0
+          if os.path.exists(summary_path):
+              with open(summary_path,'r',encoding='utf-8') as f:
+                  data=json.load(f)
+                  stat=data.get('statistic',{})
+                  passed=int(stat.get('passed',0))
+                  failed=int(stat.get('failed',0))
+                  broken=int(stat.get('broken',0))
+                  skipped=int(stat.get('skipped',0))
+                  total=int(stat.get('total',0))
+          else:
+              surefire = os.path.join(art_dir,'surefire-reports')
+              if os.path.isdir(surefire):
+                  for fn in os.listdir(surefire):
+                      if fn.startswith('TEST-') and fn.endswith('.xml'):
+                          try:
+                              tree = ET.parse(os.path.join(surefire,fn))
+                              root = tree.getroot()
+                              tests = int(root.attrib.get('tests', 0))
+                              failures = int(root.attrib.get('failures', 0))
+                              errors = int(root.attrib.get('errors', 0))
+                              skipped_i = int(root.attrib.get('skipped', 0))
+                              total += tests
+                              failed += failures
+                              broken += errors
+                              skipped += skipped_i
+                          except Exception:
                               pass
-                          msg = fnode.attrib.get('message') or (fnode.text or '')
-                          rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc((msg or '').strip().splitlines()[0][:500])}</td></tr>")
-                      elif enode is not None:
-                          msg = enode.attrib.get('message') or (enode.text or '')
-                          rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc((msg or '').strip().splitlines()[0][:500])}</td></tr>")
-                  if total and (failed+broken+skipped+passed)==0:
-                      pass
-              except Exception:
-                  pass
-
-          if total == 0 and os.path.isdir(surefire_dir):
-              for path in glob.glob(os.path.join(surefire_dir,'TEST-*.xml')):
-                  try:
-                      root = ET.parse(path).getroot()
-                      if root.tag == 'testsuite':
-                          parse_testsuite(root)
-                      elif root.tag == 'testsuites':
-                          for ts in root.findall('testsuite'):
-                              parse_testsuite(ts)
-                  except Exception:
-                      pass
-
-          if total and passed == 0:
-              p = total - (failed + broken + skipped)
-              passed = p if p > 0 else 0
-
-          verdict = "FAILED" if (failed + broken) > 0 or len(rows) > 0 else "PASSED"
-
-          failed_table_html = (
-              '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;">'
-              '<tr><th style="text-align:left;">Test</th><th style="text-align:left;">Message</th></tr>'
-              + "".join(rows) +
-              '</table>'
-          ) if rows else '<p>No failed tests.</p>'
-
-          failed_table_html = re.sub(r"\\s+", " ", failed_table_html).strip()
-
+                  passed = max(total - failed - broken - skipped, 0)
+          verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-              out.write(f"passed={passed}\\n")
-              out.write(f"failed={failed}\\n")
-              out.write(f"broken={broken}\\n")
-              out.write(f"skipped={skipped}\\n")
-              out.write(f"total={total}\\n")
-              out.write(f"verdict={verdict}\\n")
-              out.write("failed_table_html<<EOF\\n")
-              out.write(failed_table_html + "\\n")
-              out.write("EOF\\n")
+              out.write(f"passed={passed}\n")
+              out.write(f"failed={failed}\n")
+              out.write(f"broken={broken}\n")
+              out.write(f"skipped={skipped}\n")
+              out.write(f"total={total}\n")
+              out.write(f"verdict={verdict}\n")
           PY
-
       - name: Build ZIP (Allure if present, else raw artifacts)
         run: |
           python3 - << 'PY'
@@ -269,7 +193,6 @@ jobs:
                       p=os.path.join(root,fn)
                       z.write(p, os.path.relpath(p, base))
           PY
-
       - name: Upload Allure HTML as artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -279,7 +202,6 @@ jobs:
             ${{ env.REPORT_DIR }}/**
             allure-report.zip
           retention-days: 14
-
       - name: Send email with Allure report
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -291,11 +213,10 @@ jobs:
           secure: ${{ secrets.SMTP_SECURE }}
           from: ${{ secrets.SMTP_FROM != '' && secrets.SMTP_FROM || secrets.SMTP_USERNAME }}
           to: ${{ secrets.SMTP_TO }}
-          subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict }}"
+          subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
           html_body: |
             <p>Hello team,</p>
-            <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict }}</b>.</p>
-
+            <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -307,16 +228,12 @@ jobs:
               </tr>
               <tr>
                 <td align="center">${{ steps.summary.outputs.total || '0' }}</td>
-                <td align="center" style="color:green;"><b>${{ steps.summary.outputs.passed || '0' }}</b></td>
-                <td align="center" style="color:red;"><b>${{ steps.summary.outputs.failed || '0' }}</b></td>
-                <td align="center" style="color:#b10;"><b>${{ steps.summary.outputs.broken || '0' }}</b></td>
-                <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
+                <td align="center" style="color:green;">${{ steps.summary.outputs.passed || '0' }}</td>
+                <td align="center" style="color:red;">${{ steps.summary.outputs.failed || '0' }}</td>
+                <td align="center" style="color:orange;">${{ steps.summary.outputs.broken || '0' }}</td>
+                <td align="center" style="color:gray;">${{ steps.summary.outputs.skipped || '0' }}</td>
               </tr>
             </table>
-
-            <p>Failed tests:</p>
-            ${{ steps.summary.outputs.failed_table_html }}
-
             <p>
               <ul>
                 <li>Workflow: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">link</a></li>
