@@ -193,13 +193,13 @@ jobs:
 
           if [ -n "$rows" ]; then
             {
-              echo '<h3>Failed tests</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<h3>Failed tests:</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
               echo '<thead><tr style="background:#f5f5f5;"><th style="text-align:left;">Test &amp; reason</th></tr></thead><tbody>'
               printf "%s\n" "$rows"
               echo '</tbody></table>'
             } > /tmp/failed_table.html
           else
-            echo '<h3>Failed tests</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
+            echo '<h3>Failed tests:</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
           fi
 
           oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
@@ -221,7 +221,7 @@ jobs:
             <p>Hello team,</p>
             <p>The nightly BE run of the automation tests finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
 
-            <p style="font-size:16px; font-weight:bold; margin-top:12px;">Summary:</p>
+            <h3>Summary:</h3>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
                 <th>Total</th>
