@@ -205,6 +205,22 @@ jobs:
           oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
           echo "table=$oneline" >> "$GITHUB_OUTPUT"
 
+      - name: Conditionally upload Allure HTML (skip if missing)
+        shell: bash
+        run: |
+          if [ -f "$REPORT_DIR/index.html" ]; then
+            echo "UPLOAD_HTML=true" >> "$GITHUB_ENV"
+          else
+            echo "UPLOAD_HTML=false" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: env.UPLOAD_HTML == 'true'
+        with:
+          name: allure-html-report
+          path: ${{ env.REPORT_DIR }}/**
+          retention-days: 14
+
       - name: Send email with Allure report (link only, no attachment)
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -246,6 +262,8 @@ jobs:
             <p>
               <ul>
                 <li>Workflow summary &amp; Allure report: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
+                <li>Artifact (if generated): <i>allure-html-report</i></li>
+                <li>Raw results: <i>be-api-test-artifacts</i></li>
               </ul>
             </p>
 
