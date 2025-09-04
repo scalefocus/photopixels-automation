@@ -172,22 +172,35 @@ jobs:
         id: failedtbl
         shell: bash
         run: |
+          set -e
+          TMP_AWK="/tmp/parse_fail.awk"
+          cat > "$TMP_AWK" <<'AWK'
+BEGIN { RS="</testcase>"; FS="\n" }
+{
+  name=""; cls=""; msg=""; has=0
+  if (match($0, /<testcase[^>]*name="([^"]+)"[^>]*classname="([^"]*)"/, a)) {
+    name=a[1]; cls=a[2]
+    if ($0 ~ /<failure/ || $0 ~ /<error/) {
+      has=1
+      if (match($0, /<failure[^>]*message="([^"]*)"/, m) || match($0, /<error[^>]*message="([^"]*)"/, m)) { msg=m[1] }
+      if (msg == "") {
+        if (match($0, /<failure[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/failure>/, t) || match($0, /<error[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/error>/, t)) { msg=t[1] }
+      }
+      gsub(/\r/, " ", msg); gsub(/\n+/, " ", msg)
+      gsub(/&/, "\\&amp;", msg); gsub(/</, "\\&lt;", msg); gsub(/>/, "\\&gt;", msg)
+      printf("<tr><td><b>%s.%s</b><br/><div style='white-space:pre-wrap;margin:4px 0;'>%s</div></td></tr>\n", cls, name, msg)
+    }
+  }
+}
+AWK
+
           ROWS=""
+          shopt -s nullglob
           for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
-            [ -f "$f" ] || continue
-            out=$(awk '
-              /<testcase/ {name="";cls="";fail=0;msg=""}
-              match($0,/name="([^"]+)"/,a){name=a[1]}
-              match($0,/classname="([^"]*)"/,b){cls=b[1]}
-              /<failure|<error/ {fail=1; if(match($0,/message="([^"]*)"/,m)) msg=m[1]}
-              /<\/testcase>/ {
-                if(fail){
-                  gsub(/&/,"\\&amp;",msg); gsub(/</,"\\&lt;",msg); gsub(/>/,"\\&gt;",msg);
-                  printf("<tr><td><b>%s.%s</b><br/><div style='\''white-space:pre-wrap;margin:4px 0;'\''>%s</div></td></tr>\n",cls,name,msg)
-                }
-              }' "$f")
+            out=$(awk -f "$TMP_AWK" "$f" || true)
             [ -n "$out" ] && ROWS="${ROWS}${out}"
           done
+
           if [ -n "$ROWS" ]; then
             {
               echo "table<<EOF"
