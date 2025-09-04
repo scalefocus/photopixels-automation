@@ -1,23 +1,27 @@
 package com.photopixels.api.users;
 
+import com.photopixels.api.dtos.email.GetEmailAddressResponseDto;
 import com.photopixels.api.dtos.errors.ErrorResponseDto;
 import com.photopixels.api.dtos.users.LoginResponseDto;
+import com.photopixels.api.steps.email.GetEmailListSteps;
 import com.photopixels.api.steps.users.PostForgotUserPasswordSteps;
 import com.photopixels.api.steps.users.PostLoginSteps;
+import com.photopixels.api.steps.users.PostRegisterUserSteps;
 import com.photopixels.api.steps.users.PostResetUserPasswordSteps;
 import com.photopixels.base.IApiBaseTest;
 import com.photopixels.enums.ErrorMessagesEnum;
-import com.photopixels.helpers.DriverUtils;
 import com.photopixels.listeners.StatusTestListener;
-import com.photopixels.web.pages.email.EmailPage;
 import io.qameta.allure.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.openqa.selenium.WebDriver;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.photopixels.constants.Constants.PASSWORD;
 import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_TITLE;
@@ -26,14 +30,29 @@ import static com.photopixels.constants.ErrorMessageConstants.VALIDATION_ERRORS_
 @Feature("Users")
 public class PostResetUserPasswordTests implements IApiBaseTest {
 
+    private static final String EMAIL_RECEIVED_FROM = "photopixels.test@scalefocus.com";
     private String email;
     private String code;
+    private final Map<String, String> registeredUsersList = new HashMap<>();
+    private String sid;
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
-        // Using predefined email to get the reset code from the inbox
-        email = "Romer1977@cuvox.de";
+        GetEmailListSteps getEmailListSteps = new GetEmailListSteps();
+        GetEmailAddressResponseDto getEmailAddressResponseDto = getEmailListSteps.getEmailAddress();
+        sid = getEmailAddressResponseDto.getSidToken();
+        email = getEmailAddressResponseDto.getEmailAddress();
         code = RandomStringUtils.randomNumeric(6);
+        String name = "TestUser" + RandomStringUtils.randomNumeric(6);
+
+        PostRegisterUserSteps postRegisterUserSteps = new PostRegisterUserSteps();
+        postRegisterUserSteps.registerUser(name, email, PASSWORD);
+        registeredUsersList.put(email, PASSWORD);
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void cleanup() {
+        deleteRegisteredUsers(registeredUsersList);
     }
 
     @Test(description = "Reset user password")
@@ -46,10 +65,12 @@ public class PostResetUserPasswordTests implements IApiBaseTest {
         PostForgotUserPasswordSteps postForgotUserPasswordSteps = new PostForgotUserPasswordSteps();
         postForgotUserPasswordSteps.forgotUserPassword(email);
 
-        String code = getCodeForReset();
+        GetEmailListSteps getEmailListSteps = new GetEmailListSteps();
+        long mailId = getEmailListSteps.getMailIdFromSender(EMAIL_RECEIVED_FROM, sid);
+        String codeFromMail = getEmailListSteps.getResetCodeFromMail(sid, mailId);
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
-        postResetUserPasswordSteps.resetUserPassword(code, newPassword, email);
+        postResetUserPasswordSteps.resetUserPassword(codeFromMail, newPassword, email);
 
         PostLoginSteps postLoginSteps = new PostLoginSteps();
         LoginResponseDto loginResponseDto = postLoginSteps.login(email, newPassword);
@@ -164,29 +185,4 @@ public class PostResetUserPasswordTests implements IApiBaseTest {
 
         softAssert.assertAll();
     }
-
-    // TODO: Find better solution for the web part in the api tests
-    private String getCodeForReset() {
-        WebDriver driver = null;
-
-        // Sleep is needed to let the code be sent to the email
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            // No need to do anything here
-        }
-        try {
-            driver = new DriverUtils().getDriver();
-
-            driver.get(configProperties.getProperty("emailUrl"));
-
-            EmailPage emailPage = new EmailPage(driver);
-            return emailPage.getCodeFromEmail();
-        } finally {
-            if (driver != null) {
-                driver.quit();
-            }
-        }
-    }
-
 }
