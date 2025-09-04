@@ -158,30 +158,30 @@ jobs:
             echo "verdict=$VERDICT"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Build failed-tests table HTML from Allure JSON
+      - name: Build failed-tests table HTML from Surefire XML
         id: failedtbl
         shell: bash
         run: |
           set -e
           rows=""
           shopt -s nullglob
-          for f in "$ART_DIR"/allure-results/*-result.json; do
-            [ -f "$f" ] || continue
-            content=$(tr -d '\n' < "$f")
-            status=$(printf '%s' "$content" | sed -n 's/.*"status":"\([^"]*\)".*/\1/p' | head -1)
-            if [ "$status" = "failed" ] || [ "$status" = "broken" ]; then
-              fullname=$(printf '%s' "$content" | sed -n 's/.*"fullName":"\([^"]*\)".*/\1/p' | head -1)
-              if [ -z "$fullname" ]; then
-                fullname=$(printf '%s' "$content" | sed -n 's/.*"name":"\([^"]*\)".*/\1/p' | head -1)
-              fi
-              msg=$(printf '%s' "$content" | sed -n 's/.*"statusDetails":[^{}]*"message":"\([^"]*\)".*/\1/p' | head -1)
-              if [ -z "$msg" ]; then
-                msg=$(printf '%s' "$content" | sed -n 's/.*"statusDetails":[^{}]*"trace":"\([^"]*\)".*/\1/p' | head -1)
-              fi
-              esc_full=$(printf '%s' "$fullname" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-              esc_msg=$(printf '%s' "$msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-              rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
-            fi
+          for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+            cls=""
+            name=""
+            while IFS= read -r line; do
+              case "$line" in
+                *"<testcase "*)
+                  cls=$(printf '%s\n' "$line" | sed -n 's/.*classname="\([^"]*\)".*/\1/p')
+                  name=$(printf '%s\n' "$line" | sed -n 's/.*name="\([^"]*\)".*/\1/p')
+                  ;;
+                *"<failure "*|*"<error "*)
+                  msg=$(printf '%s\n' "$line" | sed -n 's/.*message="\([^"]*\)".*/\1/p')
+                  esc_full=$(printf '%s.%s' "$cls" "$name" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+                  esc_msg=$(printf '%s' "$msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+                  rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
+                  ;;
+              esac
+            done < "$f"
           done
 
           if [ -n "$rows" ]; then
