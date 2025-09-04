@@ -135,7 +135,7 @@ PY
         run: |
           echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
           echo "=== widgets ==="; ls -la "$REPORT_DIR/widgets" || true
-          test -f "$REPORT_DIR/index.html" && echo "index.html: OK" || echo "index.html: MISSING"
+          if [ -f "$REPORT_DIR/index.html" ]; then echo "index.html: OK"; else echo "index.html: MISSING"; fi
 
       - name: Extract summary (Allure or fallback to surefire)
         id: summary
@@ -150,12 +150,12 @@ passed=failed=broken=skipped=total=0
 if os.path.exists(summary_path):
     with open(summary_path,'r',encoding='utf-8') as f:
         data=json.load(f)
-        stat=data.get('statistic',{})
-        passed=int(stat.get('passed',0))
-        failed=int(stat.get('failed',0))
-        broken=int(stat.get('broken',0))
-        skipped=int(stat.get('skipped',0))
-        total=int(stat.get('total',0))
+    stat=data.get('statistic',{})
+    passed=int(stat.get('passed',0))
+    failed=int(stat.get('failed',0))
+    broken=int(stat.get('broken',0))
+    skipped=int(stat.get('skipped',0))
+    total=int(stat.get('total',0))
 else:
     surefire = os.path.join(art_dir,'surefire-reports')
     if os.path.isdir(surefire):
@@ -214,6 +214,7 @@ PY
           else
             echo "UPLOAD_HTML=false" >> "$GITHUB_ENV"
           fi
+
       - uses: actions/upload-artifact@v4
         if: env.UPLOAD_HTML == 'true'
         with:
