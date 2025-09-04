@@ -177,11 +177,10 @@ jobs:
           cat > "$TMP_AWK" <<'AWK'
 BEGIN { RS="</testcase>"; FS="\n" }
 {
-  name=""; cls=""; msg=""; has=0
+  name=""; cls=""; msg=""
   if (match($0, /<testcase[^>]*name="([^"]+)"[^>]*classname="([^"]*)"/, a)) {
     name=a[1]; cls=a[2]
     if ($0 ~ /<failure/ || $0 ~ /<error/) {
-      has=1
       if (match($0, /<failure[^>]*message="([^"]*)"/, m) || match($0, /<error[^>]*message="([^"]*)"/, m)) { msg=m[1] }
       if (msg == "") {
         if (match($0, /<failure[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/failure>/, t) || match($0, /<error[^>]*>([[:space:][:print:][:cntrl:]]*?)<\/error>/, t)) { msg=t[1] }
