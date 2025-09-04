@@ -105,22 +105,13 @@ jobs:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
 
-      - name: Verify Allure inputs
+      - name: Verify inputs
         shell: bash
         run: |
           echo "=== ART_DIR tree ==="; ls -la "$ART_DIR" || true
           echo "=== surefire-reports ==="; ls -la "$ART_DIR/surefire-reports" || true
           echo "=== allure-results ==="; ls -la "$ART_DIR/allure-results" || true
-          cat > /tmp/count_results.py <<'PY'
-import os, glob
-base=os.environ['ART_DIR']
-res=os.path.join(base,'allure-results')
-files=glob.glob(os.path.join(res,'*-result.json'))
-print("Allure *-result.json count:", len(files))
-for p in sorted(files)[:5]:
-    print("  ", os.path.basename(p))
-PY
-          python3 /tmp/count_results.py
+          echo "Allure result json count: $(find "$ART_DIR/allure-results" -type f -name '*-result.json' 2>/dev/null | wc -l)"
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
@@ -134,77 +125,49 @@ PY
         shell: bash
         run: |
           echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
-          echo "=== widgets ==="; ls -la "$REPORT_DIR/widgets" || true
-          if [ -f "$REPORT_DIR/index.html" ]; then echo "index.html: OK"; else echo "index.html: MISSING"; fi
+          [ -f "$REPORT_DIR/index.html" ] && echo "index.html: OK" || echo "index.html: MISSING"
+          [ -f "$REPORT_DIR/widgets/summary.json" ] && echo "summary.json: OK" || echo "summary.json: MISSING"
 
-      - name: Extract summary (Allure or fallback to surefire)
+      - name: Extract summary from surefire (fallback if Allure missing)
         id: summary
         shell: bash
         run: |
-          cat > /tmp/summary.py <<'PY'
-import os, json, xml.etree.ElementTree as ET
-report_dir = os.environ['REPORT_DIR']
-art_dir = os.environ['ART_DIR']
-summary_path = os.path.join(report_dir,'widgets','summary.json')
-passed=failed=broken=skipped=total=0
-if os.path.exists(summary_path):
-    with open(summary_path,'r',encoding='utf-8') as f:
-        data=json.load(f)
-    stat=data.get('statistic',{})
-    passed=int(stat.get('passed',0))
-    failed=int(stat.get('failed',0))
-    broken=int(stat.get('broken',0))
-    skipped=int(stat.get('skipped',0))
-    total=int(stat.get('total',0))
-else:
-    surefire = os.path.join(art_dir,'surefire-reports')
-    if os.path.isdir(surefire):
-        for fn in os.listdir(surefire):
-            if fn.startswith('TEST-') and fn.endswith('.xml'):
-                try:
-                    tree = ET.parse(os.path.join(surefire,fn))
-                    root = tree.getroot()
-                    tests = int(root.attrib.get('tests', 0))
-                    failures = int(root.attrib.get('failures', 0))
-                    errors = int(root.attrib.get('errors', 0))
-                    skipped_i = int(root.attrib.get('skipped', 0))
-                    total += tests
-                    failed += failures
-                    broken += errors
-                    skipped += skipped_i
-                except Exception:
-                    pass
-        passed = max(total - failed - broken - skipped, 0)
-verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
-with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-    out.write(f"passed={passed}\n")
-    out.write(f"failed={failed}\n")
-    out.write(f"broken={broken}\n")
-    out.write(f"skipped={skipped}\n")
-    out.write(f"total={total}\n")
-    out.write(f"verdict={verdict}\n")
-PY
-          python3 /tmp/summary.py
-
-      - name: Zip Allure report for artifact convenience (only if HTML exists)
-        if: always()
-        shell: bash
-        run: |
-          if [ -f "$REPORT_DIR/index.html" ]; then
-            cat > /tmp/zip_allure.py <<'PY'
-import os, zipfile
-report_dir=os.environ['REPORT_DIR']
-zip_path='allure-report.zip'
-with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
-    for root,_,files in os.walk(report_dir):
-        for fn in files:
-            p=os.path.join(root,fn)
-            z.write(p, os.path.relpath(p, report_dir))
-PY
-            python3 /tmp/zip_allure.py
+          set -e
+          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0
+          if [ -f "$REPORT_DIR/widgets/summary.json" ]; then
+            # Опит за четене на Allure summary без jq (грубо, но работи за числата)
+            PASS=$(grep -o '"passed":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            FAILED=$(grep -o '"failed":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            BROKEN=$(grep -o '"broken":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            SKIPPED=$(grep -o '"skipped":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            TOTAL=$(grep -o '"total":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            PASSED=$PASS
           else
-            echo "No HTML to zip, skipping zip step."
+            for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+              [ -f "$f" ] || continue
+              line=$(head -1 "$f")
+              t=$(echo "$line" | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
+              fa=$(echo "$line" | sed -n 's/.*failures="\([0-9]\+\)".*/\1/p')
+              er=$(echo "$line" | sed -n 's/.*errors="\([0-9]\+\)".*/\1/p')
+              sk=$(echo "$line" | sed -n 's/.*skipped="\([0-9]\+\)".*/\1/p')
+              TOTAL=$((TOTAL + ${t:-0}))
+              FAILED=$((FAILED + ${fa:-0}))
+              BROKEN=$((BROKEN + ${er:-0}))
+              SKIPPED=$((SKIPPED + ${sk:-0}))
+            done
+            PASSED=$((TOTAL - FAILED - BROKEN - SKIPPED))
+            [ $PASSED -lt 0 ] && PASSED=0 || true
           fi
+          VERDICT="PASSED"
+          if [ $((FAILED + BROKEN)) -gt 0 ]; then VERDICT="FAILED"; fi
+          {
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "broken=$BROKEN"
+            echo "skipped=$SKIPPED"
+            echo "total=$TOTAL"
+            echo "verdict=$VERDICT"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Conditionally upload Allure HTML (skip if missing)
         shell: bash
@@ -219,9 +182,7 @@ PY
         if: env.UPLOAD_HTML == 'true'
         with:
           name: allure-html-report
-          path: |
-            ${{ env.REPORT_DIR }}/**
-            allure-report.zip
+          path: ${{ env.REPORT_DIR }}/**
           retention-days: 14
 
       - name: Send email with Allure report (link only, no attachment)
