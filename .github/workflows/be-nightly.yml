@@ -53,10 +53,10 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-      - name: Start environment
+      - name: Start environment (backend + db only)
         run: |
-          chmod +x "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
-          "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "${COMPOSE_FILE}"
+          docker compose -f "${COMPOSE_FILE}" pull backend db || true
+          docker compose -f "${COMPOSE_FILE}" up -d backend db
       - name: Run API tests
         id: run-tests
         continue-on-error: true
@@ -131,7 +131,7 @@ jobs:
           summary_path = os.path.join(report_dir,'widgets','summary.json')
           passed=failed=broken=skipped=total=0
           if os.path.exists(summary_path):
-              with open(summary_path,'r',encoding='utf-8') as f:
+              with open(summary_path,'encoding':'utf-8') as f:
                   data=json.load(f)
                   stat=data.get('statistic',{})
                   passed=int(stat.get('passed',0))
