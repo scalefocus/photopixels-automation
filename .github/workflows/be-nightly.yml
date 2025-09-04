@@ -92,34 +92,46 @@ jobs:
     needs: [automation]
     if: always()
     steps:
-      - name: Init temp paths
+      - name: Set workspace-scoped paths (visible in action container)
         run: |
-          echo "ART_DIR=$RUNNER_TEMP/be-artifacts" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=$RUNNER_TEMP/allure-report" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/be-artifacts" "$RUNNER_TEMP/allure-report"
-      - name: Prep artifact dir
-        run: |
-          rm -rf "$ART_DIR" && mkdir -p "$ART_DIR"
-      - name: Download test artifacts
+          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
+          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
+
+      - name: Download test artifacts (into workspace)
         uses: actions/download-artifact@v4
         with:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
-      - name: Show downloaded artifacts
+
+      - name: Verify Allure inputs
         run: |
-          echo "=== ART_DIR tree ==="
-          ls -la "$ART_DIR" || true
-          echo "=== surefire-reports ==="
-          ls -la "$ART_DIR/surefire-reports" || true
-          echo "=== allure-results ==="
-          ls -la "$ART_DIR/allure-results" || true
-      - name: Generate Allure report
+          echo "=== ART_DIR tree ==="; ls -la "$ART_DIR" || true
+          echo "=== surefire-reports ==="; ls -la "$ART_DIR/surefire-reports" || true
+          echo "=== allure-results ==="; ls -la "$ART_DIR/allure-results" || true
+          python3 - << 'PY'
+          import os, glob
+          base=os.environ['ART_DIR']; res=os.path.join(base,'allure-results')
+          files=glob.glob(os.path.join(res,'*-result.json'))
+          print("Allure *-result.json count:", len(files))
+          for p in sorted(files)[:5]:
+              print("  ", os.path.basename(p))
+          PY
+
+      - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
         continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
+
+      - name: Verify Allure output
+        run: |
+          echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
+          echo "=== widgets ==="; ls -la "$REPORT_DIR/widgets" || true
+          test -f "$REPORT_DIR/index.html" && echo "index.html: OK" || echo "index.html: MISSING"
+
       - name: Extract summary (Allure or fallback to surefire)
         id: summary
         shell: bash
@@ -160,34 +172,43 @@ jobs:
                   passed = max(total - failed - broken - skipped, 0)
           verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-              out.write(f"passed={passed}\n")
-              out.write(f"failed={failed}\n")
-              out.write(f"broken={broken}\n")
-              out.write(f"skipped={skipped}\n")
-              out.write(f"total={total}\n")
-              out.write(f"verdict={verdict}\n")
+              out.write(f"passed={passed}\nfailed={failed}\nbroken={broken}\nskipped={skipped}\n")
+              out.write(f"total={total}\nverdict={verdict}\n")
           PY
-      - name: Zip Allure report for artifact convenience
+
+      - name: Zip Allure report for artifact convenience (only if HTML exists)
         run: |
-          python3 - << 'PY'
-          import os, zipfile
-          report_dir=os.environ['REPORT_DIR']
-          zip_path='allure-report.zip'
-          with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
-              for root,_,files in os.walk(report_dir):
-                  for fn in files:
-                      p=os.path.join(root,fn)
-                      z.write(p, os.path.relpath(p, report_dir))
-          PY
-      - name: Upload Allure HTML and ZIP as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+          if [ -f "$REPORT_DIR/index.html" ]; then
+            python3 - << 'PY'
+            import os, zipfile
+            report_dir=os.environ['REPORT_DIR']
+            zip_path='allure-report.zip'
+            with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
+                for root,_,files in os.walk(report_dir):
+                    for fn in files:
+                        p=os.path.join(root,fn)
+                        z.write(p, os.path.relpath(p, report_dir))
+            PY
+          else
+            then echo "No HTML to zip, skipping zip step."
+          fi
+
+      - name: Conditionally upload Allure HTML (skip if missing)
+        run: |
+          if [ -f "$REPORT_DIR/index.html" ]; then
+            echo "UPLOAD_HTML=true" >> "$GITHUB_ENV"
+          else
+            echo "UPLOAD_HTML=false" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: env.UPLOAD_HTML == 'true'
         with:
           name: allure-html-report
           path: |
             ${{ env.REPORT_DIR }}/**
             allure-report.zip
           retention-days: 14
+
       - name: Send email with Allure report (link only, no attachment)
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -225,7 +246,8 @@ jobs:
             <p>
               <ul>
                 <li>Workflow &amp; Artifacts: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
-                <li>Download ZIP: <i>allure-html-report</i> &rarr; <i>allure-report.zip</i> in the artifacts of this run</li>
+                <li>Allure HTML artifact (if generated): <i>allure-html-report</i></li>
+                <li>Raw results (always): <i>be-api-test-artifacts</i></li>
               </ul>
             </p>
 
