@@ -171,8 +171,6 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          secure: ${{ secrets.SMTP_SECURE || 'false' }}
-          tls: true
           from: ${{ secrets.SMTP_FROM }}
           to: ${{ secrets.SMTP_TO }}
           subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
