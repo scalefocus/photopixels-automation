@@ -116,24 +116,44 @@ jobs:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
 
-      - name: Extract summary and failed table (Allure or fallback)
+      - name: Extract summary and failed table (robust)
         id: summary
         shell: bash
         run: |
           python3 - << 'PY'
-          import os, json, xml.etree.ElementTree as ET, html, re
+          import os, json, xml.etree.ElementTree as ET, html, re, glob
+
+          def esc(s): return html.escape(s or '')
+
           report_dir = os.environ['REPORT_DIR']
           art_dir = os.environ['ART_DIR']
           summary_path = os.path.join(report_dir,'widgets','summary.json')
 
-          passed=failed=broken=skipped=total=0
+          passed = failed = broken = skipped = total = 0
           rows = []
 
-          def esc(s): return html.escape(s or '')
           def add_row(cls, name, msg):
               msg = (msg or '').strip()
               first = msg.splitlines()[0][:300]
               rows.append(f"<tr><td><code>{esc(cls)}#{esc(name)}</code></td><td>{esc(first)}</td></tr>")
+
+          def parse_testsuite(ts):
+              nonlocal total, failed, broken, skipped
+              try:
+                  total   += int(ts.attrib.get('tests',   ts.attrib.get('testsuite', 0)))
+                  failed  += int(ts.attrib.get('failures', 0))
+                  broken  += int(ts.attrib.get('errors',   0))
+                  skipped += int(ts.attrib.get('skipped',  0))
+              except Exception:
+                  pass
+              for tc in ts.findall('.//testcase'):
+                  name = tc.attrib.get('name','')
+                  cls  = tc.attrib.get('classname','')
+                  f = tc.find('failure'); e = tc.find('error')
+                  if f is not None:
+                      add_row(cls, name, f.attrib.get('message') or (f.text or ''))
+                  elif e is not None:
+                      add_row(cls, name, e.attrib.get('message') or (e.text or ''))
 
           if os.path.exists(summary_path):
               try:
@@ -148,38 +168,24 @@ jobs:
               except Exception:
                   pass
 
-          surefire = os.path.join(art_dir,'surefire-reports')
-          if os.path.isdir(surefire):
-              for fn in os.listdir(surefire):
-                  if fn.startswith('TEST-') and fn.endswith('.xml'):
-                      try:
-                          tree = ET.parse(os.path.join(surefire,fn))
-                          root = tree.getroot()
-                          tests = int(root.attrib.get('tests', 0))
-                          failures = int(root.attrib.get('failures', 0))
-                          errors = int(root.attrib.get('errors', 0))
-                          skipped_i = int(root.attrib.get('skipped', 0))
-                          if total == 0:
-                              total += tests
-                          for tc in root.findall('.//testcase'):
-                              name = tc.attrib.get('name','')
-                              cls = tc.attrib.get('classname','')
-                              f = tc.find('failure'); e = tc.find('error')
-                              if f is not None:
-                                  add_row(cls, name, f.attrib.get('message') or (f.text or ''))
-                              elif e is not None:
-                                  add_row(cls, name, e.attrib.get('message') or (e.text or ''))
-                      except Exception:
-                          pass
+          surefire_dir = os.path.join(art_dir,'surefire-reports')
+          if os.path.isdir(surefire_dir):
+              for path in glob.glob(os.path.join(surefire_dir,'TEST-*.xml')):
+                  try:
+                      root = ET.parse(path).getroot()
+                      if root.tag == 'testsuite':
+                          parse_testsuite(root)
+                      elif root.tag == 'testsuites':
+                          for ts in root.findall('testsuite'):
+                              parse_testsuite(ts)
+                  except Exception:
+                      pass
 
-          if (failed + broken) == 0 and rows:
-              failed = len(rows)
-          if total == 0 and (passed or failed or broken or skipped):
-              total = passed + failed + broken + skipped
-          if passed == 0 and total > 0:
-              passed = max(total - failed - broken - skipped, 0)
+          if total and passed == 0:
+              p = total - (failed + broken + skipped)
+              passed = p if p > 0 else 0
 
-          verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
+          verdict = "FAILED" if (failed + broken) > 0 or len(rows) > 0 else "PASSED"
 
           if rows:
               table = (
@@ -193,8 +199,7 @@ jobs:
           else:
               table = '<p>No failed tests.</p>'
 
-          # minimize to single line to avoid mail client HTML merging
-          table_min = re.sub(r"\\s+", " ", table).strip()
+          failed_table_html = re.sub(r"\\s+", " ", table).strip()
 
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
               out.write(f"passed={passed}\\n")
@@ -204,7 +209,7 @@ jobs:
               out.write(f"total={total}\\n")
               out.write(f"verdict={verdict}\\n")
               out.write("failed_table_html<<EOF\\n")
-              out.write(table_min + "\\n")
+              out.write(failed_table_html + "\\n")
               out.write("EOF\\n")
           PY
 
