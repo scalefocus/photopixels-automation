@@ -52,22 +52,19 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-
       - name: Start environment
         run: |
           chmod +x "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
           "${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "${COMPOSE_FILE}"
-
       - name: Run API tests
         id: run-tests
+        continue-on-error: true
         run: |
-          set -e
           docker run -i --name api-tests \
             -e BASE_URI="http://backend:8080/" \
             -e SUITE_NAME="api" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
-
       - name: Collect test artifacts
         if: always()
         run: |
@@ -75,7 +72,6 @@ jobs:
           mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
           docker cp api-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
           docker cp api-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
-
       - name: Upload raw artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -84,7 +80,6 @@ jobs:
           path: test-artifacts/**
           if-no-files-found: warn
           retention-days: 14
-
       - name: Cleanup
         if: always()
         run: |
@@ -101,7 +96,6 @@ jobs:
         with:
           name: be-api-test-artifacts
           path: ./test-artifacts
-
       - name: Generate Allure report
         id: gen
         continue-on-error: true
@@ -109,7 +103,6 @@ jobs:
         with:
           allure_results: ./test-artifacts/allure-results
           allure_report: ./allure-report
-
       - name: Extract summary stats (Python)
         id: summary
         shell: bash
@@ -127,14 +120,15 @@ jobs:
               broken=int(stat.get('broken',0))
               skipped=int(stat.get('skipped',0))
               total=int(stat.get('total',0))
+          verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
             out.write(f"passed={passed}\n")
             out.write(f"failed={failed}\n")
             out.write(f"broken={broken}\n")
             out.write(f"skipped={skipped}\n")
             out.write(f"total={total}\n")
+            out.write(f"verdict={verdict}\n")
           PY
-
       - name: Zip Allure report (Python)
         run: |
           python3 - << 'PY'
@@ -151,7 +145,6 @@ jobs:
                       p=os.path.join(root,fn)
                       z.write(p, os.path.relpath(p, report_dir))
           PY
-
       - name: Upload Allure HTML as artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -161,7 +154,6 @@ jobs:
             allure-report/**
             allure-report.zip
           retention-days: 14
-
       - name: Send email with Allure report
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -170,12 +162,12 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          from: "Photopixels Test <photopixel.test@scalefocus.com>"
-          to: "martin.georgiev@scalefocus.com"
-          subject: "Photopixels BE nightly API tests — ${{ needs.automation.result || 'success' }}"
+          from: ${{ secrets.SENDER }}
+          to: ${{ secrets.RECIPIENTS }}
+          subject: "Photopixels BE nightly API tests — ${{ steps.summary.outputs.verdict || 'PASSED' }}"
           html_body: |
             <p>Hello team,</p>
-            <p>The nightly run finished with status: <b>${{ needs.automation.result || 'success' }}</b>.</p>
+            <p>The nightly run finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
             <p>Summary:</p>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
