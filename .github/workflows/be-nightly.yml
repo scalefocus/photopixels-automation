@@ -3,7 +3,7 @@ name: Photopixels BE nightly API tests
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '00 14 * * *'
+    - cron: '0 14 * * *'
 
 env:
   AUTOMATION_REPO_PATH: automation
