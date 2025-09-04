@@ -93,6 +93,7 @@ jobs:
     if: always()
     steps:
       - name: Set workspace-scoped paths (visible in action container)
+        shell: bash
         run: |
           echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
           echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
@@ -105,18 +106,21 @@ jobs:
           path: ${{ env.ART_DIR }}
 
       - name: Verify Allure inputs
+        shell: bash
         run: |
           echo "=== ART_DIR tree ==="; ls -la "$ART_DIR" || true
           echo "=== surefire-reports ==="; ls -la "$ART_DIR/surefire-reports" || true
           echo "=== allure-results ==="; ls -la "$ART_DIR/allure-results" || true
-          python3 - <<'PY'
+          cat > /tmp/count_results.py <<'PY'
 import os, glob
-base=os.environ['ART_DIR']; res=os.path.join(base,'allure-results')
+base=os.environ['ART_DIR']
+res=os.path.join(base,'allure-results')
 files=glob.glob(os.path.join(res,'*-result.json'))
 print("Allure *-result.json count:", len(files))
 for p in sorted(files)[:5]:
     print("  ", os.path.basename(p))
 PY
+          python3 /tmp/count_results.py
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
@@ -127,6 +131,7 @@ PY
           allure_report: ${{ env.REPORT_DIR }}
 
       - name: Verify Allure output
+        shell: bash
         run: |
           echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
           echo "=== widgets ==="; ls -la "$REPORT_DIR/widgets" || true
@@ -136,7 +141,7 @@ PY
         id: summary
         shell: bash
         run: |
-          python3 - <<'PY'
+          cat > /tmp/summary.py <<'PY'
 import os, json, xml.etree.ElementTree as ET
 report_dir = os.environ['REPORT_DIR']
 art_dir = os.environ['ART_DIR']
@@ -172,16 +177,21 @@ else:
         passed = max(total - failed - broken - skipped, 0)
 verdict = "FAILED" if (failed + broken) > 0 else "PASSED"
 with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-    out.write(f"passed={passed}\nfailed={failed}\nbroken={broken}\nskipped={skipped}\n")
-    out.write(f"total={total}\nverdict={verdict}\n")
+    out.write(f"passed={passed}\n")
+    out.write(f"failed={failed}\n")
+    out.write(f"broken={broken}\n")
+    out.write(f"skipped={skipped}\n")
+    out.write(f"total={total}\n")
+    out.write(f"verdict={verdict}\n")
 PY
+          python3 /tmp/summary.py
 
       - name: Zip Allure report for artifact convenience (only if HTML exists)
         if: always()
         shell: bash
         run: |
           if [ -f "$REPORT_DIR/index.html" ]; then
-            python3 - <<'PY'
+            cat > /tmp/zip_allure.py <<'PY'
 import os, zipfile
 report_dir=os.environ['REPORT_DIR']
 zip_path='allure-report.zip'
@@ -191,11 +201,13 @@ with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:
             p=os.path.join(root,fn)
             z.write(p, os.path.relpath(p, report_dir))
 PY
+            python3 /tmp/zip_allure.py
           else
             echo "No HTML to zip, skipping zip step."
           fi
 
       - name: Conditionally upload Allure HTML (skip if missing)
+        shell: bash
         run: |
           if [ -f "$REPORT_DIR/index.html" ]; then
             echo "UPLOAD_HTML=true" >> "$GITHUB_ENV"
