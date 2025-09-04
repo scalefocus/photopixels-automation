@@ -131,7 +131,7 @@ jobs:
           summary_path = os.path.join(report_dir,'widgets','summary.json')
           passed=failed=broken=skipped=total=0
           if os.path.exists(summary_path):
-              with open(summary_path,'encoding':'utf-8') as f:
+              with open(summary_path,'r',encoding='utf-8') as f:
                   data=json.load(f)
                   stat=data.get('statistic',{})
                   passed=int(stat.get('passed',0))
