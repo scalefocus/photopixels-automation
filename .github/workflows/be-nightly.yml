@@ -289,7 +289,3 @@ jobs:
             </p>
 
             <p>Best regards,<br/>GitHub Actions</p>
-      - name: Cleanup email job workspace (local)
-        if: always()
-        run: |
-          rm -rf "$ART_DIR" "$REPORT_DIR" || true
