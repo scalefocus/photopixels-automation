@@ -18,6 +18,13 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           repository: scalefocus/photopixels-backend-net
@@ -39,6 +46,13 @@ jobs:
     timeout-minutes: 15
     needs: [build-be]
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -85,11 +99,15 @@ jobs:
           path: test-artifacts/**
           if-no-files-found: warn
           retention-days: 14
-      - name: Cleanup
+      - name: Cleanup containers & stack
         if: always()
         run: |
           docker rm -f api-tests || true
           docker compose -f "$COMPOSE_FILE" down -v || true
+      - name: Cleanup workspace artifacts (local)
+        if: always()
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/test-artifacts" || true
 
   allure-report-email:
     runs-on: self-hosted
@@ -271,3 +289,7 @@ jobs:
             </p>
 
             <p>Best regards,<br/>GitHub Actions</p>
+      - name: Cleanup email job workspace (local)
+        if: always()
+        run: |
+          rm -rf "$ART_DIR" "$REPORT_DIR" || true
