@@ -36,6 +36,7 @@ jobs:
            --build-arg VERSION_SUFFIX="" \
            -t $BACKEND_TAG \
            -f ./src/SF.PhotoPixels.API/Dockerfile .
+
   build-automation:
     runs-on: self-hosted
     steps:
@@ -57,11 +58,46 @@ jobs:
           chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
           ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
 
+      - name: Get Mobile APK
+        id: get_url
+        run: |
+          url=$(curl -s https://api.github.com/repos/scalefocus/photopixels-android/releases/latest \
+            | jq -r '.assets[] | select(.name | endswith("-release.apk")) | .browser_download_url')
+          echo "APP_PATH=$url" >> $GITHUB_ENV
+
       - name: Run Api tests
+        id: api_tests
+        continue-on-error: true
         run: |
           docker run -i --rm \
           -e BASE_URI="http://backend:8080/" \
+          -e WEB_URI="http://selenium-hub:4444/" \
           -e SUITE_NAME="api" \
+          --network utils_sf-photos-net \
+          $AUTOMATION_TAG
+
+      - name: Run Web tests
+        id: web_tests
+        continue-on-error: true
+        run: |
+          docker run -i --rm \
+          -e BASE_URI="http://backend:8080/api" \
+          -e WEB_URI="http://selenium-hub:4444/" \
+          -e SUITE_NAME="web" \
+          --network utils_sf-photos-net \
+          $AUTOMATION_TAG
+
+      - name: Run Mobile tests
+        id: mobile_tests
+        continue-on-error: true
+        run: |
+          docker run -i --rm \
+          -e BASE_URI="http://backend:8080/" \
+          -e WEB_URI="http://selenium-hub:4444/" \
+          -e SUITE_NAME="mobile" \
+          -e APP_PATH="$APP_PATH" \
+          -e appPackage="io.photopixels.app" \
+          -e appActivity="io.photopixels.app.MainActivity" \
           --network utils_sf-photos-net \
           $AUTOMATION_TAG
 

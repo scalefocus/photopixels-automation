@@ -47,6 +47,52 @@ while ((i >= 0)); do
     fi
 done
 
+while ((i >= 0)); do
+    wget_result=$(wget -NS --no-check-certificate http://localhost:4444/status -O /dev/null 2>&1 |
+        grep "HTTP/" |
+        awk '{print $2}' |
+        tail -n 1)
+
+    if [ "$wget_result" = "200" ]; then
+        echo "Selenium hub service started successfully."
+        exit 0
+    fi
+
+    ((i--))
+
+    echo "Selenium hub service not ready. Waiting for $sleep_time seconds..."
+    sleep "$sleep_time"
+
+    # Exponential backoff with cap
+    sleep_time=$((sleep_time * 2))
+    if ((sleep_time > max_sleep)); then
+        sleep_time=$max_sleep
+    fi
+done
+
+while ((i >= 0)); do
+    wget_result=$(wget -NS --no-check-certificate http://localhost:4723/wd/hub/status -O /dev/null 2>&1 |
+        grep "HTTP/" |
+        awk '{print $2}' |
+        tail -n 1)
+
+    if [ "$wget_result" = "200" ]; then
+        echo "Appium service started successfully."
+        exit 0
+    fi
+
+    ((i--))
+
+    echo "Appium service not ready. Waiting for $sleep_time seconds..."
+    sleep "$sleep_time"
+
+    # Exponential backoff with cap
+    sleep_time=$((sleep_time * 2))
+    if ((sleep_time > max_sleep)); then
+        sleep_time=$max_sleep
+    fi
+done
+
 docker compose -f "$1" logs
 echo "Services did not become healthy in time."
 exit 1
