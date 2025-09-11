@@ -73,18 +73,6 @@ jobs:
           chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
           ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
 
-      - name: Get Mobile APK
-        id: get_url
-        run: |
-          url=$(curl -fsSL "https://api.github.com/repos/scalefocus/photopixels-android/releases/latest" \
-            | python - <<'PY'
-          import sys, json
-          j = json.load(sys.stdin)
-          print(next(a["browser_download_url"] for a in j.get("assets", []) if a["name"].endswith("-release.apk")))
-          PY
-          )
-          echo "URL: $url"
-
       - name: Run Api tests
         id: api_tests
         continue-on-error: true
@@ -117,7 +105,7 @@ jobs:
           -е appiumServiceHost="selenium-hub" \
           -е appiumPort="4444" \
           -e SUITE_NAME="mobile" \
-          -e applicationName="$APP_PATH" \
+          -e applicationName="https://github.com/scalefocus/photopixels-android/releases/download/v.0.4.0/io.photopixels.app-v0.4.0.362345530.-release.apk" \
           -e appPackage="io.photopixels.app" \
           -e appActivity="io.photopixels.app.MainActivity" \
           --network utils_sf-photos-net \
