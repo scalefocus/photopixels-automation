@@ -7,7 +7,7 @@ env:
   AUTOMATION_REPO_PATH: automation
   BACKEND_REPO_PATH: backend
   FRONTEND_REPO_PATH: frontend
-  COMPOSE_FILE: ./utils/docker-compose.yml
+  COMPOSE_FILE: automation/utils/docker-compose.yml
   FRONTEND_TAG: scalefocusad/photopixels-web:automation
   BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
@@ -70,8 +70,8 @@ jobs:
           path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Start environment
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/utils/create-environment.sh"
-          ${GITHUB_WORKSPACE}/utils/create-environment.sh ${COMPOSE_FILE}
+          chmod +x "${GITHUB_WORKSPACE}/${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
+          "${GITHUB_WORKSPACE}/${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "$COMPOSE_FILE"
 
       - name: Run Api tests
         id: api_tests
@@ -79,7 +79,7 @@ jobs:
         run: |
           docker run -i --rm \
           -e BASE_URI="http://backend:8080/" \
-          -e WEB_URI="http://selenium-hub:4444/" \
+          -e WEB_URI="http://frontend:80/" \
           -e SUITE_NAME="api" \
           --network utils_sf-photos-net \
           $AUTOMATION_TAG
@@ -90,7 +90,8 @@ jobs:
         run: |
           docker run -i --rm \
           -e BASE_URI="http://backend:8080/api" \
-          -e WEB_URI="http://selenium-hub:4444/" \
+          -e WEB_URI="http://frontend:80/" \
+          -e seleniumHubHost="selenium-hub"
           -e SUITE_NAME="web" \
           --network utils_sf-photos-net \
           $AUTOMATION_TAG
@@ -100,10 +101,10 @@ jobs:
         continue-on-error: true
         run: |
           docker run -i --rm \
-          -e BASE_URI="http://backend:8080/" \
-          -e WEB_URI="http://selenium-hub:4444/" \
-          -е appiumServiceHost="selenium-hub" \
-          -е appiumPort="4444" \
+          -e BASE_URI="http://backend:8080/api" \
+          -e WEB_URI="http://frontend:80/" \
+          -e appiumServiceHost="selenium-hub" \
+          -e appiumPort="4444" \
           -e SUITE_NAME="mobile" \
           -e applicationName="https://github.com/scalefocus/photopixels-android/releases/download/v.0.4.0/io.photopixels.app-v0.4.0.362345530.-release.apk" \
           -e appPackage="io.photopixels.app" \
@@ -113,4 +114,4 @@ jobs:
 
       - name: Cleanup environment
         if: always()
-        run: docker compose -f $COMPOSE_FILE down --volumes --rmi all --remove-orphans
+        run: docker compose -f "$COMPOSE_FILE" down --volumes --rmi all --remove-orphans

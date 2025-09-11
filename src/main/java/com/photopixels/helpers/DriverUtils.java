@@ -59,7 +59,7 @@ public class DriverUtils {
 		isGridRequired = Boolean.parseBoolean(props.getProperty("useSeleniumGrid"));
 
 		if (isGridRequired) {
-			String host = System.getProperty("seleniumHubHost");
+			String host = System.getProperty("seleniumHubHost", System.getenv().get("seleniumHubHost"));
 
 			if (host == null) {
 				gridUrl = props.getProperty("gridUrl");

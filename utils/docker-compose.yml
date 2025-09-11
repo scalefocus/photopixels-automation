@@ -59,7 +59,7 @@ services:
       - sf-photos-net
     ports: [ "4442-4444:4442-4444" ]
     healthcheck:
-      test: [ "CMD-SHELL", "wget -q --spider http://localhost:4444/status" ]
+      test: [ "CMD-SHELL", "curl -sf http://localhost:4444/status | grep -q '\"ready\":true'" ]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -142,7 +142,7 @@ services:
       adb wait-for-device &&
       appium --allow-cors --base-path / --log-timestamp"
     healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://localhost:4723/wd/hub/status | jq -e '.value.ready==true' >/dev/null" ]
+      test: [ "CMD-SHELL", "curl -sf http://localhost:4723/status | grep -q '\"ready\":true'" ]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -171,7 +171,7 @@ services:
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
       - SE_SESSION_REQUEST_TIMEOUT=300
     healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://selenium-hub:4444/status | jq -e '.ready' >/dev/null" ]
+      test: [ "CMD-SHELL", "curl -sf http://selenium-hub:4444/status | grep -q '\"ready\":true'" ]
       interval: 10s
       timeout: 5s
       retries: 30
