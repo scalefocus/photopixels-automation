@@ -10,4 +10,4 @@ COPY upload_files upload_files/
 
 RUN mvn clean install -DskipTests
 
-ENTRYPOINT ["/bin/sh", "-c", "mvn -B -q -DbaseUri=$BASE_URI -DsuiteXmlFile=$SUITE_NAME test"]
+ENTRYPOINT ["/bin/sh", "-c", "mvn -B -q -DbaseUri=$BASE_URI -DsuiteXmlFile=$SUITE_NAME -DappiumServiceHost=$APPIUM_HOST -DappiumPort=$APPIUM_PORT -DapplicationName=$APP_NAME -DappPackage=$APP_PACKAGE -DactivityName=$ACTIVITY_NAME test"]

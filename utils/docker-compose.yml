@@ -73,6 +73,7 @@ services:
       labels:
         automation.environment:
     container_name: selenium-node-chrome
+    shm_size: 2gb
     depends_on:
       selenium-hub:
         condition: service_healthy
@@ -89,9 +90,7 @@ services:
     container_name: android-emulator
     privileged: true
     networks: [ sf-photos-net ]
-    ports:
-      - "5554:5554"
-      - "5555:5555"
+    ports: [ "5554:5554", "5555:5555" ]
     devices:
       - /dev/kvm:/dev/kvm
     environment:
@@ -103,20 +102,28 @@ services:
     depends_on:
       selenium-hub:
         condition: service_healthy
+    healthcheck:
+      test: "adb shell getprop sys.boot_completed | grep 1 || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s # Give the emulator ample time to start up.
 
   appium:
     image: appium/appium:latest
     container_name: appium
     networks:
       - sf-photos-net
-    depends_on: [ android-emulator ]
-    ports:
-      - "4723:4723"
+    depends_on:
+      android-emulator:
+        condition: service_healthy
+    ports: [ "4723:4723" ]
     environment:
       - ANDROID_HOME=/opt/android-sdk
       - ANDROID_SDK_ROOT=/opt/android-sdk
       - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
       - APPIUM_ARGS=--base-path / --log-level info
+      - CONNECT_TO_GRID=false
     command: >
       sh -lc "
       adb connect android-emulator:5555 &&
@@ -142,13 +149,14 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_RELAY_URL=http://appium:4723
-      - SE_NODE_RELAY_STATUS_ENDPOINT=/status
-      - SE_NODE_RELAY_PROTOCOL_VERSION=HTTP/1.1
-      - SE_NODE_RELAY_STEREOTYPE={"platformName":"Android","appium:automationName":"UiAutomator2","se:name":"Android Emulator"}
+      - SE_NODE_HOST=appium-relay
+      - SE_NODE_STEREOTYPE={"capabilities": [ { "platformName": "Android", "appium:automationName": "UiAutomator2", "appium:deviceName": "emulator-5554" } ] }
+      - SE_RELAY_HOST=appium
+      - SE_RELAY_PORT=4723
+      - SE_RELAY_STATUS_PATH=/status
       - SE_NODE_MAX_SESSIONS=1
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
-      - SE_SESSION_REQUEST_TIMEOUT=300
+    entrypoint: /opt/bin/selenium-grid-node
 
 networks:
   sf-photos-db:

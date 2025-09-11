@@ -103,12 +103,12 @@ jobs:
           docker run -i --rm \
           -e BASE_URI="http://backend:8080/api" \
           -e WEB_URI="http://frontend:80/" \
-          -e appiumServiceHost="selenium-hub" \
-          -e appiumPort="4444" \
+          -e APPIUM_HOST="selenium-hub" \
+          -e APPIUM_PORT="4444" \
           -e SUITE_NAME="mobile" \
-          -e applicationName="https://github.com/scalefocus/photopixels-android/releases/download/v.0.4.0/io.photopixels.app-v0.4.0.362345530.-release.apk" \
-          -e appPackage="io.photopixels.app" \
-          -e appActivity="io.photopixels.app.MainActivity" \
+          -e APP_NAME="https://github.com/scalefocus/photopixels-android/releases/download/v.0.4.0/io.photopixels.app-v0.4.0.362345530.-release.apk" \
+          -e $APP_PACKAGE="io.photopixels.app" \
+          -e ACTIVITY_NAME="io.photopixels.app.MainActivity" \
           --network utils_sf-photos-net \
           $AUTOMATION_TAG
 
