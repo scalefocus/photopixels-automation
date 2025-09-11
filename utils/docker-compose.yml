@@ -78,7 +78,6 @@ services:
         condition: service_healthy
     networks:
       - sf-photos-net
-    shm_size: 2g
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
@@ -90,7 +89,6 @@ services:
     container_name: android-emulator
     privileged: true
     networks: [ sf-photos-net ]
-    shm_size: 2g
     ports:
       - "5554:5554"
       - "5555:5555"
@@ -105,21 +103,13 @@ services:
     depends_on:
       selenium-hub:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "timeout 5 bash -lc '</dev/tcp/localhost/5555'" ]
-      interval: 20s
-      timeout: 15s
-      retries: 60
-      start_period: 100s
 
   appium:
     image: appium/appium:latest
     container_name: appium
     networks:
       - sf-photos-net
-    depends_on:
-      android-emulator:
-        condition: service_healthy
+    depends_on: [ android-emulator ]
     ports:
       - "4723:4723"
     environment:
@@ -148,8 +138,6 @@ services:
     depends_on:
       selenium-hub:
         condition: service_started
-      android-emulator:
-        condition: service_healthy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
