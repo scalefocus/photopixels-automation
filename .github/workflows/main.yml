@@ -15,6 +15,7 @@ env:
 jobs:
   build-fe:
     runs-on: self-hosted
+    needs: [ build-be ]
     steps:
       - name: Disk sanity (safe prune before build)
         run: |
@@ -25,11 +26,12 @@ jobs:
           docker system df || true
       - uses: actions/checkout@v4
         with:
-          repository: "scalefocus/photopixels-web"
+          repository: scalefocus/photopixels-web
           submodules: recursive
           fetch-depth: 0
           path: ${{ env.FRONTEND_REPO_PATH }}
       - name: Build docker image
+        working-directory: ${{ env.FRONTEND_REPO_PATH }}
         run: |
           docker build --no-cache -t $FRONTEND_TAG -f ./Dockerfile .
 
@@ -45,12 +47,13 @@ jobs:
           docker system df || true
       - uses: actions/checkout@v4
         with:
-          repository: "scalefocus/photopixels-backend-net"
+          repository: scalefocus/photopixels-backend-net
           submodules: recursive
           fetch-depth: 0
           path: ${{ env.BACKEND_REPO_PATH }}
 
       - name: Build docker image
+        working-directory: ${{ env.BACKEND_REPO_PATH }}
         run: |
           docker build \
            --no-cache \
@@ -61,6 +64,7 @@ jobs:
 
   build-automation:
     runs-on: self-hosted
+    needs: [ build-fe ]
     steps:
       - name: Disk sanity (safe prune before build)
         run: |
@@ -74,7 +78,8 @@ jobs:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Build docker image
-        run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
+        working-directory: ${{ env.AUTOMATION_REPO_PATH }}
+        run: docker build --no-cache -f ./Dockerfile -t "$AUTOMATION_TAG" .
 
   automation:
     runs-on: self-hosted
