@@ -76,9 +76,14 @@ jobs:
       - name: Get Mobile APK
         id: get_url
         run: |
-          url=$(curl -s https://api.github.com/repos/scalefocus/photopixels-android/releases/latest \
-            | jq -r '.assets[] | select(.name | endswith("-release.apk")) | .browser_download_url')
-          echo "APP_PATH=$url" >> $GITHUB_ENV
+          url=$(curl -fsSL "https://api.github.com/repos/scalefocus/photopixels-android/releases/latest" \
+            | python - <<'PY'
+          import sys, json
+          j = json.load(sys.stdin)
+          print(next(a["browser_download_url"] for a in j.get("assets", []) if a["name"].endswith("-release.apk")))
+          PY
+          )
+          echo "URL: $url"
 
       - name: Run Api tests
         id: api_tests
@@ -120,4 +125,4 @@ jobs:
 
       - name: Cleanup environment
         if: always()
-        run: docker compose -f $COMPOSE_FILE down -volumes --rmi all --remove-orphans
+        run: docker compose -f $COMPOSE_FILE down --volumes --rmi all --remove-orphans
