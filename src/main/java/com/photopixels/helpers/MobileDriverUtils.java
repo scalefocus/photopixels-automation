@@ -69,9 +69,10 @@ public class MobileDriverUtils {
 
         platform = PlatformEnum.fromString(pl);
 
-        String host = System.getProperty("appiumServiceHost");
+        String host = System.getProperty("appiumServiceHost", System.getenv().get("appiumServiceHost"));
 
-        appiumPort = Integer.parseInt(props.getProperty("appiumPort"));
+        appiumPort = Integer.parseInt(System.getProperty("appiumPort",
+                System.getenv().getOrDefault("appiumPort", props.getProperty("appiumPort"))));
         appiumHost = props.getProperty("appiumHost");
 
         if (host == null) {
@@ -82,16 +83,16 @@ public class MobileDriverUtils {
 
         isServiceRequired = Boolean.parseBoolean(props.getProperty("isAppiumServerNeeded"));
 
-        String app = System.getProperty("applicationName");
+        String app = System.getenv().get("applicationName");
 
         if (app == null) {
             appName = props.getProperty("appName");
         }
 
-        appPackage = props.getProperty("appPackage");
-        activityName = props.getProperty("activityName");
+        appPackage = System.getenv().getOrDefault("appPackage", props.getProperty("appPackage"));
+        activityName = System.getenv().getOrDefault("activityName", props.getProperty("activityName"));
 
-        String device = System.getProperty("deviceName");
+        String device = System.getenv().get("deviceName");
 
         if (device == null) {
             deviceName = props.getProperty("deviceName");

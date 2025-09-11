@@ -124,8 +124,10 @@ jobs:
           docker run -i --rm \
           -e BASE_URI="http://backend:8080/" \
           -e WEB_URI="http://selenium-hub:4444/" \
+          -е appiumServiceHost="selenium-hub" \
+          -е appiumPort="4444" \
           -e SUITE_NAME="mobile" \
-          -e APP_PATH="$APP_PATH" \
+          -e applicationName="$APP_PATH" \
           -e appPackage="io.photopixels.app" \
           -e appActivity="io.photopixels.app.MainActivity" \
           --network utils_sf-photos-net \
