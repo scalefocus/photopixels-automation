@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
 
 env:
+  AUTOMATION_REPO_PATH: automation
+  BACKEND_REPO_PATH: backend
+  FRONTEND_REPO_PATH: frontend
   COMPOSE_FILE: ./utils/docker-compose.yml
   FRONTEND_TAG: scalefocusad/photopixels-web:automation
   BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
@@ -13,9 +16,19 @@ jobs:
   build-fe:
     runs-on: self-hosted
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           repository: "scalefocus/photopixels-web"
+          submodules: recursive
+          fetch-depth: 0
+          path: ${{ env.FRONTEND_REPO_PATH }}
       - name: Build docker image
         run: |
           docker build --no-cache -t $FRONTEND_TAG -f ./Dockerfile .
@@ -23,10 +36,19 @@ jobs:
   build-be:
     runs-on: self-hosted
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           repository: "scalefocus/photopixels-backend-net"
-          submodules: "recursive"
+          submodules: recursive
+          fetch-depth: 0
+          path: ${{ env.BACKEND_REPO_PATH }}
 
       - name: Build docker image
         run: |
@@ -40,9 +62,17 @@ jobs:
   build-automation:
     runs-on: self-hosted
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Build docker image
         run: docker build --no-cache -f ./Dockerfile -t $AUTOMATION_TAG .
 
