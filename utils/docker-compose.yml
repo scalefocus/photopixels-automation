@@ -59,7 +59,7 @@ services:
       - sf-photos-net
     ports: [ "4442-4444:4442-4444" ]
     healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://localhost:4444/status | grep -q '\"ready\":true'" ]
+      test: [ "CMD-SHELL", "curl -sf http://selenium-hub:4444/status > /dev/null" ]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -134,18 +134,12 @@ services:
       - ANDROID_HOME=/opt/android-sdk
       - ANDROID_SDK_ROOT=/opt/android-sdk
       - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-      # Keep base-path at "/" so relay can find /status and session routes
       - APPIUM_ARGS=--base-path / --log-level info
     command: >
       sh -lc "
       adb connect android-emulator:5555 &&
       adb wait-for-device &&
       appium --allow-cors --base-path / --log-timestamp"
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://localhost:4723/status | grep -q '\"ready\":true'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
 
   appium-relay:
     image: selenium/node-base:4.35.0
@@ -170,11 +164,6 @@ services:
       - SE_NODE_MAX_SESSIONS=1
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
       - SE_SESSION_REQUEST_TIMEOUT=300
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://selenium-hub:4444/status | grep -q '\"ready\":true'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
 
 networks:
   sf-photos-db:
