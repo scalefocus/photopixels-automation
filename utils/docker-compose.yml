@@ -149,14 +149,13 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_HOST=appium-relay
-      - SE_NODE_STEREOTYPE={"capabilities": [ { "platformName": "Android", "appium:automationName": "UiAutomator2", "appium:deviceName": "emulator-5554" } ] }
-      - SE_RELAY_HOST=appium
-      - SE_RELAY_PORT=4723
-      - SE_RELAY_STATUS_PATH=/status
+      - SE_NODE_RELAY_URL=http://appium:4723
+      - SE_NODE_RELAY_STATUS_ENDPOINT=/status
+      - SE_NODE_RELAY_PROTOCOL_VERSION=HTTP/1.1
+      - 'SE_NODE_RELAY_STEREOTYPE={"platformName":"Android","appium:automationName":"UiAutomator2","se:name":"Android Emulator"}'
       - SE_NODE_MAX_SESSIONS=1
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
-    entrypoint: /opt/bin/selenium-grid-node
+      - SE_SESSION_REQUEST_TIMEOUT=300
 
 networks:
   sf-photos-db:
