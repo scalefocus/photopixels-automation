@@ -87,17 +87,9 @@ services:
 
   android-emulator:
     image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64-no-metrics:30.1.2
-    deploy:
-      labels:
-        automation.environment:
-      resources:
-        limits:
-          cpus: 2
-          memory: 4g
     container_name: android-emulator
     privileged: true
-    networks:
-      - sf-photos-net
+    networks: [ sf-photos-net ]
     shm_size: 2g
     ports:
       - "5554:5554"
@@ -108,13 +100,13 @@ services:
       ADBKEY: "/root/.android/adbkey"
       EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel on -no-snapshot"
     volumes:
-      - ~/.android/adbkey:/root/.android/adbkey:ro
-      - ~/.android/adbkey.pub:/root/.android/adbkey.pub:ro
+      - ${HOME}/.android/adbkey:/root/.android/adbkey:ro
+      - ${HOME}/.android/adbkey.pub:/root/.android/adbkey.pub:ro
     depends_on:
       selenium-hub:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 5555" ]
+      test: [ "CMD-SHELL", "timeout 5 bash -lc '</dev/tcp/localhost/5555'" ]
       interval: 20s
       timeout: 15s
       retries: 60
@@ -140,6 +132,11 @@ services:
       adb connect android-emulator:5555 &&
       adb wait-for-device &&
       appium --allow-cors --base-path / --log-timestamp"
+    healthcheck:
+      test: [ "CMD-SHELL",  "curl -sf http://localhost:4723/status > /dev/null" ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
   appium-relay:
     image: selenium/node-base:4.35.0
