@@ -95,7 +95,7 @@ services:
       - /dev/kvm:/dev/kvm
     environment:
       ADBKEY: "/root/.android/adbkey"
-      EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel on -no-snapshot"
+      EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel off -no-snapshot"
     volumes:
       - ${HOME}/.android/adbkey:/root/.android/adbkey:ro
       - ${HOME}/.android/adbkey.pub:/root/.android/adbkey.pub:ro
@@ -103,11 +103,11 @@ services:
       selenium-hub:
         condition: service_healthy
     healthcheck:
-      test: "adb shell getprop sys.boot_completed | grep 1 || exit 1"
+      test: [ "CMD-SHELL", "adb shell getprop sys.boot_completed | grep 1 || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 20
-      start_period: 60s # Give the emulator ample time to start up.
+      start_period: 60s
 
   appium:
     image: appium/appium:latest
