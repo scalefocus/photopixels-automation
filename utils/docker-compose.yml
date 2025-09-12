@@ -96,9 +96,6 @@ services:
     environment:
       ADBKEY: "/root/.android/adbkey"
       EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel off -no-snapshot"
-    volumes:
-      - ${HOME}/.android/adbkey:/root/.android/adbkey:ro
-      - ${HOME}/.android/adbkey.pub:/root/.android/adbkey.pub:ro
     depends_on:
       selenium-hub:
         condition: service_healthy

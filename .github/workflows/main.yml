@@ -68,33 +68,18 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
+      - name: Show KVM
+        run: |
+          ls -l /dev/kvm || true
+          lsmod | grep kvm || true
       - name: Start environment
         run: |
           chmod +x "${GITHUB_WORKSPACE}/${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh"
           "${GITHUB_WORKSPACE}/${{ env.AUTOMATION_REPO_PATH }}/utils/create-environment.sh" "$COMPOSE_FILE"
-
-      - name: Run Api tests
-        id: api_tests
-        continue-on-error: true
+      - name: Emulator logs (for debugging if it fails)
+        if: failure()
         run: |
-          docker run -i --rm \
-          -e BASE_URI="http://backend:8080/" \
-          -e WEB_URI="http://frontend:80/" \
-          -e SUITE_NAME="api" \
-          --network utils_sf-photos-net \
-          $AUTOMATION_TAG
-
-      - name: Run Web tests
-        id: web_tests
-        continue-on-error: true
-        run: |
-          docker run -i --rm \
-          -e BASE_URI="http://backend:8080/api" \
-          -e WEB_URI="http://frontend:80/" \
-          -e seleniumHubHost="selenium-hub"
-          -e SUITE_NAME="web" \
-          --network utils_sf-photos-net \
-          $AUTOMATION_TAG
+          docker logs android-emulator || true
 
       - name: Run Mobile tests
         id: mobile_tests
