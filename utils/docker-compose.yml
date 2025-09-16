@@ -95,7 +95,7 @@ services:
       - /dev/kvm:/dev/kvm
     environment:
       ADBKEY: "/root/.android/adbkey"
-      EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel off -no-snapshot"
+      EMULATOR_ARGS: "-no-window -gpu swiftshader_indirect -no-boot-anim -accel on -no-snapshot"
     depends_on:
       selenium-hub:
         condition: service_healthy
