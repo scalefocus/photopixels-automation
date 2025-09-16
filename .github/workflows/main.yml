@@ -17,6 +17,13 @@ jobs:
     runs-on: self-hosted
     needs: [ build-be ]
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           repository: scalefocus/photopixels-web
@@ -31,6 +38,13 @@ jobs:
   build-be:
     runs-on: self-hosted
     steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
       - uses: actions/checkout@v4
         with:
           repository: scalefocus/photopixels-backend-net
@@ -85,7 +99,7 @@ jobs:
         id: mobile_tests
         continue-on-error: true
         run: |
-          docker run -i --rm \
+          docker run -i --name mobile_tests \
           -e BASE_URI="http://backend:8080/api" \
           -e WEB_URI="http://frontend:80/" \
           -e APPIUM_HOST="selenium-hub" \
@@ -96,6 +110,16 @@ jobs:
           -e ACTIVITY_NAME="io.photopixels.app.MainActivity" \
           --network utils_sf-photos-net \
           $AUTOMATION_TAG
+
+      - name: Cleanup containers & stack
+        if: always()
+        run: |
+          docker rm -f mobile_tests || true
+          docker compose -f "$COMPOSE_FILE" down -v || true
+      - name: Cleanup workspace artifacts (local)
+        if: always()
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/test-artifacts" || true
 
       - name: Cleanup environment
         if: always()
