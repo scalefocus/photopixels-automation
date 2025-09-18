@@ -3,6 +3,7 @@ package com.photopixels.mobile;
 import com.photopixels.base.IApiBaseTest;
 import com.photopixels.base.MobileBaseTest;
 import com.photopixels.listeners.StatusTestListener;
+import com.photopixels.mobile.pages.ErrorPopUpPage;
 import com.photopixels.mobile.pages.MobileLoginPage;
 import com.photopixels.mobile.pages.RegistrationPage;
 import io.qameta.allure.*;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static com.photopixels.constants.Constants.PASSWORD;
 import static com.photopixels.constants.Constants.REGISTRATION_SUCCESSFUL;
+import static com.photopixels.constants.ErrorMessageConstants.*;
 
 @Listeners(StatusTestListener.class)
 @Feature("Mobile")
@@ -118,5 +120,62 @@ public class MobileRegisterNewUserTests extends MobileBaseTest implements IApiBa
         registrationPage.registerNewUser(randomValidName, randomValidEmail, invalidPassword, invalidPassword);
 
         Assert.assertTrue(registrationPage.isPasswordFieldErrorMessageVisible(), "Password field validation fails, app accepts invalid password: " + invalidPassword);
+    }
+
+    @Test(description = "Registration not allowed with incorrect password confirmation")
+    @Description("User cannot register as new user if confirmation password input does not match the password")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerWithInvalidConfirmPasswordNotAllowedMobileTest() {
+
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        RegistrationPage registrationPage = loginPage.clickRegistrationButton();
+        registrationPage.registerNewUser(randomValidName, randomValidEmail, PASSWORD, randomValidEmail);
+
+        Assert.assertTrue(registrationPage.isPasswordFieldErrorMessageVisible(), "Password field validation fails, app accepts incorrect password confirmation");
+        Assert.assertEquals(registrationPage.getPasswordFieldErrorText(), CONFIRM_PASSWORD_MISMATCH, "Password mismatch incorrect message");
+    }
+
+    @Test(description = "Registration not allowed with already existing name")
+    @Description("User cannot register as new user if already existing Name is used in registration form")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerWithExistingNameNotAllowedMobileTest() {
+        String randomValidName = "TestUserInitial" + random;
+        String randomEmail = "testUserMail" + random + "@test.com";
+        String newRandomEmail = "testUserEmail" + random + "@test.com";
+
+        //Register a new user
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        RegistrationPage registrationPage = loginPage.clickRegistrationButton();
+        registrationPage.registerNewUser(randomValidName, randomEmail, PASSWORD, PASSWORD);
+
+        //Try to register another user with the same name
+        registrationPage = loginPage.clickRegistrationButton();
+        ErrorPopUpPage errorPopUpPage = registrationPage.registerNewUserError(randomValidName, newRandomEmail, PASSWORD, PASSWORD);
+
+        Assert.assertEquals(errorPopUpPage.getErrorText(), ACCOUNT_ALREADY_TAKEN, "Incorrect error message for account already taken");
+    }
+
+    @Test(description = "Registration not allowed with already existing email")
+    @Description("User cannot register as new user if already existing Email is used in registration form")
+    @Story("Register User")
+    @Severity(SeverityLevel.NORMAL)
+    public void registerWithExistingEmailNotAllowedMobileTest() {
+        String randomValidName = "TestUserFirst" + random;
+        String randomNewValidName = "TestUserNew" + random;
+        String randomEmail = "testUserDelivery" + random + "@test.com";
+
+        //Register a new user
+        MobileLoginPage loginPage = loadPhotoPixelsApp();
+        RegistrationPage registrationPage = loginPage.clickRegistrationButton();
+        registrationPage.registerNewUser(randomValidName, randomEmail, PASSWORD, PASSWORD);
+
+        //Try to register another user with the same email
+        registrationPage = loginPage.clickRegistrationButton();
+        ErrorPopUpPage errorPopUpPage = registrationPage.registerNewUserError(randomNewValidName, randomEmail, PASSWORD, PASSWORD);
+
+        //TODO: Use more detailed error message when such is implemented
+        Assert.assertEquals(errorPopUpPage.getErrorText(), GENERIC_REGISTRATION_ERROR, "Incorrect error message");
     }
 }

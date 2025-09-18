@@ -50,6 +50,13 @@ public class RegistrationPage extends WaitOperationHelper {
         return new MobileLoginPage(driver);
     }
 
+    @Step("Unsuccessful registration of a new user")
+    public ErrorPopUpPage registerNewUserError(String name, String email, String password, String confirmPassword) {
+        fillInRegistrationFields(name, email, password, confirmPassword);
+        registerButton.click();
+        return new ErrorPopUpPage(driver);
+    }
+
     @Step("Fill in all registration fields")
     public void fillInRegistrationFields(String name, String email, String password, String confirmPassword){
         fillNameField(name);
@@ -110,4 +117,13 @@ public class RegistrationPage extends WaitOperationHelper {
         return "true".equals(registerButton.getAttribute("clickable"));
     }
 
+    @Step("Get 'Password' field error text")
+    public String getPasswordFieldErrorText() {
+        try {
+            waitForElementToBeVisible(driver, passwordFieldErrorMessage, 2);
+            return passwordFieldErrorMessage.getText().trim();
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

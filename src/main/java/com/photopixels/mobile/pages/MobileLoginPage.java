@@ -75,7 +75,7 @@ public class MobileLoginPage extends WaitOperationHelper {
 
     @Step("Click Registration button")
     public RegistrationPage clickRegistrationButton() {
-        registerButton.click();
+        waitForElementToBeClickable(driver, registerButton, 5).click();
         return new RegistrationPage(driver);
     }
 

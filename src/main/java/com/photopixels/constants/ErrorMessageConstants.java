@@ -17,6 +17,10 @@ public class ErrorMessageConstants {
 	public static final String MISSING_UPLOAD_OFFSET_ERROR = "Missing Upload-Offset header";
 
 	// Object operations
-	public static final String INVALID_OBJECT_ID_FORMAT = "Invalid object ID format";
+
+	//Mobile
+	public static final String CONFIRM_PASSWORD_MISMATCH = "Passwords don't match";
+	public static final String ACCOUNT_ALREADY_TAKEN = "Account is already taken. Please choose different account.";
+	public static final String GENERIC_REGISTRATION_ERROR = "Error while register. Please try again";
 
 }
