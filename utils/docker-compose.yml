@@ -46,7 +46,7 @@ services:
     depends_on:
       - db
     networks:
-      - sf-photos
+      - sf-photos-net
 
   db:
     image: postgres:14.3
