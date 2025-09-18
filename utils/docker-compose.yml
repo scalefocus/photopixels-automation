@@ -29,12 +29,24 @@ services:
       ConnectionStrings__PhotosMetadata: 'Host=db;Port=5432;Database=photosdb;Username=postgres;Password=test123'
       Admin__Email: 'testadmin@test.com'
       Admin__Password: 'Test12345!'
-      EmailConfiguration__Host: ''
-      EmailConfiguration__Port: ''
-      EmailConfiguration__Username: ''
+      EmailConfiguration__Host: 'mailhog'
+      EmailConfiguration__Port: '25'
+      EmailConfiguration__Username: 'user'
+      EmailConfiguration__UseSsl: false
+      EmailConfiguration__CheckCertificateRevocation: false
     restart: always
     depends_on:
+      - mailhog
+
+  mailhog:
+    image: mailhog/mailhog
+    deploy:
+      labels:
+        automation.environment:
+    depends_on:
       - db
+    networks:
+      - sf-photos
 
   db:
     image: postgres:14.3
