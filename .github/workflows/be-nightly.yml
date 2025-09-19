@@ -82,7 +82,7 @@ jobs:
           docker run -i --name api-tests \
             -e BASE_URI="http://backend:8080/" \
             -e SUITE_NAME="api" \
-            -e LOCAL_MAIL_URI="http://mailhog:8025/"
+            -e LOCAL_MAIL_URI="http://mailhog:8025/" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
       - name: Collect test artifacts
