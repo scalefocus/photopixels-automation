@@ -66,8 +66,13 @@ public class PostResetUserPasswordTests implements IApiBaseTest {
         postForgotUserPasswordSteps.forgotUserPassword(email);
 
         GetEmailListSteps getEmailListSteps = new GetEmailListSteps();
-        long mailId = getEmailListSteps.getMailIdFromSender(EMAIL_RECEIVED_FROM, sid);
-        String codeFromMail = getEmailListSteps.getResetCodeFromMail(sid, mailId);
+        String codeFromMail;
+        if (System.getProperty("localMailUri") != null) {
+            codeFromMail = getEmailListSteps.getResetCodeFromLocalMail();
+        } else {
+            long mailId = getEmailListSteps.getMailIdFromSender(EMAIL_RECEIVED_FROM, sid);
+            codeFromMail = getEmailListSteps.getResetCodeFromMail(sid, mailId);
+        }
 
         PostResetUserPasswordSteps postResetUserPasswordSteps = new PostResetUserPasswordSteps();
         postResetUserPasswordSteps.resetUserPassword(codeFromMail, newPassword, email);

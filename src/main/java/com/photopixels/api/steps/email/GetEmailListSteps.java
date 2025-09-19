@@ -1,6 +1,7 @@
 package com.photopixels.api.steps.email;
 
 import com.photopixels.api.dtos.email.FetchEmailResponseDto;
+import com.photopixels.api.dtos.email.FetchLocalEmailResponseDto;
 import com.photopixels.api.dtos.email.GetEmailAddressResponseDto;
 import com.photopixels.api.dtos.email.GetEmailListResponseDto;
 import com.photopixels.helpers.CustomRequestSpecification;
@@ -21,6 +22,7 @@ public class GetEmailListSteps {
     private static final String FUNC_GET_EMAIL_ADDRESS = "get_email_address";
     private static final String FUNC_GET_EMAIL_LIST = "get_email_list";
     private static final String FUNC_FETCH_EMAIL = "fetch_email";
+    private static final String SEARCH_LOCAL_MAIL = "api/v2/messages";
     private static final Pattern SIX_DIGIT_CODE = Pattern.compile("\\b\\d{6}\\b");
     private static final int MAX_RETRIES = 5;
     private static final int DELAY_MILLIS = 4000;
@@ -65,6 +67,13 @@ public class GetEmailListSteps {
                 new RuntimeException("No code found"));
     }
 
+    public String getResetCodeFromLocalMail() {
+        FetchLocalEmailResponseDto response = fetchLocalEmail();
+
+        return SIX_DIGIT_CODE.matcher(response.getMailBody()).results().map(MatchResult::group).findFirst().orElseThrow(() ->
+                new RuntimeException("No code found"));
+    }
+
     public GetEmailAddressResponseDto getEmailAddress() {
         Response response = getEmail(FUNC_GET_EMAIL_ADDRESS, null, null, null);
 
@@ -89,6 +98,14 @@ public class GetEmailListSteps {
         return response.as(FetchEmailResponseDto.class);
     }
 
+    public FetchLocalEmailResponseDto fetchLocalEmail() {
+        Response response = getLastLocalMail();
+
+        response.then().statusCode(HttpStatus.SC_OK);
+
+        return response.as(FetchLocalEmailResponseDto.class);
+    }
+
     private Response getEmail(String function, String sidToken, Integer offset, Long mailId) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("f", function);
@@ -101,6 +118,17 @@ public class GetEmailListSteps {
         if (offset != null) {
             queryParams.put("offset", String.valueOf(offset));
         }
+        requestSpecification.addQueryParams(queryParams);
+
+        return requestOperationsHelper.sendGetRequest(requestSpecification.getFilterableRequestSpecification());
+    }
+
+    private Response getLastLocalMail() {
+        requestSpecification.addBaseUri(System.getProperty("localMailUri"));
+        requestSpecification.addBasePath(SEARCH_LOCAL_MAIL);
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("limit", "1");
+        queryParams.put("start", "0");
         requestSpecification.addQueryParams(queryParams);
 
         return requestOperationsHelper.sendGetRequest(requestSpecification.getFilterableRequestSpecification());
