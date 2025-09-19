@@ -52,6 +52,12 @@ public class WaitOperationHelper {
 		wait.until(ExpectedConditions.elementToBeClickable(element));
 	}
 
+	// Waits until the given element becomes clickable within the specified timeout (in seconds)
+	public WebElement waitForElementToBeClickable(WebDriver driver, WebElement element, int timeoutSeconds) {
+		customWait(driver, timeoutSeconds).until(ExpectedConditions.elementToBeClickable(element));
+		return element;
+	}
+
 	public void waitForAllElementsToBeVisible(List<WebElement> elements) {
 		wait.until(ExpectedConditions.visibilityOfAllElements(elements));
 	}
