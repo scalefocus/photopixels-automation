@@ -10,4 +10,4 @@ COPY upload_files upload_files/
 
 RUN mvn clean install -DskipTests
 
-ENTRYPOINT ["/bin/sh", "-c", "mvn -B -q -DbaseUri=$BASE_URI -DsuiteXmlFile=$SUITE_NAME test"]
+ENTRYPOINT ["/bin/sh", "-c", "mvn -B -q -DbaseUri=$BASE_URI -DsuiteXmlFile=$SUITE_NAME -DlocalMailUri=$LOCAL_MAIL_URI test"]

@@ -30,7 +30,7 @@ services:
       Admin__Email: 'testadmin@test.com'
       Admin__Password: 'Test12345!'
       EmailConfiguration__Host: 'mailhog'
-      EmailConfiguration__Port: '25'
+      EmailConfiguration__Port: '1025'
       EmailConfiguration__Username: 'user'
       EmailConfiguration__UseSsl: false
       EmailConfiguration__CheckCertificateRevocation: false
