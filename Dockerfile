@@ -12,7 +12,7 @@ RUN mvn clean install -DskipTests
 
 ENTRYPOINT ["/bin/bash", "-c", "\
 if [ \"$SUITE_NAME\" = \"frontend\" ]; then \
-  mvn -DsuiteXmlFile=${SUITE_NAME} test -Dwebdriver.remote.url=${SELENIUM_GRID_URL} -Dwebdriver.remote.isRemote=true; \
+  mvn clean -DsuiteXmlFile=${SUITE_NAME} test -Dwebdriver.remote.url=${SELENIUM_GRID_URL} -Dwebdriver.remote.isRemote=true; \
 else \
-  mvn -q -DbaseUri=${BASE_URI} -DsuiteXmlFile=${SUITE_NAME} -DlocalMailUri=${LOCAL_MAIL_URI} test; \
+  mvn clean -q -DbaseUri=${BASE_URI} -DsuiteXmlFile=${SUITE_NAME} -DlocalMailUri=${LOCAL_MAIL_URI} test; \
 fi"]
