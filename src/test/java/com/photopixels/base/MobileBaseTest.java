@@ -18,6 +18,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
+import java.util.Map;
+
+import static com.photopixels.constants.Constants.GALLERY_PATH;
 
 public class MobileBaseTest implements IBaseTest {
 
@@ -75,7 +78,15 @@ public class MobileBaseTest implements IBaseTest {
     public void pushImageToGallery(String localFilePath, String fileName) throws Exception {
         // Upload the file to /storage/emulated/0/Download/ for Android Platform
         if (mobileDriver.getCapabilities().getPlatformName().name().equalsIgnoreCase(PlatformEnum.ANDROID.toString())) {
-            ((AndroidDriver) mobileDriver).pushFile("/storage/emulated/0/Download/" + fileName, new File(localFilePath));
+            ((AndroidDriver) mobileDriver).pushFile(GALLERY_PATH + fileName, new File(localFilePath));
+        }
+    }
+
+    public void deleteImageFromPhoneGallery(String fileName) {
+        if (mobileDriver.getCapabilities().getPlatformName().name().equalsIgnoreCase(PlatformEnum.ANDROID.toString())) {
+            mobileDriver.executeScript("mobile: deleteFile", Map.of(
+                    "remotePath", GALLERY_PATH + fileName
+            ));
         }
     }
 
