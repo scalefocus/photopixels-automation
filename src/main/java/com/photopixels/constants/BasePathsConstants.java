@@ -47,6 +47,7 @@ public class BasePathsConstants {
     public static String POST_TRASH_OBJECTS  = "/object/trash";
     public static String POST_ADD_FAVORITES = "/object/addFavorites";
     public static String POST_REMOVE_FAVORITES = "/object/removeFavorites";
+    public static String GET_OBJECTS_FAVORITES = "/objects/favorites";
 
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";

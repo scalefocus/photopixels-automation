@@ -14,6 +14,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,6 +30,7 @@ public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest 
     private String password;
     private String token;
     private String objectId;
+    private final String imageName = "french-fries.jpg";
 
     @BeforeClass(alwaysRun = true)
     public void setup() {
@@ -36,7 +38,7 @@ public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest 
         password = inputData.getPassword();
         token = getUserToken();
         try {
-            pushImageToGallery(FRENCH_FRIES_FILE, "french-fries.jpg");
+            pushImageToGallery(FRENCH_FRIES_FILE, imageName);
         } catch (Exception e) {
             System.out.println("Image could not be pushed to device!" + e);
         }
@@ -45,6 +47,11 @@ public class MobileAutoSyncTests extends MobileBaseTest implements IApiBaseTest 
     @AfterMethod(alwaysRun = true)
     public void cleanup() {
         deleteObjects(Collections.singletonList(objectId), token);
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void restoreDevice() {
+        deleteImageFromPhoneGallery(imageName);
     }
 
     @Test(description = "Auto Sync photos only through Wi-Fi")
