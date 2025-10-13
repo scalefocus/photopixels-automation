@@ -122,8 +122,6 @@ jobs:
           echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
           echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
           mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
-          rm -rf "${GITHUB_WORKSPACE}/ci-allure-report"/*
-          rm -rf ${GITHUB_WORKSPACE}/ci-artifacts
 
       - name: Download test artifacts (into workspace)
         uses: actions/download-artifact@v4
