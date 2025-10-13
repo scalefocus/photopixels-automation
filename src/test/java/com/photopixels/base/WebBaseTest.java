@@ -40,7 +40,12 @@ public class WebBaseTest implements IBaseTest {
     }
 
     public LoginPage loadPhotoPixelsApp() {
-        driver.get(configProperties.getProperty("webUrl"));
+        String webUrl = System.getProperty("webUrl");
+
+        if (webUrl == null) {
+            webUrl = configProperties.getProperty("webUrl");
+        }
+        driver.get(webUrl);
 
         return new LoginPage(driver);
     }

@@ -27,7 +27,7 @@ jobs:
           docker system df || true
       - uses: actions/checkout@v4
         with:
-          repository: scalefocus/photopixels-frontend
+          repository: scalefocus/photopixels-web
           fetch-depth: 0
           path: ${{ env.FRONTEND_REPO_PATH }}
       - name: Build docker image (FE)
@@ -78,7 +78,8 @@ jobs:
         run: |
           docker run -i --name ui-tests \
             -e WEB_URL="http://frontend:3000/"  \
-            -e SUITE_NAME="ui" \
+            -e BASE_URI="http://backend:8080/" \
+            -e SUITE_NAME="web" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
       - name: Collect test artifacts
@@ -124,6 +125,9 @@ jobs:
           name: fe-ui-test-artifacts
           path: ${{ env.ART_DIR }}
 
+      - name: Clean previous reports
+        run: rm -rf ${{ env.REPORT_DIR }}/*
+
       - name: Generate Allure report
         id: gen
         continue-on-error: true
@@ -131,6 +135,7 @@ jobs:
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
+          keep_reports: 5
 
       - name: Verify Allure output
         run: |

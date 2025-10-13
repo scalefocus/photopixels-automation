@@ -56,7 +56,11 @@ public class DriverUtils {
 
 		browser = BrowserEnum.fromString(brw);
 
-		isGridRequired = Boolean.parseBoolean(props.getProperty("useSeleniumGrid"));
+		if (Boolean.parseBoolean(System.getProperty("webdriver.remote.isRemote"))) {
+			isGridRequired = Boolean.parseBoolean(System.getProperty("webdriver.remote.isRemote"));
+		} else {
+			isGridRequired = Boolean.parseBoolean(props.getProperty("useSeleniumGrid"));
+		}
 
 		if (isGridRequired) {
 			String host = System.getProperty("seleniumHubHost");
