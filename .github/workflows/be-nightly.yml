@@ -122,17 +122,14 @@ jobs:
           echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
           echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
           mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
+          rm -rf "${GITHUB_WORKSPACE}/ci-allure-report"/*
+          rm -rf ${GITHUB_WORKSPACE}/ci-artifacts
 
       - name: Download test artifacts (into workspace)
         uses: actions/download-artifact@v4
         with:
           name: be-api-test-artifacts
           path: ${{ env.ART_DIR }}
-
-      - name: Clean previous reports
-        run: |
-          rm -rf "${{ env.REPORT_DIR }}" || true
-          mkdir -p "${{ env.REPORT_DIR }}"
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
