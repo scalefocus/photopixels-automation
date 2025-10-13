@@ -131,8 +131,8 @@ jobs:
 
       - name: Clean previous reports
         run: |
-          chmod -R 777 "${{ env.REPORT_DIR }}" || true
-          rm -rf "${{ env.REPORT_DIR }}"/* || true
+          rm -rf "${{ env.REPORT_DIR }}" || true
+          mkdir -p "${{ env.REPORT_DIR }}"
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
