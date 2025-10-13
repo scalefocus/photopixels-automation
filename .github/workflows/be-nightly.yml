@@ -130,7 +130,7 @@ jobs:
           path: ${{ env.ART_DIR }}
 
       - name: Clean previous reports
-        run: rm -rf ${{ env.REPORT_DIR }}/*
+        run: sudo rm -rf "${{ env.REPORT_DIR }}"/*
 
       - name: Generate Allure report (paths under $GITHUB_WORKSPACE)
         id: gen
