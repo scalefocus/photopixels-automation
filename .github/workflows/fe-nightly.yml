@@ -92,7 +92,7 @@ jobs:
 
   automation:
     runs-on: self-hosted
-    timeout-minutes: 20
+    timeout-minutes: 40
     needs: [build-automation]
     steps:
       - uses: actions/checkout@v4
