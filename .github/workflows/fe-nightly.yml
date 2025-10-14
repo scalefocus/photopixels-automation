@@ -11,6 +11,7 @@ env:
   FRONTEND_REPO_PATH: frontend
   BACKEND_REPO_PATH: backend
   COMPOSE_FILE: ${{ github.workspace }}/automation/utils/docker-compose.yml
+  GRID_COMPOSE_FILE: ${{ github.workspace }}/automation/utils/frontend/docker-compose.selenium.yml
   BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
   FRONTEND_TAG: scalefocusad/photopixels-web:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
@@ -98,10 +99,10 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-      - name: Start environment (frontend + backend + db)
+      - name: Start environment (frontend + backend + db) with selenium grid
         run: |
+          docker compose -f "${GRID_COMPOSE_FILE}" up -d
           docker compose -f "${COMPOSE_FILE}" pull frontend backend mailhog db || true
-          docker compose -f "${COMPOSE_FILE}" up -d frontend backend mailhog db
       - name: Run UI tests
         id: run-tests
         continue-on-error: true
@@ -109,6 +110,8 @@ jobs:
           docker run -i --name ui-tests \
             -e WEB_URL="http://frontend:3000/"  \
             -e BASE_URI="http://backend:8080/" \
+            -e SELENIUM_GRID_URL="selenium-hub" \
+            -e IS_REMOTE="true" \
             -e SUITE_NAME="web" \
             --network utils_sf-photos-net \
             "$AUTOMATION_TAG"
@@ -132,6 +135,7 @@ jobs:
         run: |
           docker rm -f ui-tests || true
           docker compose -f "$COMPOSE_FILE" down -v || true
+          docker compose -f "$GRID_COMPOSE_FILE" down -v || true
       - name: Cleanup workspace artifacts (local)
         if: always()
         run: |

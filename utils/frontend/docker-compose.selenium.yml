@@ -6,6 +6,8 @@ services:
     image: selenium/node-chrome:4.35.0-20250828
     platform: linux/amd64
     shm_size: 2gb
+    networks:
+      - sf-photos-net
     depends_on:
       - selenium-hub
     environment:
@@ -13,6 +15,8 @@ services:
 
   chrome_video:
     image: selenium/video:ffmpeg-8.0-20250828
+    networks:
+      - sf-photos-net
     volumes:
       - /tmp/videos:/videos
     depends_on:
@@ -26,6 +30,8 @@ services:
   selenium-hub:
     image: selenium/hub:4.35.0-20250828
     container_name: selenium-hub
+    networks:
+      - sf-photos-net
     ports:
       - "4442:4442"
       - "4443:4443"
@@ -35,9 +41,14 @@ services:
     image: filebrowser/filebrowser:latest
     container_name: file_browser
     restart: always
+    networks:
+      - sf-photos-net
     ports:
       - "8081:80"
     volumes:
       - /tmp/videos:/srv
     environment:
       - FB_NOAUTH=true
+
+networks:
+  sf-photos-net:
