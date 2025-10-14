@@ -86,9 +86,9 @@ jobs:
         if: always()
         run: |
           set -e
-          mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
-          docker cp ui-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
-          docker cp ui-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
+          mkdir -p "${GITHUB_WORKSPACE}/test-artifacts-fe"
+          docker cp ui-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts-fe/surefire-reports-fe" || true
+          docker cp ui-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts-fe/allure-results-fe"   || true
       - name: Upload raw artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -105,7 +105,7 @@ jobs:
       - name: Cleanup workspace artifacts (local)
         if: always()
         run: |
-          rm -rf "${GITHUB_WORKSPACE}/test-artifacts" || true
+          rm -rf "${GITHUB_WORKSPACE}/test-artifacts-fe" || true
 
   allure-report-email:
     runs-on: self-hosted
@@ -115,9 +115,9 @@ jobs:
     steps:
       - name: Set workspace-scoped paths
         run: |
-          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
-          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
+          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts-fe" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report-fe" >> "$GITHUB_ENV"
+          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts-fe" "${GITHUB_WORKSPACE}/ci-allure-report-fe"
 
       - name: Download test artifacts
         uses: actions/download-artifact@v4
@@ -133,7 +133,7 @@ jobs:
         continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
-          allure_results: ${{ env.ART_DIR }}/allure-results
+          allure_results: ${{ env.ART_DIR }}/allure-results-fe
           allure_report: ${{ env.REPORT_DIR }}
           keep_reports: 5
 
