@@ -46,6 +46,7 @@ jobs:
   build-fe:
     runs-on: self-hosted
     timeout-minutes: 15
+    needs: [ build-be ]
     steps:
       - name: Disk sanity (safe prune before build)
         run: |
