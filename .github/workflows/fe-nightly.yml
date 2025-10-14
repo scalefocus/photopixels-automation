@@ -101,8 +101,10 @@ jobs:
           path: ${{ env.AUTOMATION_REPO_PATH }}
       - name: Start environment (frontend + backend + db) with selenium grid
         run: |
-          docker compose -f "${GRID_COMPOSE_FILE}" up -d
+          docker compose -f "${GRID_COMPOSE_FILE}" pull selenium-hub chrome || true
+          docker compose -f "${GRID_COMPOSE_FILE}" up -d selenium-hub chrome
           docker compose -f "${COMPOSE_FILE}" pull frontend backend mailhog db || true
+          docker compose -f "${COMPOSE_FILE}" up -d backend mailhog db
       - name: Run UI tests
         id: run-tests
         continue-on-error: true
