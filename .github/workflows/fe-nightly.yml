@@ -10,6 +10,7 @@ env:
   AUTOMATION_REPO_PATH: automation
   FRONTEND_REPO_PATH: frontend
   COMPOSE_FILE: ${{ github.workspace }}/automation/utils/docker-compose.yml
+  BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
   FRONTEND_TAG: scalefocusad/photopixels-frontend:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
