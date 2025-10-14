@@ -113,7 +113,7 @@ jobs:
             -e SELENIUM_GRID_URL="selenium-hub" \
             -e IS_REMOTE="true" \
             -e SUITE_NAME="web" \
-            --network utils_frontend_sf-photos-net \
+            --network frontend_sf-photos-net \
             "$AUTOMATION_TAG"
       - name: Collect test artifacts
         if: always()
