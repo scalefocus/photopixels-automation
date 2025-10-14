@@ -326,7 +326,4 @@ jobs:
       - name: Remove files
         shell: bash
         run: |
-          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
           rm -rf "${GITHUB_WORKSPACE}/ci-artifacts"
-          rm -rf "${GITHUB_WORKSPACE}/ci-allure-report"

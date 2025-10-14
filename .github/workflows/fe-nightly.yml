@@ -14,6 +14,33 @@ env:
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
 jobs:
+  build-be:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
+      - uses: actions/checkout@v4
+        with:
+          repository: scalefocus/photopixels-backend-net
+          submodules: recursive
+          fetch-depth: 0
+          path: ${{ env.BACKEND_REPO_PATH }}
+      - name: Build docker image (BE)
+        working-directory: ${{ env.BACKEND_REPO_PATH }}
+        run: |
+          docker build \
+            --no-cache \
+            --build-arg VERSION="1.0.0" \
+            --build-arg VERSION_SUFFIX="" \
+            -t "$BACKEND_TAG" \
+            -f ./src/SF.PhotoPixels.API/Dockerfile .
+
   build-fe:
     runs-on: self-hosted
     timeout-minutes: 15
