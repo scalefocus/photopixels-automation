@@ -193,11 +193,11 @@ jobs:
           for f in "$ART_DIR"/allure-results/*-result.json; do
             [ -e "$f" ] || continue
             # Extract simple string fields
-            status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-            fullName=$(grep -m1 '"fullName"[[:space:]]*:' "$f" | sed 's/.*"fullName"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-            test_name=$(grep -Pom1 '"links":[^}]*},[[:space:]]*"name"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f")
-            issueUrl=$(grep -A2 '"type"[[:space:]]*:[[:space:]]*"issue"' "$f" | grep -m1 '"url"' | sed 's/.*"url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-            msg=$(grep -Poz '"message"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" | tr -d '\0')
+            status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            fullName=$(grep -m1 '"fullName"[[:space:]]*:' "$f" | sed 's/.*"fullName"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            test_name=$(grep -Pom1 '"links":[^}]*},[[:space:]]*"name"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" || true)
+            issueUrl=$(grep -A2 '"type"[[:space:]]*:[[:space:]]*"issue"' "$f" | grep -m1 '"url"' | sed 's/.*"url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            msg=$(grep -Poz '"message"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" | tr -d '\0' || true)
             if grep -Eq '"known"[[:space:]]*:[[:space:]]*true' "$f"; then
               known_flag="true"
             else
