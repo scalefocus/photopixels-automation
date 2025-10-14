@@ -9,9 +9,16 @@ services:
     networks:
       - sf-photos-net
     depends_on:
-      - selenium-hub
+      selenium-hub:
+        condition: service_healthy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   chrome_video:
     image: selenium/video:ffmpeg-8.0-20250828
@@ -36,6 +43,12 @@ services:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   file_browser:
     image: filebrowser/filebrowser:latest
@@ -52,3 +65,4 @@ services:
 
 networks:
   sf-photos-net:
+    external: true
