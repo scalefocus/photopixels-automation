@@ -99,6 +99,10 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
+      - name: Create shared Docker network
+        run: |
+          docker network inspect sf-photos-net >/dev/null 2>&1 || \
+          docker network create sf-photos-net
       - name: Start environment (frontend + backend + db) with selenium grid
         run: |
           docker compose -f "${GRID_COMPOSE_FILE}" pull selenium-hub chrome || true
@@ -142,6 +146,10 @@ jobs:
         if: always()
         run: |
           rm -rf "${GITHUB_WORKSPACE}/test-artifacts-fe" || true
+      - name: Cleanup Docker network
+        if: always()
+        run: |
+          docker network rm sf-photos-net || true
 
   allure-report-email:
     runs-on: self-hosted
