@@ -64,4 +64,3 @@ services:
 networks:
   sf-photos-db:
   sf-photos-net:
-    external: true
