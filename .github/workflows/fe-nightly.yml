@@ -108,7 +108,7 @@ jobs:
         continue-on-error: true
         run: |
           docker run -i --name ui-tests \
-            -e WEB_URL="http://frontend:3000/"  \
+            -e WEB_URL="http://frontend/"  \
             -e BASE_URI="http://backend:8080/" \
             -e SELENIUM_GRID_URL="selenium-hub" \
             -e IS_REMOTE="true" \
