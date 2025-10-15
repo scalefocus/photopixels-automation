@@ -127,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fe-ui-test-artifacts
-          path: test-artifacts/**
+          path: test-artifacts-fe/**
           if-no-files-found: warn
           retention-days: 14
       - name: Cleanup containers & stack
