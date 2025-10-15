@@ -9,6 +9,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 public class WebBaseTest implements IBaseTest {
 
@@ -17,6 +18,11 @@ public class WebBaseTest implements IBaseTest {
 
     @Getter
     protected WebDriver driver;
+
+    @BeforeSuite(alwaysRun = true)
+    public void initSuiteWeb() {
+        prepareUsers();
+    }
 
     @BeforeClass(alwaysRun = true)
     public void setupBaseClass() {

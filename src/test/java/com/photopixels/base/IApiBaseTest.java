@@ -1,14 +1,10 @@
 package com.photopixels.base;
 
 import com.photopixels.api.dtos.admin.GetUserResponseDto;
-import com.photopixels.api.dtos.users.LoginResponseDto;
 import com.photopixels.api.steps.admin.DeleteUserAdminSteps;
 import com.photopixels.api.steps.admin.GetUsersSteps;
-import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
 import com.photopixels.api.steps.objectoperations.DeleteObjectSteps;
 import com.photopixels.api.steps.users.DeleteUserSteps;
-import com.photopixels.api.steps.users.PostLoginSteps;
-import com.photopixels.enums.UserRolesEnum;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -25,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
@@ -51,34 +46,6 @@ public interface IApiBaseTest extends IBaseTest {
         }
 
         prepareUsers();
-    }
-
-    // TODO: Move that to be available for web and mobile suites
-    default void prepareUsers() {
-        String token = getAdminToken();
-
-        GetUsersSteps getUsersSteps = new GetUsersSteps(token);
-        GetUserResponseDto[] getUserResponseDto = getUsersSteps.getUsers();
-
-        if (Arrays.stream(getUserResponseDto).noneMatch(
-                u -> u.getEmail().equals(inputData.getUsername()))) {
-            registerUser(inputData.getUserFullName(), inputData.getUsername(), inputData.getPassword(), UserRolesEnum.USER);
-        }
-    }
-
-     default String getUserToken() {
-        return getToken(inputData.getUsername(), inputData.getPassword());
-    }
-
-    default String getAdminToken() {
-        return getToken(inputData.getUsernameAdmin(), inputData.getPasswordAdmin());
-    }
-
-    default String getToken(String username, String password) {
-        PostLoginSteps postLoginSteps = new PostLoginSteps();
-        LoginResponseDto loginResponseDto = postLoginSteps.login(username, password);
-
-        return loginResponseDto.getTokenType() + " " + loginResponseDto.getAccessToken();
     }
 
     default String getUserId(String username) {
@@ -146,13 +113,6 @@ public interface IApiBaseTest extends IBaseTest {
     default String removeExtension(String filename) {
         int dotIndex = filename.lastIndexOf('.');
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
-    }
-
-    default void registerUser(String username, String email, String password, UserRolesEnum role) {
-        String token = getAdminToken();
-
-        PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
-        postRegisterUserAdminSteps.registerUserAdmin(username, email, password, role);
     }
 
     @DataProvider(name = "files")

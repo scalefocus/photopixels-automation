@@ -175,11 +175,43 @@ jobs:
         run: |
           [ -f "$REPORT_DIR/index.html" ] && echo "index.html OK" || echo "index.html MISSING"
 
-      - name: Extract summary
+      - name: Extract summary (prefer Allure, fallback to Surefire)
         id: summary
+        shell: bash
         run: |
-          # (same parsing logic as BE version)
-          echo "verdict=PASSED" >> "$GITHUB_OUTPUT"
+          set -e
+          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0; PASSED=0
+          if [ -f "$REPORT_DIR/widgets/summary.json" ]; then
+            PASSED=$(grep -o '"passed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            FAILED=$(grep -o '"failed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            BROKEN=$(grep -o '"broken":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            SKIPPED=$(grep -o '"skipped":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            TOTAL=$(grep -o '"total":[0-9]\+'    "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+          else
+            for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+              [ -f "$f" ] || continue
+              line=$(head -1 "$f")
+              t=$(echo "$line"  | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
+              fa=$(echo "$line" | sed -n 's/.*failures="\([0-9]\+\)".*/\1/p')
+              er=$(echo "$line" | sed -n 's/.*errors="\([0-9]\+\)".*/\1/p')
+              sk=$(echo "$line" | sed -n 's/.*skipped="\([0-9]\+\)".*/\1/p')
+              TOTAL=$((TOTAL + ${t:-0}))
+              FAILED=$((FAILED + ${fa:-0}))
+              BROKEN=$((BROKEN + ${er:-0}))
+              SKIPPED=$((SKIPPED + ${sk:-0}))
+            done
+            PASSED=$((TOTAL - FAILED - BROKEN - SKIPPED))
+            [ $PASSED -lt 0 ] && PASSED=0 || true
+          fi
+          VERDICT="PASSED"; [ $((FAILED + BROKEN)) -gt 0 ] && VERDICT="FAILED"
+          {
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "broken=$BROKEN"
+            echo "skipped=$SKIPPED"
+            echo "total=$TOTAL"
+            echo "verdict=$VERDICT"
+          } >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         if: success()
@@ -222,3 +254,8 @@ jobs:
                 <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
               </tr>
             </table>
+
+      - name: Remove files
+        shell: bash
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/ci-artifacts-fe"

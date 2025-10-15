@@ -13,7 +13,7 @@ public class NavigationPage extends WaitOperationHelper {
 
     private WebDriver driver;
 
-    @FindBy(xpath = "//p[contains(@class,'css-pfq02h')]")
+    @FindBy(xpath = "//a[@href='/' and .//img[@alt='Logo']]/following::p[1]")
     private WebElement userName;
 
     @FindBy(xpath = "//nav/a[@href='/']")
