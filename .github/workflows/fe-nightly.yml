@@ -159,9 +159,6 @@ jobs:
           name: fe-ui-test-artifacts
           path: ${{ env.ART_DIR }}
 
-      - name: Clean previous reports
-        run: rm -rf ${{ env.REPORT_DIR }}/*
-
       - name: Generate Allure report
         id: gen
         continue-on-error: true
@@ -213,6 +210,84 @@ jobs:
             echo "verdict=$VERDICT"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Build failed-tests table HTML from Allure results
+        id: failedtbl
+        shell: bash
+        run: |
+          set -e
+          rows=""
+          shopt -s nullglob
+          for f in "$ART_DIR"/allure-results/*-result.json; do
+            [ -e "$f" ] || continue
+            # Extract simple string fields
+            status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            fullName=$(grep -m1 '"fullName"[[:space:]]*:' "$f" | sed 's/.*"fullName"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            test_name=$(grep -Pom1 '"links":[^}]*},[[:space:]]*"name"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" || true)
+            issueUrl=$(grep -A2 '"type"[[:space:]]*:[[:space:]]*"issue"' "$f" | grep -m1 '"url"' | sed 's/.*"url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            msg=$(grep -Poz '"message"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" | tr -d '\0' || true)
+            if grep -Eq '"known"[[:space:]]*:[[:space:]]*true' "$f"; then
+              known_flag="true"
+            else
+              known_flag="false"
+            fi
+            if [ "$status" != "failed" ] && [ "$status" != "broken" ]; then
+              continue
+            fi
+
+            esc_full=$(printf '%s' "$fullName" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+            issue_link=""
+            if [ -n "$issueUrl" ] && [ "$issueUrl" != "null" ]; then
+            issue_link="<br/><a href=\"$issueUrl\" target=\"_blank\">GitHub Issue</a>"
+            fi
+          
+            row="<tr><td><b>${esc_full}</b><br/><i>${test_name}</i><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${msg}${issue_link}</div></td></tr>"
+            if [ "$known_flag" = "true" ]; then
+              known_rows="${known_rows}${row}"$'\n'
+            elif [ "$status" = "broken" ]; then
+              broken_rows="${broken_rows}${row}"$'\n'
+            else
+              failed_rows="${failed_rows}${row}"$'\n'
+            fi
+          done
+
+          if [ -n "$failed_rows" ] || [ -n "$known_rows" ] || [ -n "$broken_rows" ]; then
+            {
+              echo '<h3>Failed tests:</h3>'
+              if [ -n "$failed_rows" ]; then
+                echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+                echo '<thead><tr style="background:#f5f5f5;"><th>Test &amp; reason</th></tr></thead><tbody>'
+                printf "%s\n" "$failed_rows"
+                echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests.</i></p>'
+              fi
+          
+              echo '<h3>Known issues:</h3>'
+              if [ -n "$known_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#fff8dc;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$known_rows"
+              echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests with known issues.</i></p>'
+              fi
+          
+              echo '<h3>Broken tests:</h3>'
+              if [ -n "$broken_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#ffe6e6;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$broken_rows"
+              echo '</tbody></table>'
+              else
+              echo '<p><i>No broken tests.</i></p>'
+              fi
+            } > /tmp/failed_table.html
+          else
+            echo '<h3>Failed tests:</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
+          fi
+          oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
+          echo "table=$oneline" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v4
         if: success()
         with:
@@ -234,9 +309,7 @@ jobs:
           html_body: |
             <p>Hello team,</p>
             <p>The nightly FE run of the automation tests finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
-            <p>Workflow summary & Allure report: 
-              <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></p>
-           
+
             <h3>Summary:</h3>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -254,6 +327,18 @@ jobs:
                 <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
               </tr>
             </table>
+
+            <div style="margin-top:12px;">
+              ${{ steps.failedtbl.outputs.table }}
+            </div>
+
+            <p>
+              <ul>
+                <li>Workflow summary &amp; Allure report: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
+              </ul>
+            </p>
+
+            <p>Best regards,<br/>GitHub Actions</p>
 
       - name: Remove files
         shell: bash
