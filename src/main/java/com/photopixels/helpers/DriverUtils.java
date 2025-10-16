@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
@@ -98,6 +99,7 @@ public class DriverUtils {
 		default:
 			break;
 		}
+		((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());
 	}
 
 	private void getLocalDriver() {
