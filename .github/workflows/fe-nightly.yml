@@ -134,7 +134,6 @@ jobs:
         if: always()
         run: |
           docker rm -f ui-tests || true
-          docker compose -f "$COMPOSE_FILE" down -v || true
           docker compose -f "$GRID_COMPOSE_FILE" down -v || true
       - name: Cleanup workspace artifacts (local)
         if: always()
@@ -170,7 +169,9 @@ jobs:
 
       - name: Verify Allure output
         run: |
-          [ -f "$REPORT_DIR/index.html" ] && echo "index.html OK" || echo "index.html MISSING"
+          echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
+          [ -f "$REPORT_DIR/index.html" ] && echo "index.html: OK" || echo "index.html: MISSING"
+          [ -f "$REPORT_DIR/widgets/summary.json" ] && echo "summary.json: OK" || echo "summary.json: MISSING"
 
       - name: Extract summary (prefer Allure, fallback to Surefire)
         id: summary

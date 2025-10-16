@@ -12,7 +12,7 @@ services:
     networks:
       - sf-photos-net
     environment:
-      SERVER_URL: 'http://localhost:8888'
+      SERVER_URL: 'http://backend:8080'
     restart: always
     depends_on:
       - backend
