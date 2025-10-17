@@ -61,6 +61,7 @@ services:
       - selenium-hub
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_LOG_LEVEL=FINE
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ]
       interval: 10s
@@ -91,6 +92,8 @@ services:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
+    environment:
+      - SE_LOG_LEVEL=FINE
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ]
       interval: 30s
