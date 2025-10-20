@@ -54,9 +54,6 @@ public class OverviewPage extends MediaContentPage {
 
         File file = new File(filePath);
         String absolutePath = file.getAbsolutePath();
-        System.out.println("File exists? " + file.exists());
-        System.out.println("Absolute path: " + file.getAbsolutePath());
-        System.out.println(absolutePath);
         fileInput.sendKeys(absolutePath);
 
         waitForUploadToFinish();
