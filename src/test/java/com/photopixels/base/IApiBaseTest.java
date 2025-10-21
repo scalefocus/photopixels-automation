@@ -24,13 +24,12 @@ import java.util.Map;
 
 import static com.photopixels.constants.Constants.SAMPLE_VIDEO_FILE;
 import static com.photopixels.constants.Constants.TRAINING_FILE;
-import static io.restassured.RestAssured.baseURI;
 
 public interface IApiBaseTest extends IBaseTest {
 
     @BeforeSuite(alwaysRun = true)
     default void initSuiteApi() {
-        baseURI = baseUri;
+        IBaseTest.configureRestAssured();
 
         String logEnabled = System.getProperty("isLogEnabled");
 

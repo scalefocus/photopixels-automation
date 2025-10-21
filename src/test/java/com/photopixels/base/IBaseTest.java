@@ -21,6 +21,8 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Properties;
 
+import static io.restassured.RestAssured.baseURI;
+
 public interface IBaseTest {
 
 	String CONFIG_PROPS = "config.properties";
@@ -56,7 +58,13 @@ public interface IBaseTest {
 		generateCategoriesFile(allureResults);
 	}
 
+	static void configureRestAssured() {
+		baseURI = getBaseUri();
+		;
+	}
+
 	default void prepareUsers() {
+		configureRestAssured();
 		String token = getAdminToken();
 		boolean isRegistrationEnabled = getRegistrationStatus();
 		if (!isRegistrationEnabled) {

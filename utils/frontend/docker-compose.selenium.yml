@@ -3,7 +3,7 @@
 # To stop the execution, hit Ctrl+C, and then `docker compose -f .\docker-compose.selenium.yml down`
 services:
   frontend:
-    image: scalefocusad/photopixels-web:0.17.1-alpha
+    image: scalefocusad/photopixels-web:automation
     deploy:
       labels:
         automation.environment:
@@ -18,7 +18,7 @@ services:
       - backend
 
   backend:
-    image: scalefocusad/photopixels-backend-net:0.9.8
+    image: scalefocusad/photopixels-backend-net:automation
     deploy:
       labels:
         automation.environment:

@@ -17,7 +17,8 @@ if [ \"$SUITE_NAME\" = \"web\" ]; then \
   -DsuiteXmlFile=${SUITE_NAME} \
   -DwebUrl=${WEB_URL} \
   -DseleniumHubHost=${SELENIUM_GRID_URL} \
-  -Dwebdriver.remote.isRemote=${IS_REMOTE}; \
+  -DisPrepareUsers=${PREPARE_USERS:-true} \
+  -Dwebdriver.remote.isRemote=${IS_REMOTE:-true}; \
 else \
   mvn -q clean test \
   -DbaseUri=${BASE_URI} \

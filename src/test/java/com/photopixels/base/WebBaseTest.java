@@ -21,7 +21,10 @@ public class WebBaseTest implements IBaseTest {
 
     @BeforeSuite(alwaysRun = true)
     public void initSuiteWeb() {
-        prepareUsers();
+        boolean isPrepareUsers = Boolean.parseBoolean(System.getProperty("isPrepareUsers"));
+        if (isPrepareUsers) {
+            prepareUsers();
+        }
     }
 
     @BeforeClass(alwaysRun = true)

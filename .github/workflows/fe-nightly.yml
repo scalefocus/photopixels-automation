@@ -113,6 +113,7 @@ jobs:
             -e SELENIUM_GRID_URL="selenium-hub" \
             -e IS_REMOTE="true" \
             -e SUITE_NAME="web" \
+            -e PREPARE_USERS="true" \
             --network frontend_sf-photos-net \
             "$AUTOMATION_TAG"
       - name: Collect test artifacts
@@ -218,7 +219,7 @@ jobs:
           set -e
           rows=""
           shopt -s nullglob
-          for f in "$ART_DIR"/allure-results/*-result.json; do
+          for f in "$ART_DIR"/allure-results-fe/*-result.json; do
             [ -e "$f" ] || continue
             # Extract simple string fields
             status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
