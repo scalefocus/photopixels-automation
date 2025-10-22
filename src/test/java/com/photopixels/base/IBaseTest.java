@@ -60,7 +60,6 @@ public interface IBaseTest {
 
 	static void configureRestAssured() {
 		baseURI = getBaseUri();
-		;
 	}
 
 	default void prepareUsers() {
