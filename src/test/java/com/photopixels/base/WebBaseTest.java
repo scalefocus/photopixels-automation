@@ -9,6 +9,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 public class WebBaseTest implements IBaseTest {
 
@@ -17,6 +18,14 @@ public class WebBaseTest implements IBaseTest {
 
     @Getter
     protected WebDriver driver;
+
+    @BeforeSuite(alwaysRun = true)
+    public void initSuiteWeb() {
+        boolean isPrepareUsers = Boolean.parseBoolean(System.getProperty("isPrepareUsers"));
+        if (isPrepareUsers) {
+            prepareUsers();
+        }
+    }
 
     @BeforeClass(alwaysRun = true)
     public void setupBaseClass() {
@@ -40,7 +49,12 @@ public class WebBaseTest implements IBaseTest {
     }
 
     public LoginPage loadPhotoPixelsApp() {
-        driver.get(configProperties.getProperty("webUrl"));
+        String webUrl = System.getProperty("webUrl");
+
+        if (webUrl == null) {
+            webUrl = configProperties.getProperty("webUrl");
+        }
+        driver.get(webUrl);
 
         return new LoginPage(driver);
     }

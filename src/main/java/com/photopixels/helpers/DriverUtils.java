@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
@@ -56,7 +57,8 @@ public class DriverUtils {
 
 		browser = BrowserEnum.fromString(brw);
 
-		isGridRequired = Boolean.parseBoolean(props.getProperty("useSeleniumGrid"));
+		isGridRequired = Boolean.parseBoolean(System.getProperty("webdriver.remote.isRemote"))
+				|| Boolean.parseBoolean(props.getProperty("useSeleniumGrid"));
 
 		if (isGridRequired) {
 			String host = System.getProperty("seleniumHubHost");
@@ -81,6 +83,7 @@ public class DriverUtils {
 		switch (browser) {
 		case CHROME:
 			ChromeOptions chromeOptions = getChromeOptions();
+			chromeOptions.addArguments("--unsafely-treat-insecure-origin-as-secure=" + System.getProperty("webUrl"));
 
 			driver = new RemoteWebDriver(url, chromeOptions);
 
@@ -94,6 +97,7 @@ public class DriverUtils {
 		default:
 			break;
 		}
+		((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());
 	}
 
 	private void getLocalDriver() {

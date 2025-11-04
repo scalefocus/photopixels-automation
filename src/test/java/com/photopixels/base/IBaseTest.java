@@ -1,6 +1,15 @@
 package com.photopixels.base;
 
 
+import com.photopixels.api.dtos.admin.GetUserResponseDto;
+import com.photopixels.api.dtos.status.GetStatusResponseDto;
+import com.photopixels.api.dtos.users.LoginResponseDto;
+import com.photopixels.api.steps.admin.GetUsersSteps;
+import com.photopixels.api.steps.admin.PostDisableRegistrationSteps;
+import com.photopixels.api.steps.admin.PostRegisterUserAdminSteps;
+import com.photopixels.api.steps.status.GetStatusSteps;
+import com.photopixels.api.steps.users.PostLoginSteps;
+import com.photopixels.enums.UserRolesEnum;
 import com.photopixels.helpers.InputDataHelper;
 import com.photopixels.helpers.PropertiesUtils;
 import io.qameta.allure.Allure;
@@ -9,7 +18,10 @@ import org.testng.annotations.AfterSuite;
 
 import java.io.*;
 import java.nio.file.FileSystems;
+import java.util.Arrays;
 import java.util.Properties;
+
+import static io.restassured.RestAssured.baseURI;
 
 public interface IBaseTest {
 
@@ -44,6 +56,60 @@ public interface IBaseTest {
 		copyReportHistory(allureResults);
 		generateEnvironmentFile(allureResults);
 		generateCategoriesFile(allureResults);
+	}
+
+	static void configureRestAssured() {
+		baseURI = getBaseUri();
+	}
+
+	default void prepareUsers() {
+		configureRestAssured();
+		String token = getAdminToken();
+		boolean isRegistrationEnabled = getRegistrationStatus();
+		if (!isRegistrationEnabled) {
+			PostDisableRegistrationSteps postDisableRegistrationSteps = new PostDisableRegistrationSteps(token);
+			postDisableRegistrationSteps.disableRegistration(true);
+		}
+		GetUsersSteps getUsersSteps = new GetUsersSteps(token);
+		GetUserResponseDto[] getUserResponseDto = getUsersSteps.getUsers();
+
+		if (Arrays.stream(getUserResponseDto).noneMatch(
+				u -> u.getEmail().equals(inputData.getUsername()))) {
+			registerUser(inputData.getUserFullName(), inputData.getUsername(), inputData.getPassword(), UserRolesEnum.USER);
+		}
+	}
+
+	default boolean getRegistrationStatus() {
+		return getStatus();
+	}
+
+	default boolean getStatus() {
+		GetStatusSteps getStatusSteps = new GetStatusSteps();
+		GetStatusResponseDto getStatusResponseDto = getStatusSteps.getStatus();
+
+		return getStatusResponseDto.getRegistration();
+	}
+
+	default String getAdminToken() {
+		return getToken(inputData.getUsernameAdmin(), inputData.getPasswordAdmin());
+	}
+
+	default String getToken(String username, String password) {
+		PostLoginSteps postLoginSteps = new PostLoginSteps();
+		LoginResponseDto loginResponseDto = postLoginSteps.login(username, password);
+
+		return loginResponseDto.getTokenType() + " " + loginResponseDto.getAccessToken();
+	}
+
+	default String getUserToken() {
+		return getToken(inputData.getUsername(), inputData.getPassword());
+	}
+
+	default void registerUser(String username, String email, String password, UserRolesEnum role) {
+		String token = getAdminToken();
+
+		PostRegisterUserAdminSteps postRegisterUserAdminSteps = new PostRegisterUserAdminSteps(token);
+		postRegisterUserAdminSteps.registerUserAdmin(username, email, password, role);
 	}
 
 	 default void addIssueLinkToAllureReport(String issueLink) {

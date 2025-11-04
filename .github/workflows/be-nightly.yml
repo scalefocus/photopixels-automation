@@ -136,6 +136,7 @@ jobs:
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results
           allure_report: ${{ env.REPORT_DIR }}
+          keep_reports: 5
 
       - name: Verify Allure output
         shell: bash
@@ -182,50 +183,81 @@ jobs:
             echo "verdict=$VERDICT"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Build failed-tests table HTML from Surefire XML
+      - name: Build failed-tests table HTML from Allure results
         id: failedtbl
         shell: bash
         run: |
           set -e
           rows=""
           shopt -s nullglob
-          for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
-            cls=""
-            name=""
-            msg=""
-            while IFS= read -r line; do
-              case "$line" in
-                *"<testcase "*)
-                  cls=$(printf '%s\n' "$line" | sed -n 's/.*classname="\([^"]*\)".*/\1/p')
-                  name=$(printf '%s\n' "$line" | sed -n 's/.*name="\([^"]*\)".*/\1/p')
-                  msg=""
-                  ;;
-                *"<failure "*|*"<error "*)
-                  msg=$(printf '%s\n' "$line" | sed -n 's/.*message="\([^"]*\)".*/\1/p')
-                  if [ -n "$msg" ]; then
-                    esc_full=$(printf '%s.%s' "$cls" "$name" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-                    tmp_msg=$(printf '%s' "$msg" | sed -e 's/&#10;/___BR___/g' -e 's/\\n/___BR___/g' -e 's/\r\n/___BR___/g')
-                    esc_msg=$(printf '%s' "$tmp_msg" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
-                    esc_msg=$(printf '%s' "$esc_msg" | sed -e 's/\&amp;lt;/\&lt;/g' -e 's/\&amp;gt;/\&gt;/g' -e 's/\&amp;quot;/\&quot;/g' -e 's/\&amp;\#10;/___BR___/g')
-                    esc_msg=$(printf '%s' "$esc_msg" | sed -e 's/___BR___/<br\/>/g')
-                    rows="${rows}<tr><td><b>${esc_full}</b><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${esc_msg}</div></td></tr>"$'\n'
-                  fi
-                  ;;
-              esac
-            done < "$f"
+          for f in "$ART_DIR"/allure-results/*-result.json; do
+            [ -e "$f" ] || continue
+            # Extract simple string fields
+            status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            fullName=$(grep -m1 '"fullName"[[:space:]]*:' "$f" | sed 's/.*"fullName"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            test_name=$(grep -Pom1 '"links":[^}]*},[[:space:]]*"name"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" || true)
+            issueUrl=$(grep -A2 '"type"[[:space:]]*:[[:space:]]*"issue"' "$f" | grep -m1 '"url"' | sed 's/.*"url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            msg=$(grep -Poz '"message"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" | tr -d '\0' || true)
+            if grep -Eq '"known"[[:space:]]*:[[:space:]]*true' "$f"; then
+              known_flag="true"
+            else
+              known_flag="false"
+            fi
+            if [ "$status" != "failed" ] && [ "$status" != "broken" ]; then
+              continue
+            fi
+
+            esc_full=$(printf '%s' "$fullName" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+            issue_link=""
+            if [ -n "$issueUrl" ] && [ "$issueUrl" != "null" ]; then
+            issue_link="<br/><a href=\"$issueUrl\" target=\"_blank\">GitHub Issue</a>"
+            fi
+          
+            row="<tr><td><b>${esc_full}</b><br/><i>${test_name}</i><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${msg}${issue_link}</div></td></tr>"
+            if [ "$known_flag" = "true" ]; then
+              known_rows="${known_rows}${row}"$'\n'
+            elif [ "$status" = "broken" ]; then
+              broken_rows="${broken_rows}${row}"$'\n'
+            else
+              failed_rows="${failed_rows}${row}"$'\n'
+            fi
           done
 
-          if [ -n "$rows" ]; then
+          if [ -n "$failed_rows" ] || [ -n "$known_rows" ] || [ -n "$broken_rows" ]; then
             {
-              echo '<h3>Failed tests:</h3><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
-              echo '<thead><tr style="background:#f5f5f5;"><th style="text-align:left;">Test &amp; reason</th></tr></thead><tbody>'
-              printf "%s\n" "$rows"
+              echo '<h3>Failed tests:</h3>'
+              if [ -n "$failed_rows" ]; then
+                echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+                echo '<thead><tr style="background:#f5f5f5;"><th>Test &amp; reason</th></tr></thead><tbody>'
+                printf "%s\n" "$failed_rows"
+                echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests.</i></p>'
+              fi
+          
+              echo '<h3>Known issues:</h3>'
+              if [ -n "$known_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#fff8dc;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$known_rows"
               echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests with known issues.</i></p>'
+              fi
+          
+              echo '<h3>Broken tests:</h3>'
+              if [ -n "$broken_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#ffe6e6;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$broken_rows"
+              echo '</tbody></table>'
+              else
+              echo '<p><i>No broken tests.</i></p>'
+              fi
             } > /tmp/failed_table.html
           else
             echo '<h3>Failed tests:</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
           fi
-
           oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
           echo "table=$oneline" >> "$GITHUB_OUTPUT"
 
@@ -290,3 +322,8 @@ jobs:
             </p>
 
             <p>Best regards,<br/>GitHub Actions</p>
+
+      - name: Remove files
+        shell: bash
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/ci-artifacts"

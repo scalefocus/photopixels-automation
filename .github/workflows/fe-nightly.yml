@@ -9,12 +9,15 @@ on:
 env:
   AUTOMATION_REPO_PATH: automation
   FRONTEND_REPO_PATH: frontend
+  BACKEND_REPO_PATH: backend
   COMPOSE_FILE: ${{ github.workspace }}/automation/utils/docker-compose.yml
-  FRONTEND_TAG: scalefocusad/photopixels-frontend:automation
+  GRID_COMPOSE_FILE: ${{ github.workspace }}/automation/utils/frontend/docker-compose.selenium.yml
+  BACKEND_TAG: scalefocusad/photopixels-backend-net:automation
+  FRONTEND_TAG: scalefocusad/photopixels-web:automation
   AUTOMATION_TAG: scalefocusad/photopixels-automated-tests:automation
 
 jobs:
-  build-fe:
+  build-be:
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -27,7 +30,35 @@ jobs:
           docker system df || true
       - uses: actions/checkout@v4
         with:
-          repository: scalefocus/photopixels-frontend
+          repository: scalefocus/photopixels-backend-net
+          submodules: recursive
+          fetch-depth: 0
+          path: ${{ env.BACKEND_REPO_PATH }}
+      - name: Build docker image (BE)
+        working-directory: ${{ env.BACKEND_REPO_PATH }}
+        run: |
+          docker build \
+            --no-cache \
+            --build-arg VERSION="1.0.0" \
+            --build-arg VERSION_SUFFIX="" \
+            -t "$BACKEND_TAG" \
+            -f ./src/SF.PhotoPixels.API/Dockerfile .
+
+  build-fe:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    needs: [ build-be ]
+    steps:
+      - name: Disk sanity (safe prune before build)
+        run: |
+          docker container prune -f || true
+          docker image prune -f || true
+          docker builder prune -af || true
+          df -h || true
+          docker system df || true
+      - uses: actions/checkout@v4
+        with:
+          repository: scalefocus/photopixels-web
           fetch-depth: 0
           path: ${{ env.FRONTEND_REPO_PATH }}
       - name: Build docker image (FE)
@@ -61,50 +92,54 @@ jobs:
 
   automation:
     runs-on: self-hosted
-    timeout-minutes: 20
+    timeout-minutes: 40
     needs: [build-automation]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: ${{ env.AUTOMATION_REPO_PATH }}
-      - name: Start environment (frontend + backend + db)
+      - name: Start environment (frontend + backend + db) with selenium grid
         run: |
-          docker compose -f "${COMPOSE_FILE}" pull frontend backend db || true
-          docker compose -f "${COMPOSE_FILE}" up -d frontend backend db
+          docker compose -f "${GRID_COMPOSE_FILE}" pull frontend backend db selenium-hub chrome || true
+          docker compose -f "${GRID_COMPOSE_FILE}" up -d frontend backend db selenium-hub chrome
       - name: Run UI tests
         id: run-tests
         continue-on-error: true
         run: |
           docker run -i --name ui-tests \
-            -e WEB_URL="http://frontend:3000/"  \
-            -e SUITE_NAME="ui" \
-            --network utils_sf-photos-net \
+            -e WEB_URL="http://frontend/"  \
+            -e BASE_URI="http://backend:8080/" \
+            -e SELENIUM_GRID_URL="selenium-hub" \
+            -e IS_REMOTE="true" \
+            -e SUITE_NAME="web" \
+            -e PREPARE_USERS="true" \
+            --network frontend_sf-photos-net \
             "$AUTOMATION_TAG"
       - name: Collect test artifacts
         if: always()
         run: |
           set -e
-          mkdir -p "${GITHUB_WORKSPACE}/test-artifacts"
-          docker cp ui-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts/surefire-reports" || true
-          docker cp ui-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts/allure-results"   || true
+          mkdir -p "${GITHUB_WORKSPACE}/test-artifacts-fe"
+          docker cp ui-tests:/app/target/surefire-reports "${GITHUB_WORKSPACE}/test-artifacts-fe/surefire-reports-fe" || true
+          docker cp ui-tests:/app/target/allure-results   "${GITHUB_WORKSPACE}/test-artifacts-fe/allure-results-fe"   || true
       - name: Upload raw artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: fe-ui-test-artifacts
-          path: test-artifacts/**
+          path: test-artifacts-fe/**
           if-no-files-found: warn
           retention-days: 14
       - name: Cleanup containers & stack
         if: always()
         run: |
           docker rm -f ui-tests || true
-          docker compose -f "$COMPOSE_FILE" down -v || true
+          docker compose -f "$GRID_COMPOSE_FILE" down -v || true
       - name: Cleanup workspace artifacts (local)
         if: always()
         run: |
-          rm -rf "${GITHUB_WORKSPACE}/test-artifacts" || true
+          rm -rf "${GITHUB_WORKSPACE}/test-artifacts-fe" || true
 
   allure-report-email:
     runs-on: self-hosted
@@ -114,9 +149,9 @@ jobs:
     steps:
       - name: Set workspace-scoped paths
         run: |
-          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report" >> "$GITHUB_ENV"
-          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts" "${GITHUB_WORKSPACE}/ci-allure-report"
+          echo "ART_DIR=${GITHUB_WORKSPACE}/ci-artifacts-fe" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=${GITHUB_WORKSPACE}/ci-allure-report-fe" >> "$GITHUB_ENV"
+          mkdir -p "${GITHUB_WORKSPACE}/ci-artifacts-fe" "${GITHUB_WORKSPACE}/ci-allure-report-fe"
 
       - name: Download test artifacts
         uses: actions/download-artifact@v4
@@ -129,18 +164,131 @@ jobs:
         continue-on-error: true
         uses: simple-elf/allure-report-action@v1.8
         with:
-          allure_results: ${{ env.ART_DIR }}/allure-results
+          allure_results: ${{ env.ART_DIR }}/allure-results-fe
           allure_report: ${{ env.REPORT_DIR }}
+          keep_reports: 5
 
       - name: Verify Allure output
         run: |
-          [ -f "$REPORT_DIR/index.html" ] && echo "index.html OK" || echo "index.html MISSING"
+          echo "=== REPORT_DIR tree ==="; ls -la "$REPORT_DIR" || true
+          [ -f "$REPORT_DIR/index.html" ] && echo "index.html: OK" || echo "index.html: MISSING"
+          [ -f "$REPORT_DIR/widgets/summary.json" ] && echo "summary.json: OK" || echo "summary.json: MISSING"
 
-      - name: Extract summary
+      - name: Extract summary (prefer Allure, fallback to Surefire)
         id: summary
+        shell: bash
         run: |
-          # (same parsing logic as BE version)
-          echo "verdict=PASSED" >> "$GITHUB_OUTPUT"
+          set -e
+          TOTAL=0; FAILED=0; BROKEN=0; SKIPPED=0; PASSED=0
+          if [ -f "$REPORT_DIR/widgets/summary.json" ]; then
+            PASSED=$(grep -o '"passed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            FAILED=$(grep -o '"failed":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            BROKEN=$(grep -o '"broken":[0-9]\+'  "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            SKIPPED=$(grep -o '"skipped":[0-9]\+' "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+            TOTAL=$(grep -o '"total":[0-9]\+'    "$REPORT_DIR/widgets/summary.json" | head -1 | cut -d: -f2 || echo 0)
+          else
+            for f in "$ART_DIR"/surefire-reports/TEST-*.xml; do
+              [ -f "$f" ] || continue
+              line=$(head -1 "$f")
+              t=$(echo "$line"  | sed -n 's/.*tests="\([0-9]\+\)".*/\1/p')
+              fa=$(echo "$line" | sed -n 's/.*failures="\([0-9]\+\)".*/\1/p')
+              er=$(echo "$line" | sed -n 's/.*errors="\([0-9]\+\)".*/\1/p')
+              sk=$(echo "$line" | sed -n 's/.*skipped="\([0-9]\+\)".*/\1/p')
+              TOTAL=$((TOTAL + ${t:-0}))
+              FAILED=$((FAILED + ${fa:-0}))
+              BROKEN=$((BROKEN + ${er:-0}))
+              SKIPPED=$((SKIPPED + ${sk:-0}))
+            done
+            PASSED=$((TOTAL - FAILED - BROKEN - SKIPPED))
+            [ $PASSED -lt 0 ] && PASSED=0 || true
+          fi
+          VERDICT="PASSED"; [ $((FAILED + BROKEN)) -gt 0 ] && VERDICT="FAILED"
+          {
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "broken=$BROKEN"
+            echo "skipped=$SKIPPED"
+            echo "total=$TOTAL"
+            echo "verdict=$VERDICT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build failed-tests table HTML from Allure results
+        id: failedtbl
+        shell: bash
+        run: |
+          set -e
+          rows=""
+          shopt -s nullglob
+          for f in "$ART_DIR"/allure-results-fe/*-result.json; do
+            [ -e "$f" ] || continue
+            # Extract simple string fields
+            status=$(grep -m1 '"status"[[:space:]]*:' "$f" | sed 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            fullName=$(grep -m1 '"fullName"[[:space:]]*:' "$f" | sed 's/.*"fullName"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            test_name=$(grep -Pom1 '"links":[^}]*},[[:space:]]*"name"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" || true)
+            issueUrl=$(grep -A2 '"type"[[:space:]]*:[[:space:]]*"issue"' "$f" | grep -m1 '"url"' | sed 's/.*"url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+            msg=$(grep -Poz '"message"[[:space:]]*:[[:space:]]*"\K([^"\\]|\\.)*(?=")' "$f" | tr -d '\0' || true)
+            if grep -Eq '"known"[[:space:]]*:[[:space:]]*true' "$f"; then
+              known_flag="true"
+            else
+              known_flag="false"
+            fi
+            if [ "$status" != "failed" ] && [ "$status" != "broken" ]; then
+              continue
+            fi
+
+            esc_full=$(printf '%s' "$fullName" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
+            issue_link=""
+            if [ -n "$issueUrl" ] && [ "$issueUrl" != "null" ]; then
+            issue_link="<br/><a href=\"$issueUrl\" target=\"_blank\">GitHub Issue</a>"
+            fi
+          
+            row="<tr><td><b>${esc_full}</b><br/><i>${test_name}</i><br/><div style=\"white-space:pre-wrap;margin:4px 0;\">${msg}${issue_link}</div></td></tr>"
+            if [ "$known_flag" = "true" ]; then
+              known_rows="${known_rows}${row}"$'\n'
+            elif [ "$status" = "broken" ]; then
+              broken_rows="${broken_rows}${row}"$'\n'
+            else
+              failed_rows="${failed_rows}${row}"$'\n'
+            fi
+          done
+
+          if [ -n "$failed_rows" ] || [ -n "$known_rows" ] || [ -n "$broken_rows" ]; then
+            {
+              echo '<h3>Failed tests:</h3>'
+              if [ -n "$failed_rows" ]; then
+                echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+                echo '<thead><tr style="background:#f5f5f5;"><th>Test &amp; reason</th></tr></thead><tbody>'
+                printf "%s\n" "$failed_rows"
+                echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests.</i></p>'
+              fi
+          
+              echo '<h3>Known issues:</h3>'
+              if [ -n "$known_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#fff8dc;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$known_rows"
+              echo '</tbody></table>'
+              else
+              echo '<p><i>No failed tests with known issues.</i></p>'
+              fi
+          
+              echo '<h3>Broken tests:</h3>'
+              if [ -n "$broken_rows" ]; then
+              echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">'
+              echo '<thead><tr style="background:#ffe6e6;"><th>Test &amp; reason</th></tr></thead><tbody>'
+              printf "%s\n" "$broken_rows"
+              echo '</tbody></table>'
+              else
+              echo '<p><i>No broken tests.</i></p>'
+              fi
+            } > /tmp/failed_table.html
+          else
+            echo '<h3>Failed tests:</h3><p><i>No failed/broken tests.</i></p>' > /tmp/failed_table.html
+          fi
+          oneline=$(tr '\n' ' ' < /tmp/failed_table.html | sed 's/  \+/ /g')
+          echo "table=$oneline" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         if: success()
@@ -163,9 +311,7 @@ jobs:
           html_body: |
             <p>Hello team,</p>
             <p>The nightly FE run of the automation tests finished with status: <b>${{ steps.summary.outputs.verdict || 'PASSED' }}</b>.</p>
-            <p>Workflow summary & Allure report: 
-              <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></p>
-           
+
             <h3>Summary:</h3>
             <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
               <tr>
@@ -183,3 +329,20 @@ jobs:
                 <td align="center" style="color:gray;"><b>${{ steps.summary.outputs.skipped || '0' }}</b></td>
               </tr>
             </table>
+
+            <div style="margin-top:12px;">
+              ${{ steps.failedtbl.outputs.table }}
+            </div>
+
+            <p>
+              <ul>
+                <li>Workflow summary &amp; Allure report: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">open</a></li>
+              </ul>
+            </p>
+
+            <p>Best regards,<br/>GitHub Actions</p>
+
+      - name: Remove files
+        shell: bash
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/ci-artifacts-fe"

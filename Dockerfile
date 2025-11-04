@@ -11,8 +11,17 @@ COPY upload_files upload_files/
 RUN mvn clean install -DskipTests
 
 ENTRYPOINT ["/bin/bash", "-c", "\
-if [ \"$SUITE_NAME\" = \"frontend\" ]; then \
-  mvn clean -DsuiteXmlFile=${SUITE_NAME} test -Dwebdriver.remote.url=${SELENIUM_GRID_URL} -Dwebdriver.remote.isRemote=true; \
+if [ \"$SUITE_NAME\" = \"web\" ]; then \
+  mvn clean test \
+  -DbaseUri=${BASE_URI} \
+  -DsuiteXmlFile=${SUITE_NAME} \
+  -DwebUrl=${WEB_URL} \
+  -DseleniumHubHost=${SELENIUM_GRID_URL} \
+  -DisPrepareUsers=${PREPARE_USERS:-true} \
+  -Dwebdriver.remote.isRemote=${IS_REMOTE:-true}; \
 else \
-  mvn clean -q -DbaseUri=${BASE_URI} -DsuiteXmlFile=${SUITE_NAME} -DlocalMailUri=${LOCAL_MAIL_URI} test; \
+  mvn -q clean test \
+  -DbaseUri=${BASE_URI} \
+  -DsuiteXmlFile=${SUITE_NAME} \
+  -DlocalMailUri=${LOCAL_MAIL_URI}; \
 fi"]

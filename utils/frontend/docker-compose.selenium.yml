@@ -2,17 +2,78 @@
 # Add the `-d` flag at the end for detached execution
 # To stop the execution, hit Ctrl+C, and then `docker compose -f .\docker-compose.selenium.yml down`
 services:
+  frontend:
+    image: scalefocusad/photopixels-web:automation
+    deploy:
+      labels:
+        automation.environment:
+    ports:
+      - '5001:80'
+    networks:
+      - sf-photos-net
+    environment:
+      SERVER_URL: 'http://backend:8080'
+    restart: always
+    depends_on:
+      - backend
+
+  backend:
+    image: scalefocusad/photopixels-backend-net:automation
+    deploy:
+      labels:
+        automation.environment:
+
+    ports:
+      - '8888:8080'
+    networks:
+      - sf-photos-net
+      - sf-photos-db
+    environment:
+      ConnectionStrings__PhotosMetadata: 'Host=db;Port=5432;Database=photosdb;Username=postgres;Password=test123'
+      Admin__Email: 'testadmin@test.com'
+      Admin__Password: 'Test12345!'
+      EmailConfiguration__Host: ''
+      EmailConfiguration__Port: ''
+      EmailConfiguration__CheckCertificateRevocation: false
+    restart: always
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14.3
+    deploy:
+      labels:
+        automation.environment:
+    networks:
+      - sf-photos-db
+    environment:
+      POSTGRES_DB: 'photosdb'
+      POSTGRES_PASSWORD: 'test123'
+    restart: always
+
   chrome:
     image: selenium/node-chrome:4.35.0-20250828
     platform: linux/amd64
     shm_size: 2gb
+    networks:
+      - sf-photos-net
     depends_on:
       - selenium-hub
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   chrome_video:
     image: selenium/video:ffmpeg-8.0-20250828
+    networks:
+      - sf-photos-net
     volumes:
       - /tmp/videos:/videos
     depends_on:
@@ -26,18 +87,32 @@ services:
   selenium-hub:
     image: selenium/hub:4.35.0-20250828
     container_name: selenium-hub
+    networks:
+      - sf-photos-net
     ports:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   file_browser:
     image: filebrowser/filebrowser:latest
     container_name: file_browser
     restart: always
+    networks:
+      - sf-photos-net
     ports:
       - "8081:80"
     volumes:
       - /tmp/videos:/srv
     environment:
       - FB_NOAUTH=true
+
+networks:
+  sf-photos-db:
+  sf-photos-net:

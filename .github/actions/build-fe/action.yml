@@ -9,6 +9,10 @@ inputs:
     description: 'Branch to checkout'
     required: false
     default: 'main'
+  tag:
+    description: 'Tag for the docker test image'
+    required: false
+    default: 'automation'
 
 runs:
   using: "composite"
