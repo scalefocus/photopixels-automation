@@ -162,7 +162,7 @@ jobs:
       - name: Generate Allure report
         id: gen
         continue-on-error: true
-        uses: simple-elf/allure-report-action@v1.8
+        uses: simple-elf/allure-report-action@v1.13
         with:
           allure_results: ${{ env.ART_DIR }}/allure-results-fe
           allure_report: ${{ env.REPORT_DIR }}
