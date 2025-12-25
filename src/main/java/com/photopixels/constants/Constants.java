@@ -22,7 +22,7 @@ public class Constants {
     public static final String GALLERY_PATH = "/storage/emulated/0/Download/";
 
     // Login Web
-    public static final String OVERVIEW_HEADER = "Overview";
+    public static final String OVERVIEW_HEADER = "Gallery";
     public static final String WRONG_CREDENTIALS_MESSAGE = "Wrong email or password!";
 
     // Create User Web
@@ -44,7 +44,12 @@ public class Constants {
     public static final String FILE_PERMANENTLY_DELETED = "Object(s) deleted permanently successfully.";
     public static final String MEDIA_ADDED_TO_FAVORITES = "Object(s) added to Favorites successfully.";
     public static final String MEDIA_REMOVED_FROM_FAVORITES = "Object(s) removed from favorites successfully.";
-    
+    public static final String ALBUM_CREATED_MESSAGE = "Album has been updated.";
+    public static final String ALBUM_DELETED_MESSAGE = "The album \"Test Album\" has been successfully deleted.";
+    public static final String ALBUM_DELETED_MESSAGE_SHORT = "Album deleted.";
+    public static final String SELECTED_ALBUM_DELETED_MESSAGE = "Deleted: 1 albums.";
+    public static final String MEDIA_ADDED_TO_ALBUM_MESSAGE = "The file(s) were added to the selected album(s).";
+
     // Login Mobile
     public static final String LOGIN_ERROR_TITLE = "Error Login";
     public static final String LOGIN_ERROR_TEXT = "Error while Login. Please try again.";
