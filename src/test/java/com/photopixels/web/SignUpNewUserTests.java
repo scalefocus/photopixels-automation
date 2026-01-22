@@ -54,8 +54,8 @@ public class SignUpNewUserTests extends WebBaseTest implements IApiBaseTest {
 
         loginPage = signUpUserPage.signUpNewUser(randomName, randomEmail, PASSWORD);
 
-        /* This wait is necessary because when the page loads too fast the elements don't populate */
-        loginPage.waitMs();
+        loginPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+        // dynamic wait was executing properly.
 
         OverviewPage overviewPage = loginPage.login(randomEmail, PASSWORD);
 

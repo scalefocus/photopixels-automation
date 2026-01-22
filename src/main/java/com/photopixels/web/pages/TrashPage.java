@@ -15,7 +15,7 @@ public class TrashPage extends MediaContentPage {
     @FindBy(xpath = "//h5[text()='Trash']")
     private WebElement trashHeader;
 
-    @FindBy(xpath = "//button[contains(@class, 'MuiButton-text') and text()='Empty Trash']")
+    @FindBy(xpath = "//button[normalize-space()='Empty Trash']")
     private WebElement emptyTrashButton;
 
     @FindBy(xpath = "//button[contains(@class, 'MuiButton-containedError') and text()='Empty Trash']")
