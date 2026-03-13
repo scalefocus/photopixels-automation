@@ -41,6 +41,12 @@ public class FavoritesPage extends MediaContentPage {
 
     @Step("Verify all media items have a favorite icon")
     public boolean allMediaHasFavoriteIcon() {
+        waitForAllElementsToBeVisible(favoriteIcon);
+
+        if (favoriteIcon.isEmpty()) {
+            return false;
+        }
+
         for (WebElement icon : favoriteIcon) {
             if (!icon.isDisplayed()) {
                 return false;

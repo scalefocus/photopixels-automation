@@ -1,9 +1,10 @@
 package com.photopixels.web.pages;
 
 import io.qameta.allure.Step;
-import org.openqa.selenium.Alert;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -26,7 +27,7 @@ public class AlbumsPage extends MediaContentPage {
     @FindBy(xpath = "//button[normalize-space()='Create Album']")
     private WebElement clickCreateAlbumButton;
 
-    @FindBy(css = "#root div:nth-of-type(2) > div:nth-of-type(2) > div")
+    @FindBy(xpath = "//div[@role='alert']")
     private WebElement albumCreatedMessage;
 
     @FindBy(css = "[data-testid='DeleteIcon']")
@@ -35,29 +36,20 @@ public class AlbumsPage extends MediaContentPage {
     @FindBy(xpath = "//button[normalize-space()='OK']")
     private WebElement confirmDelete;
 
-    @FindBy(css = "div[role='dialog']")
-    private WebElement confirmationDialog;
-
-    @FindBy(css = "div[role='status']")
-    private WebElement albumDeletedToast;
-
     @FindBy(css = "a.MuiTypography-root")
     private WebElement albumCardName;
 
     @FindBy(xpath = "//button[normalize-space()='Delete Album']")
     private WebElement deleteAlbum;
 
-    @FindBy(css = "input[aria-label='Album selection']")
+    @FindBy(css = "input[type='checkbox'][aria-label='Album selection']")
     private WebElement selectAlbum;
 
-    @FindBy(xpath = "//button[@aria-label='Изтрий избраните']")
+    @FindBy(css = "button[aria-label='Изтрий избраните']")
     private WebElement deleteSelectedAlbum;
 
     @FindBy(xpath = "//button[normalize-space()='Delete']")
     private WebElement deleteSelectedAlbums;
-
-    @FindBy(xpath = "//div[@role='status']")
-    private WebElement selectedAlbumDeletedMessage;
 
     @FindBy(xpath = "//a[normalize-space()='Test Album']")
     private WebElement albumNameLink;
@@ -73,8 +65,6 @@ public class AlbumsPage extends MediaContentPage {
 
     @FindBy(css = "span.MuiCircularProgress-root")
     private WebElement uploadLoader;
-
-    private String deletedMessage;
 
     public AlbumsPage(WebDriver driver) {
         super(driver);
@@ -107,8 +97,9 @@ public class AlbumsPage extends MediaContentPage {
 
     @Step("Get album created message")
     public String getAlbumCreatedMessage() {
+        waitForElementToBeVisible(albumCreatedMessage);
 
-        return getStatusMessage();
+        return albumCreatedMessage.getText().trim();
     }
 
     @Step("Delete album function")
@@ -116,10 +107,8 @@ public class AlbumsPage extends MediaContentPage {
         waitForElementToBeVisible(deleteAlbumButton);
         deleteAlbumButton.click();
 
-
-        Alert alert = driver.switchTo().alert();
-        this.deletedMessage = alert.getText();
-        alert.accept();
+        waitForAlertToBePresent();
+        driver.switchTo().alert().accept();
     }
 
     @Step("Read toast deleted message")
@@ -139,17 +128,18 @@ public class AlbumsPage extends MediaContentPage {
         waitForElementToBeVisible(deleteAlbum);
         deleteAlbum.click();
 
-        Alert alert = driver.switchTo().alert();
-        this.deletedMessage = alert.getText();
-        alert.accept();
+        waitForAlertToBePresent();
+        driver.switchTo().alert().accept();
     }
 
     @Step("Delete album with selection")
     public void deleteAlbumWithSelection() {
-        waitForElementToBeVisible(selectAlbum);
-        selectAlbum.click();
+        Actions actions = new Actions(driver);
+        actions.moveToElement(selectAlbum).perform();
 
-        waitForElementToBeVisible(deleteSelectedAlbum);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", selectAlbum);
+
+        waitForElementToBeClickable(deleteSelectedAlbum);
         deleteSelectedAlbum.click();
 
         waitForElementToBeVisible(deleteSelectedAlbums);
@@ -170,6 +160,8 @@ public class AlbumsPage extends MediaContentPage {
 
     @Step("Check if image is present in the album")
     public boolean isImagePresentInAlbum() {
+        waitForAllElementsToBeVisible(albumThumbnails);
+
         return !albumThumbnails.isEmpty();
     }
 

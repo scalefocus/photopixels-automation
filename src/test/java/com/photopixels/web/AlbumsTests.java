@@ -37,9 +37,6 @@
 
             overviewPage.addToFavoritesMedia();
 
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
-
             Assert.assertEquals(overviewPage.getFavoriteMediaMessage(), MEDIA_ADDED_TO_FAVORITES,
                     "The message is not correct.");
 
@@ -77,9 +74,6 @@
             overviewPage.selectMedia(0);
 
             overviewPage.addToFavoritesMedia();
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             Assert.assertEquals(overviewPage.getFavoriteMediaMessage(), MEDIA_ADDED_TO_FAVORITES,
                     "The message is not correct.");
@@ -222,15 +216,13 @@
             AlbumsPage albumsPage = overviewPage.goToAlbumsTab();
             albumsPage.createAlbum();
             albumsPage.enterAlbumsName("Test Album");
+            albumsPage.getAlbumCreatedMessage();
 
             albumsPage.goToOverview();
 
             overviewPage.uploadMedia(TRAINING_FILE);
             overviewPage.selectMedia(0);
             overviewPage.addMediaToAlbum();
-
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
 
             Assert.assertEquals(overviewPage.getMediaToAlbumMessage(), MEDIA_ADDED_TO_ALBUM_MESSAGE,
                     "The message is not correct.");
@@ -270,16 +262,13 @@
             albumsPage.enterAlbumsName("Test Album");
             albumsPage.uploadMediaFromAlbum(TRAINING_FILE);
 
-            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
-            // dynamic wait was executing properly.
-
             Assert.assertEquals(albumsPage.getUploadSuccessMessage(), FILE_UPLOADED,
                     "The message is not correct.");
 
+            albumsPage.goToOverview();
+
             overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
             // dynamic wait was executing properly.
-
-            albumsPage.goToOverview();
 
             Assert.assertTrue(
                     overviewPage.isImagePresentInGallery(),
