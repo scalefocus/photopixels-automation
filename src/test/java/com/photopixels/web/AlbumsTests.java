@@ -37,6 +37,9 @@
 
             overviewPage.addToFavoritesMedia();
 
+            // TODO: Remove when issue is fixed
+            addIssueLinkToAllureReport("https://github.com/orgs/scalefocus/projects/8/views/1?pane=issue&itemId=165229290&issue=scalefocus%7Cphotopixels%7C262");
+
             Assert.assertEquals(overviewPage.getFavoriteMediaMessage(), MEDIA_ADDED_TO_FAVORITES,
                     "The message is not correct.");
 
