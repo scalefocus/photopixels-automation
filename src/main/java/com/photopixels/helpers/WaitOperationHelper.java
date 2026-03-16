@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 
+import javax.lang.model.element.Element;
 import java.time.Duration;
 import java.util.List;
 
@@ -63,6 +64,11 @@ public class WaitOperationHelper {
 	}
 
 	public void waitForElementToDisappear(WebElement element) {
+
 		wait.until(ExpectedConditions.invisibilityOf(element));
+	}
+
+	public void waitForAlertToBePresent() {
+		wait.until(ExpectedConditions.alertIsPresent());
 	}
 }

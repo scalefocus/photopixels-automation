@@ -83,6 +83,9 @@
 
             overviewPage.deleteMedia();
 
+            overviewPage.waitMs(); //Necessary wait, in order to handle the speed of the execution, as no other
+            // dynamic wait was executing properly.
+
             TrashPage trashPage = overviewPage.goToTrashTab();
 
             trashPage.selectMedia(0);

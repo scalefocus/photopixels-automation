@@ -16,7 +16,7 @@ public class SignUpUserPage extends NavigationPage {
     private WebDriver driver;
 
     //TODO to fix the xpaths
-    @FindBy(xpath = "//div//h5[contains(@class, 'css-12s6qm0')]")
+    @FindBy(xpath = "//h5[normalize-space()='Sign Up']")
     private WebElement signUpNewUserHeader;
 
     @FindBy(xpath = "//input[@id='name']")

@@ -49,6 +49,10 @@ public class BasePathsConstants {
     public static String POST_REMOVE_FAVORITES = "/object/removeFavorites";
     public static String GET_OBJECTS_FAVORITES = "/objects/favorites";
 
+    // Albums
+    public static String GET_ALBUMS = "/albums";
+    public static String DELETE_ALBUM = "/album/{Id}";
+
     // TUS
     public static String POST_CREATE_UPLOAD = "/create_upload";
     public static String GET_RESUMABLE_UPLOADS = "/resumable_uploads";
