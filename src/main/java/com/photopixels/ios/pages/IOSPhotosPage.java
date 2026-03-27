@@ -27,13 +27,18 @@ public class IOSPhotosPage {
 
     public WebElement getPhotoByIndex(int index) {
         return driver.findElement(AppiumBy.xpath(
+                "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeOther[2]/XCUIElementTypeImage[" + index + "]"
+        ));
+    }
+    public WebElement getPhotoByIndex2(int index) {
+        return driver.findElement(AppiumBy.xpath(
                 "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeOther[1]/XCUIElementTypeImage[" + index + "]"
         ));
     }
 
     public List<WebElement> getAllPhotos() {
         return driver.findElements(AppiumBy.xpath(
-                "//XCUIElementTypeScrollView/XCUIElementTypeOther[3]/XCUIElementTypeOther[1]/XCUIElementTypeImage[not(@name)]"
+                "//XCUIElementTypeScrollView//XCUIElementTypeImage[not(@name)]"
         ));
     }
 
@@ -98,6 +103,9 @@ public class IOSPhotosPage {
     public void openPhoto(int index) {
         getPhotoByIndex(index).click();
     }
+    public void openPhoto2(int index) {
+        getPhotoByIndex2(index).click();
+    }
 
     public void openPhoto() {
         openPhoto(1); // default index = 1
@@ -109,14 +117,6 @@ public class IOSPhotosPage {
 
     public void deletePhoto() {
         getDeleteButton().click();
-    }
-
-    public void addToFavorites() {
-        getHeartButton().click();
-    }
-
-    public void removeFromFavorites() {
-        getFilledHeartButton().click();
     }
 
     public void confirmDelete() {
@@ -137,6 +137,9 @@ public class IOSPhotosPage {
 
     public void addPhotoToFavorites() {
         getHeartButton().click();
+    }
+    public void removePhotoFromFavorites() {
+        getFilledHeartButton().click();
     }
 
     public void clickConfirmRestore() {

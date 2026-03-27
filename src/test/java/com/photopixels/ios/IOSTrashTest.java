@@ -1,36 +1,29 @@
 package com.photopixels.ios;
 
 import com.photopixels.helpers.IOSAddToFavoriteHelper;
+import com.photopixels.helpers.IOSDriverUtils;
 import com.photopixels.helpers.IOSRemoveFromFavoriteHelper;
 import com.photopixels.ios.pages.IOSLoginPage;
 import com.photopixels.ios.pages.IOSNavbarPage;
 import com.photopixels.ios.pages.IOSPhotosPage;
 import com.photopixels.listeners.StatusTestListener;
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import io.qameta.allure.Feature;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.Listeners;
-import com.photopixels.helpers.IOSDriverUtils;
-
-import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
-import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
 
-
 @Listeners(StatusTestListener.class)
 @Feature("iOS")
-public class IOSAddToFavoritesTest {
+public class IOSTrashTest {
 
     private  AppiumDriver driver;
     private IOSDriverUtils iosDriverUtils;
@@ -92,67 +85,88 @@ public class IOSAddToFavoritesTest {
             // Sync button not present - photos already synced
         }
     }
+    // Common helper to move photo to trash
+    private void movePhotoToTrash(int photoIndex) {
+        photosPage.openPhoto(photoIndex);
+        photosPage.deletePhoto();
+        photosPage.confirmDelete();
+        photosPage.clickBackButton();
+    }
 
+    // Common helper to restore photo from trash
+    private void restorePhotoFromTrash(int photoIndex) {
+        photosPage.openPhoto2(photoIndex);
+        photosPage.restorePhoto();
+        photosPage.clickBackButton();
+    }
     @Test
-    public void shouldAddImageToFavorites() throws Exception {
+    public void shouldAddImageToTrash() throws Exception {
 
         //loginPage.login(username, password);
 
-       synchronizePhotosIfNeeded();
+        synchronizePhotosIfNeeded();
+        int initialPhotosCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos: " + initialPhotosCount);
 
-        // Go to Favorites tab and count the number of photos
-        navbarPage.goToFavorites();
+        // Go to Trash tab and count the number of photos
+        navbarPage.goToTrash();
+        int initialTrashCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos in trash: " + initialTrashCount);
 
-        int initialFavoriteCount = photosPage.getPhotoCount();
-        System.out.println("Number of favorite photos: " + initialFavoriteCount);
-
-        // Go to the Photos tab, open the first photo and find a photo that is not added in favorites
+        // Go to the Photos tab, open the first photo and delete it
         navbarPage.goToPhotos();
-        photosPage.openPhoto(1);
-        addToFavoriteHelper.addFirstAvailablePhotoToFavorites(photosPage.getPhotoCount());
-        photosPage.clickBackButton();
+        movePhotoToTrash(1);
 
-        // Go to Favorites tab and count the number of photos again
-        navbarPage.goToFavorites();
-        int finalFavoriteCount = photosPage.getPhotoCount();
-        System.out.println("Number of favorite photos after adding one: " + finalFavoriteCount);
 
-        assertEquals(finalFavoriteCount, initialFavoriteCount + 1,
-                "Favorites count should have increased by 1");
+        int finalPhotosCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos: " + finalPhotosCount);
+        assertEquals(finalPhotosCount, initialPhotosCount - 1,
+                "Photos count should have decreased by 1");
+
+
+        // Go to Trash tab and count the number of photos again
+        navbarPage.goToTrash();
+        int finalTrashCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos in trash: " + finalTrashCount);
+
+        assertEquals(finalTrashCount, initialTrashCount + 1,
+                "Trash count should have increased by 1");
 
     }
 
     @Test
-    public void shouldRemoveImageFromFavorites() throws Exception {
+    public void shouldRestoreImageToTrash() throws Exception {
 
         //loginPage.login(username, password);
 
         synchronizePhotosIfNeeded();
 
 
-        //Open the first photo and find a photo that is not added in favorites
-        photosPage.openPhoto(1);
-        addToFavoriteHelper.addFirstAvailablePhotoToFavorites(photosPage.getPhotoCount());
-        photosPage.clickBackButton();
-
-        // Go to Favorites tab and count the number of photos
-        navbarPage.goToFavorites();
-        int initialFavoriteCount = photosPage.getPhotoCount();
-        System.out.println("Number of favorite photos after adding one: " + initialFavoriteCount);
-
-        //Go to Photos tab and remove a photo from favorites
+        // Go to the Photos tab, open the first photo and delete it
         navbarPage.goToPhotos();
-        photosPage.openPhoto(1);
-        removeFromFavoriteHelper.removeFirstAvailablePhotoFromFavorites(initialFavoriteCount);
-       //Thread.sleep(2000);
-        photosPage.clickBackButton();
+        movePhotoToTrash(1);
 
-        // Go to Favorites tab and count the number of photos
-        navbarPage.goToFavorites();
-        int newNumberOfFavoritePhotos = photosPage.getPhotoCount();
-        System.out.println("Number of favorite photos after removing one: " + newNumberOfFavoritePhotos);
-        assertEquals(newNumberOfFavoritePhotos, initialFavoriteCount - 1,
-                "Favorites count should have decreased by 1");
+        int initialPhotosCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos: " + initialPhotosCount);
+
+        // Go to Trash tab and count the number of photos
+        navbarPage.goToTrash();
+        int initialTrashCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos in trash: " + initialTrashCount);
+
+        restorePhotoFromTrash(1);
+        int finalTrashCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos in trash: " + finalTrashCount);
+
+        assertEquals(finalTrashCount, initialTrashCount - 1,
+                "Trash count should have decreased by 1");
+
+        navbarPage.goToPhotos();
+        int finalPhotosCount = photosPage.getPhotoCount();
+        System.out.println("Number of photos: " + finalPhotosCount);
+        assertEquals(finalPhotosCount, initialPhotosCount + 1,
+                "Photos count should have increased by 1");
 
     }
+
 }
