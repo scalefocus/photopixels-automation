@@ -25,8 +25,8 @@ public class IOSAlbumsTest {
     private IOSSettingsPage settingsPage;
 
     // Test data
-    private final String username = "sole2@tst.com";
-    private final String password = "@Mouse24";
+    private final String username = "";
+    private final String password = "";
 
     @BeforeClass
     public void setup() throws InterruptedException {

@@ -41,8 +41,8 @@ public class IOSAddToFavoritesTest {
     private  WebDriverWait wait;
 
     // Test data
-    private final String username = "sole2@tst.com";
-    private final String password = "@Mouse24";
+    private final String username = "";
+    private final String password = "";
     private static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(10);
 
 
