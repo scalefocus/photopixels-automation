@@ -44,4 +44,7 @@ public class InputDataHelper {
     public String getPasswordAdmin() {
         return getProperty("passwordAdmin");
     }
+    public String getIosUsername() {return getProperty("iosUserName");}
+    public String getIosPassword() {return getProperty("iosPassword");}
+
 }

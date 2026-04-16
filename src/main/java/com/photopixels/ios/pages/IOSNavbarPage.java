@@ -2,12 +2,12 @@ package com.photopixels.ios.pages;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 public class IOSNavbarPage {
 
@@ -23,56 +23,61 @@ public class IOSNavbarPage {
 
     public WebElement getPhotosTab() {
         return driver.findElement(AppiumBy.xpath(
-                "(//XCUIElementTypeButton[@name='Photos'])[1]"
+                "(//XCUIElementTypeButton[@label='Photos'])"
         ));
     }
     public WebElement getFavoritesTab() {
-        return driver.findElement(AppiumBy.xpath("(//XCUIElementTypeButton[@name='Favorites'])[1]"
+        return driver.findElement(AppiumBy.xpath("(//XCUIElementTypeButton[@label='Favorites'])"
         ));
     }
 
     public WebElement getTrashTab() {
         return driver.findElement(AppiumBy.xpath(
-                "(//XCUIElementTypeButton[@name='Trash'])[1]"
+                "//XCUIElementTypeButton[@label='Trash']"
+        ));
+    }
+    public WebElement getAlbumTab() {
+        return driver.findElement(AppiumBy.xpath(
+                "//XCUIElementTypeButton[@label='Albums']"
         ));
     }
 
     public WebElement getSettingsButton() {
         return driver.findElement(AppiumBy.xpath(
-                "(//XCUIElementTypeButton[@name='person.circle'])[2]"
+                "//XCUIElementTypeButton[@label='Settings']"
         ));
     }
     public void waitForPhotosTabActive() {
         wait.until(ExpectedConditions.attributeToBe(
-                AppiumBy.xpath("//XCUIElementTypeButton[@name='Photos']"),
+                AppiumBy.xpath("//XCUIElementTypeButton[@label='Photos']"),
                 "value", "1"
         ));
     }
 
     public void waitForFavoritesTabActive() {
         wait.until(ExpectedConditions.attributeToBe(
-                AppiumBy.xpath("//XCUIElementTypeButton[@name='Favorites']"),
+                AppiumBy.xpath("//XCUIElementTypeButton[@label='Favorites']"),
                 "value", "1"
         ));
     }
 
     public void waitForTrashTabActive() {
         wait.until(ExpectedConditions.attributeToBe(
-                AppiumBy.xpath("//XCUIElementTypeButton[@name='Trash']"),
+                AppiumBy.xpath("//XCUIElementTypeButton[@label='Trash']"),
                 "value", "1"
         ));
     }
 
     public void waitForAlbumsTabActive() {
         wait.until(ExpectedConditions.attributeToBe(
-                AppiumBy.xpath("//XCUIElementTypeButton[@name='Albums']"),
+                AppiumBy.xpath("//XCUIElementTypeButton[@label='Albums']"),
                 "value", "1"
         ));
     }
 
     public void waitForSettingsTabActive() {
         wait.until(ExpectedConditions.attributeToBe(
-                AppiumBy.xpath("//XCUIElementTypeButton[@name='Settings']"),
+                AppiumBy.xpath("//XCUIElementTypeButton[@label='Settings']"),
                 "value", "1"
         ));
     }
@@ -94,8 +99,25 @@ public class IOSNavbarPage {
         waitForTrashTabActive();
     }
 
+    public void goToAlbums() {
+        getAlbumTab().click();
+        waitForAlbumsTabActive();
+    }
+
     public void goToSettings() {
         getSettingsButton().click();
         waitForSettingsTabActive();
+    }
+
+    public boolean isLoggedIn() {
+        try {
+            // Settings button only exists when logged in
+            List<WebElement> settingsButtons = driver.findElements(
+                    AppiumBy.accessibilityId("Settings")
+            );
+            return !settingsButtons.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -5,8 +5,8 @@ import com.photopixels.helpers.IOSRemoveFromFavoriteHelper;
 import com.photopixels.ios.pages.IOSLoginPage;
 import com.photopixels.ios.pages.IOSNavbarPage;
 import com.photopixels.ios.pages.IOSPhotosPage;
+import com.photopixels.ios.pages.IOSSettingsPage;
 import com.photopixels.listeners.StatusTestListener;
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import io.qameta.allure.Feature;
 import org.openqa.selenium.WebElement;
@@ -18,14 +18,12 @@ import com.photopixels.helpers.IOSDriverUtils;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-
+import static org.testng.Assert.*;
 
 
 @Listeners(StatusTestListener.class)
@@ -37,6 +35,7 @@ public class IOSAddToFavoritesTest {
     private  IOSLoginPage loginPage;
     private  IOSPhotosPage photosPage;
     private  IOSNavbarPage navbarPage;
+    private IOSSettingsPage settingsPage;
     private  IOSAddToFavoriteHelper addToFavoriteHelper;
     private IOSRemoveFromFavoriteHelper  removeFromFavoriteHelper;
     private  WebDriverWait wait;
@@ -48,7 +47,7 @@ public class IOSAddToFavoritesTest {
 
 
     @BeforeClass
-    public void setup() {
+    public void setup() throws InterruptedException {
         // Initialize IOSDriverUtils (reads ios.properties)
         iosDriverUtils = new IOSDriverUtils();
 
@@ -57,14 +56,27 @@ public class IOSAddToFavoritesTest {
 
         // Create driver session
         driver = iosDriverUtils.getIOSDriver();
-        wait = new WebDriverWait(driver, DEFAULT_WAIT_TIMEOUT);
         initializePages();
 
+        System.out.println("Pages initialized");
+        // Check if already logged in or on login page
+        if (navbarPage.isLoggedIn()) {
+            System.out.println("Already logged in, logging out first...");
+            navbarPage.goToSettings();
+            settingsPage.logout();
+        }
+
+        System.out.println("Proceeding to login...");
+        loginPage.login(username, password);
+        synchronizePhotosIfNeeded();
+
     }
+
     private void initializePages() {
         loginPage = new IOSLoginPage(driver);
         photosPage = new IOSPhotosPage(driver);
         navbarPage = new IOSNavbarPage(driver);
+        settingsPage = new IOSSettingsPage(driver);
         addToFavoriteHelper = new IOSAddToFavoriteHelper(driver);
         removeFromFavoriteHelper = new IOSRemoveFromFavoriteHelper(driver);
     }
@@ -96,10 +108,6 @@ public class IOSAddToFavoritesTest {
     @Test
     public void shouldAddImageToFavorites() throws Exception {
 
-        //loginPage.login(username, password);
-
-       synchronizePhotosIfNeeded();
-
         // Go to Favorites tab and count the number of photos
         navbarPage.goToFavorites();
 
@@ -124,11 +132,7 @@ public class IOSAddToFavoritesTest {
 
     @Test
     public void shouldRemoveImageFromFavorites() throws Exception {
-
-        //loginPage.login(username, password);
-
-        synchronizePhotosIfNeeded();
-
+        navbarPage.goToPhotos();
 
         //Open the first photo and find a photo that is not added in favorites
         photosPage.openPhoto(1);
@@ -154,5 +158,35 @@ public class IOSAddToFavoritesTest {
         assertEquals(newNumberOfFavoritePhotos, initialFavoriteCount - 1,
                 "Favorites count should have decreased by 1");
 
+    }
+    @Test
+    public void favoritedPhotoShouldShowHeartIconInGrid() {
+        navbarPage.goToFavorites();
+        assertTrue(photosPage.isHeartIconVisibleOnPhotoInGrid(0),
+                "Heart icon should be visible on favorited photo in grid");
+    }
+    @Test
+    public void favoritesShouldBeGroupedByDate() {
+        navbarPage.goToFavorites();
+        List<WebElement> dateHeaders = photosPage.getDateSectionHeaders();
+        assertFalse(dateHeaders.isEmpty(), "Favorites should show date section headers");
+        // Optionally assert ordering is descending (most recent first)
+    }
+    @Test
+    public void openingFavoritePhotoShouldShowActionButtons() throws InterruptedException {
+        navbarPage.goToFavorites();
+        photosPage.openPhoto(1);
+        assertTrue(photosPage.isShareButtonVisible(), "Share button should be visible");
+        assertTrue(photosPage.isLoveButtonVisible(), "Love/heart button should be visible");
+        assertTrue(photosPage.isDeleteButtonVisible(), "Bin button should be visible");
+        photosPage.clickBackButton();
+    }
+    @Test
+    public void backFromOpenPhotoShouldReturnToFavorites() {
+        navbarPage.goToFavorites();
+        photosPage.openPhoto(1);
+        photosPage.clickBackButton();
+        assertTrue(photosPage.isFavoritesHeaderVisible(),
+                "Should return to Favorites screen after pressing Back");
     }
 }

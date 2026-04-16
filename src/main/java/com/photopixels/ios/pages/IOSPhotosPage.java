@@ -27,12 +27,17 @@ public class IOSPhotosPage {
 
     public WebElement getPhotoByIndex(int index) {
         return driver.findElement(AppiumBy.xpath(
-                "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeOther[2]/XCUIElementTypeImage[" + index + "]"
+                "(//XCUIElementTypeWindow[@index='0']//XCUIElementTypeScrollView//XCUIElementTypeImage[not(@name)])[" + index + "]"
         ));
     }
     public WebElement getPhotoByIndex2(int index) {
         return driver.findElement(AppiumBy.xpath(
-                "//XCUIElementTypeScrollView/XCUIElementTypeOther[1]/XCUIElementTypeOther[1]/XCUIElementTypeImage[" + index + "]"
+                "(//XCUIElementTypeScrollView//XCUIElementTypeImage[not(@name)])[" + index + "]"
+        ));
+    }
+    public List<WebElement> getAllPhotos2() {
+        return driver.findElements(AppiumBy.xpath(
+                "//XCUIElementTypeWindow[@index='0']//XCUIElementTypeScrollView//XCUIElementTypeImage[not(@name)]"
         ));
     }
 
@@ -46,8 +51,32 @@ public class IOSPhotosPage {
         return driver.findElement(AppiumBy.accessibilityId("heart"));
     }
 
+
     public WebElement getFilledHeartButton() {
         return driver.findElement(AppiumBy.accessibilityId("heart.fill"));
+    }
+    public WebElement getShareButton() {
+        return driver.findElement(AppiumBy.accessibilityId("square.and.arrow.up"));
+    }
+    public List<WebElement> getDateSectionHeaders() {
+        return driver.findElements(AppiumBy.xpath(
+                "//XCUIElementTypeStaticText[contains(@traits, 'Header')]"
+        ));
+    }
+    public List<WebElement> getHeartIconsOnGrid() {
+        return driver.findElements(AppiumBy.xpath(
+                "//XCUIElementTypeScrollView//XCUIElementTypeImage[@name='heart.fill']"
+        ));
+    }
+    // Favorites tab badge count — value="1" on the tab button in the DOM
+    public int getFavoritesTabBadgeCount() {
+        WebElement favTab = driver.findElement(AppiumBy.accessibilityId("Favorites"));
+        String value = favTab.getAttribute("value"); // returns "1", "2", etc.
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public WebElement getDeleteButton() {
@@ -73,7 +102,7 @@ public class IOSPhotosPage {
     }
 
     public WebElement getRestoreButton() {
-        return driver.findElement(AppiumBy.accessibilityId("arrow.uturn.backward.circle"));
+        return driver.findElement(AppiumBy.accessibilityId("arrow.uturn.backward"));
     }
 
     public WebElement getDeletePhotoPopUp() {
@@ -93,6 +122,11 @@ public class IOSPhotosPage {
                 "//XCUIElementTypeStaticText[@name='Restore Photos?']"
         ));
     }
+
+    public WebElement getRestorePopUpButton() {
+        return driver.findElement(AppiumBy.accessibilityId("Restore"));
+    }
+
 
     // ─── Actions ───────────────────────────────────────────────────────────────
 
@@ -133,7 +167,10 @@ public class IOSPhotosPage {
 
     public void restorePhoto() {
         getRestoreButton().click();
+        getRestorePopUpButton().click();
     }
+
+
 
     public void addPhotoToFavorites() {
         getHeartButton().click();
@@ -145,7 +182,17 @@ public class IOSPhotosPage {
     public void clickConfirmRestore() {
         getConfirmRestoreButton().click();
     }
+    public void clickShareButton() {
+        getShareButton().click();
+    }
 
+
+    public List<String> getDateSectionHeaderTexts() {
+        return getDateSectionHeaders()
+                .stream()
+                .map(WebElement::getText)
+                .toList();
+    }
     // ─── State Checks ──────────────────────────────────────────────────────────
 
     public boolean isPhotoFavorite() {
@@ -159,6 +206,53 @@ public class IOSPhotosPage {
     public boolean canBeAddedToFavorites() {
         try {
             return getHeartButton().isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    public boolean isShareButtonVisible() {
+        try {
+            return getShareButton().isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isDeleteButtonVisible() {
+        try {
+            return getDeleteButton().isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+    public boolean isLoveButtonVisible() {
+        try {
+            getFilledHeartButton().isDisplayed();
+            return true;
+        } catch (Exception e) {
+            try {
+                getHeartButton().isDisplayed();
+                return true;
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+    }
+
+    public boolean isHeartIconVisibleOnPhotoInGrid(int index) {
+        // Checks the small heart.fill badge overlaid on a specific photo in the grid
+        List<WebElement> hearts = getHeartIconsOnGrid();
+        return index < hearts.size() && hearts.get(index).isDisplayed();
+    }
+
+    public boolean isFavoritesHeaderVisible() {
+        try {
+            driver.findElement(AppiumBy.xpath(
+                    "//XCUIElementTypeStaticText[@name='Favorites']"
+            ));
+            return true;
         } catch (Exception e) {
             return false;
         }
